@@ -53,6 +53,23 @@ export interface SearchHistory {
   timestamp: number;
 }
 
+export interface CollegeSecteur {
+  nom: string;
+  uai: string;
+}
+
+export interface LyceeSecteur {
+  uai: string;
+  nom: string;
+  secteur: number;
+}
+
+export interface SectorResult {
+  college: CollegeSecteur;
+  lycees: LyceeSecteur[] | null;
+  lyceeError?: string;
+}
+
 export interface ApiAddressResponse {
   type: string;
   version: string;
