@@ -1,9 +1,9 @@
-import type { SearchHistory as SearchHistoryType } from '../types';
+import type { StoredSearchHistory } from '../services/storage';
 import './SearchHistory.css';
 
 interface SearchHistoryProps {
-  history: SearchHistoryType[];
-  onSelectEntry: (entry: SearchHistoryType) => void;
+  history: StoredSearchHistory[];
+  onSelectEntry: (entry: StoredSearchHistory) => void;
   onRemoveEntry: (id: string) => void;
   onClearHistory: () => void;
 }
@@ -51,12 +51,12 @@ export function SearchHistory({
                 </svg>
                 <span>{entry.address.label}</span>
               </div>
-              {entry.college && (
+              {entry.result && (
                 <div className="history-college">
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z" />
                   </svg>
-                  <span>{entry.college.nom}</span>
+                  <span>{entry.result.college.nom}</span>
                 </div>
               )}
               <span className="history-date">{formatDate(entry.timestamp)}</span>
