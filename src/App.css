@@ -1,0 +1,155 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 32px;
+  text-align: center;
+  background: linear-gradient(180deg, #eff6ff 0%, #fff 100%);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.logo svg {
+  width: 40px;
+  height: 40px;
+  color: #fff;
+}
+
+.app-header h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: #6b7280;
+  max-width: 300px;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px 40px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.new-search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 500px;
+  margin-top: 16px;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #374151;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.new-search-button:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.new-search-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.app-footer {
+  padding: 24px 20px;
+  text-align: center;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.app-footer p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.app-footer a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments for iPhone 14 and similar devices */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 32px 16px 24px;
+  }
+
+  .logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+  }
+
+  .logo svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-header h1 {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .app-main {
+    padding: 0 16px 32px;
+  }
+
+  .app-footer {
+    padding: 20px 16px;
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .app-header {
+    padding-top: calc(40px + env(safe-area-inset-top));
+  }
+
+  .app-footer {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+}

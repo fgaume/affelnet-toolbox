@@ -1,0 +1,156 @@
+.address-input-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.address-input {
+  width: 100%;
+  padding: 16px 48px;
+  font-size: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.address-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.address-input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.address-input::placeholder {
+  color: #9ca3af;
+}
+
+.clear-button {
+  position: absolute;
+  right: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.clear-button:hover {
+  color: #374151;
+}
+
+.clear-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.loading-spinner {
+  position: absolute;
+  right: 16px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.suggestions-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #374151;
+  transition: background-color 0.15s;
+}
+
+.suggestion-item:hover {
+  background-color: #f3f4f6;
+}
+
+.location-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #3b82f6;
+}
+
+.suggestion-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .address-input {
+    padding: 14px 44px;
+    font-size: 16px;
+  }
+
+  .search-icon {
+    left: 14px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .clear-button {
+    right: 44px;
+  }
+
+  .loading-spinner {
+    right: 14px;
+  }
+}
