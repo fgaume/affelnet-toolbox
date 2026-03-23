@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
-import type { Address } from './types';
-import type { StoredSearchHistory } from './services/storage';
+import type { Address, SearchHistory as SearchHistoryType } from './types';
 import { useSectorSearch } from './hooks/useSectorSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
 import {
@@ -25,7 +24,7 @@ function App() {
   );
 
   const handleHistorySelect = useCallback(
-    (entry: StoredSearchHistory) => {
+    (entry: SearchHistoryType) => {
       showResult(entry.address, entry.result);
       refresh();
     },

@@ -1,9 +1,9 @@
-import type { StoredSearchHistory } from '../services/storage';
+import type { SearchHistory as SearchHistoryType } from '../types';
 import './SearchHistory.css';
 
 interface SearchHistoryProps {
-  history: StoredSearchHistory[];
-  onSelectEntry: (entry: StoredSearchHistory) => void;
+  history: SearchHistoryType[];
+  onSelectEntry: (entry: SearchHistoryType) => void;
   onRemoveEntry: (id: string) => void;
   onClearHistory: () => void;
 }

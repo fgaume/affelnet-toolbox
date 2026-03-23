@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import type { StoredSearchHistory } from '../services/storage';
+import { useState, useCallback } from 'react';
+import type { SearchHistory } from '../types';
 import {
   getSearchHistory,
   clearHistory as clearStorageHistory,
@@ -7,11 +7,7 @@ import {
 } from '../services/storage';
 
 export function useSearchHistory() {
-  const [history, setHistory] = useState<StoredSearchHistory[]>([]);
-
-  useEffect(() => {
-    setHistory(getSearchHistory());
-  }, []);
+  const [history, setHistory] = useState<SearchHistory[]>(getSearchHistory);
 
   const refresh = useCallback(() => {
     setHistory(getSearchHistory());

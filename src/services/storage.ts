@@ -1,24 +1,16 @@
-import type { SectorResult, Address } from '../types';
-
-/** Local type for what we store — will replace SearchHistory in types/index.ts in Task 10 */
-export interface StoredSearchHistory {
-  id: string;
-  address: Address;
-  result: SectorResult;
-  timestamp: number;
-}
+import type { SectorResult, Address, SearchHistory } from '../types';
 
 const STORAGE_KEY = 'college-secteur-history';
 const STORAGE_VERSION = 2;
 
-function isValidHistory(data: unknown): data is StoredSearchHistory[] {
+function isValidHistory(data: unknown): data is SearchHistory[] {
   if (!Array.isArray(data)) return false;
   if (data.length === 0) return true;
   const first = data[0];
   return first && typeof first === 'object' && 'result' in first && 'address' in first;
 }
 
-export function getSearchHistory(): StoredSearchHistory[] {
+export function getSearchHistory(): SearchHistory[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return [];
@@ -41,7 +33,7 @@ export function getSearchHistory(): StoredSearchHistory[] {
   }
 }
 
-export function saveSearchHistory(history: StoredSearchHistory[]): void {
+export function saveSearchHistory(history: SearchHistory[]): void {
   try {
     const limitedHistory = history.slice(0, 10);
     localStorage.setItem(
@@ -53,9 +45,9 @@ export function saveSearchHistory(history: StoredSearchHistory[]): void {
   }
 }
 
-export function addToHistory(address: Address, result: SectorResult): StoredSearchHistory {
+export function addToHistory(address: Address, result: SectorResult): SearchHistory {
   const history = getSearchHistory();
-  const newEntry: StoredSearchHistory = {
+  const newEntry: SearchHistory = {
     id: crypto.randomUUID(),
     address,
     result,

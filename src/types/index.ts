@@ -32,27 +32,6 @@ export interface AddressSuggestion {
   };
 }
 
-export interface College {
-  uai: string;
-  nom: string;
-  adresse: string;
-  codePostal: string;
-  commune: string;
-  telephone?: string;
-  email?: string;
-  siteWeb?: string;
-  latitude?: number;
-  longitude?: number;
-  secteur: string;
-}
-
-export interface SearchHistory {
-  id: string;
-  address: Address;
-  college: College | null;
-  timestamp: number;
-}
-
 export interface CollegeSecteur {
   nom: string;
   uai: string;
@@ -68,6 +47,13 @@ export interface SectorResult {
   college: CollegeSecteur;
   lycees: LyceeSecteur[] | null;
   lyceeError?: string;
+}
+
+export interface SearchHistory {
+  id: string;
+  address: Address;
+  result: SectorResult;
+  timestamp: number;
 }
 
 export interface ApiAddressResponse {
