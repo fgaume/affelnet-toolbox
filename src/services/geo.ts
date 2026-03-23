@@ -1,4 +1,4 @@
-export interface MercatorPoint {
+interface MercatorPoint {
   x: number;
   y: number;
 }

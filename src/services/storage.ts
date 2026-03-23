@@ -33,7 +33,7 @@ export function getSearchHistory(): SearchHistory[] {
   }
 }
 
-export function saveSearchHistory(history: SearchHistory[]): void {
+function saveSearchHistory(history: SearchHistory[]): void {
   try {
     const limitedHistory = history.slice(0, 10);
     localStorage.setItem(
