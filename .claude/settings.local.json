@@ -13,7 +13,17 @@
       "Bash(npm run:*)",
       "Bash(find /Users/fred/Code/college/affelnet-no-socle -type f -not -path */node_modules/* -not -path */.git/*)",
       "Bash(ls:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git stash:*)",
+      "Bash(npx playwright:*)",
+      "Bash(npx:*)",
+      "WebFetch(domain:services9.arcgis.com)",
+      "WebFetch(domain:data.education.gouv.fr)"
     ]
   }
 }

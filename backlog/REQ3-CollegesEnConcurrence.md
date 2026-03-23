@@ -1,0 +1,2 @@
+Enrichir l'affichage des lycées de secteur 1 avec la possiblité pour chacun de déplier un composant qui représente graphiquement l'ensemble des collèges qui ont ce lycée en secteur 1 (ce sont donc les collèges directement en concurrence).
+Propose plusieurs représentations graphiques. On regroupera ces collèges par bonus IPS (voir skill affelnet-ips), et on montrera graphiquement leur poids respectif en terme d'effectif (voir le skill affelnet-niveau-scolaire qui explique comment trouver mes effectifs de collèges)
