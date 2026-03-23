@@ -1,38 +1,69 @@
-import type { SearchHistory } from '../types';
+import type { SectorResult, Address } from '../types';
+
+/** Local type for what we store — will replace SearchHistory in types/index.ts in Task 10 */
+export interface StoredSearchHistory {
+  id: string;
+  address: Address;
+  result: SectorResult;
+  timestamp: number;
+}
 
 const STORAGE_KEY = 'college-secteur-history';
+const STORAGE_VERSION = 2;
 
-export function getSearchHistory(): SearchHistory[] {
+function isValidHistory(data: unknown): data is StoredSearchHistory[] {
+  if (!Array.isArray(data)) return false;
+  if (data.length === 0) return true;
+  const first = data[0];
+  return first && typeof first === 'object' && 'result' in first && 'address' in first;
+}
+
+export function getSearchHistory(): StoredSearchHistory[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return [];
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+
+    // Check if data has old format (college field instead of result)
+    if (parsed.version !== STORAGE_VERSION) {
+      localStorage.removeItem(STORAGE_KEY);
+      return [];
+    }
+
+    if (!isValidHistory(parsed.data)) {
+      localStorage.removeItem(STORAGE_KEY);
+      return [];
+    }
+
+    return parsed.data;
   } catch {
     return [];
   }
 }
 
-export function saveSearchHistory(history: SearchHistory[]): void {
+export function saveSearchHistory(history: StoredSearchHistory[]): void {
   try {
-    // Garder uniquement les 10 dernières recherches
     const limitedHistory = history.slice(0, 10);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(limitedHistory));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: STORAGE_VERSION, data: limitedHistory })
+    );
   } catch (error) {
     console.error('Erreur sauvegarde historique:', error);
   }
 }
 
-export function addToHistory(entry: Omit<SearchHistory, 'id' | 'timestamp'>): SearchHistory {
+export function addToHistory(address: Address, result: SectorResult): StoredSearchHistory {
   const history = getSearchHistory();
-  const newEntry: SearchHistory = {
-    ...entry,
+  const newEntry: StoredSearchHistory = {
     id: crypto.randomUUID(),
+    address,
+    result,
     timestamp: Date.now(),
   };
 
-  // Éviter les doublons basés sur l'adresse
   const filteredHistory = history.filter(
-    (h) => h.address.label !== entry.address.label
+    (h) => h.address.label !== address.label
   );
 
   saveSearchHistory([newEntry, ...filteredHistory]);
