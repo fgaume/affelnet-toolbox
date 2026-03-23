@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
-import type { Address, SearchHistory as SearchHistoryType } from './types';
-import { useCollegeSearch } from './hooks/useCollegeSearch';
+import type { Address } from './types';
+import type { StoredSearchHistory } from './services/storage';
+import { useSectorSearch } from './hooks/useSectorSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
 import {
   AddressInput,
@@ -12,29 +13,23 @@ import {
 import './App.css';
 
 function App() {
-  const { college, searchedAddress, isLoading, error, searchCollege, reset } =
-    useCollegeSearch();
+  const { result, searchedAddress, isLoading, error, searchSector, showResult, reset } =
+    useSectorSearch();
   const { history, refresh, clearHistory, removeEntry } = useSearchHistory();
 
   const handleAddressSelect = useCallback(
     (address: Address) => {
-      searchCollege(address);
+      searchSector(address);
     },
-    [searchCollege]
+    [searchSector]
   );
 
   const handleHistorySelect = useCallback(
-    (entry: SearchHistoryType) => {
-      if (entry.college) {
-        // Afficher directement le resultat de l'historique
-        searchCollege(entry.address);
-      } else {
-        // Relancer la recherche
-        searchCollege(entry.address);
-      }
+    (entry: StoredSearchHistory) => {
+      showResult(entry.address, entry.result);
       refresh();
     },
-    [searchCollege, refresh]
+    [showResult, refresh]
   );
 
   const handleNewSearch = useCallback(() => {
@@ -57,17 +52,17 @@ function App() {
       </header>
 
       <main className="app-main">
-        {!college && !isLoading && (
+        {!result && !isLoading && (
           <AddressInput onAddressSelect={handleAddressSelect} disabled={isLoading} />
         )}
 
         {isLoading && <LoadingState />}
 
-        {error && !isLoading && !college && <ErrorMessage message={error} />}
+        {error && !isLoading && !result && <ErrorMessage message={error} />}
 
-        {college && searchedAddress && (
+        {result && searchedAddress && (
           <>
-            <CollegeCard college={college} addressLabel={searchedAddress.label} />
+            <CollegeCard result={result} addressLabel={searchedAddress.label} />
             <button className="new-search-button" onClick={handleNewSearch}>
               <svg
                 viewBox="0 0 24 24"
@@ -83,7 +78,7 @@ function App() {
           </>
         )}
 
-        {!college && !isLoading && history.length > 0 && (
+        {!result && !isLoading && history.length > 0 && (
           <SearchHistory
             history={history}
             onSelectEntry={handleHistorySelect}
@@ -97,13 +92,21 @@ function App() {
         <p>
           Donnees fournies par{' '}
           <a
-            href="https://data.education.gouv.fr"
+            href="https://capgeo2.paris.fr"
             target="_blank"
             rel="noopener noreferrer"
           >
-            data.education.gouv.fr
-          </a>{' '}
-          et{' '}
+            CapGeo Paris
+          </a>
+          {' '}et{' '}
+          <a
+            href="https://services9.arcgis.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Rectorat de Paris
+          </a>
+          {' '}via{' '}
           <a
             href="https://api-adresse.data.gouv.fr"
             target="_blank"
