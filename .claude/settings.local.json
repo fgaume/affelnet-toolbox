@@ -23,7 +23,8 @@
       "Bash(npx playwright:*)",
       "Bash(npx:*)",
       "WebFetch(domain:services9.arcgis.com)",
-      "WebFetch(domain:data.education.gouv.fr)"
+      "WebFetch(domain:data.education.gouv.fr)",
+      "WebFetch(domain:datasets-server.huggingface.co)"
     ]
   }
 }

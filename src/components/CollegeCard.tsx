@@ -1,5 +1,9 @@
+import { useState } from 'react';
 import type { SectorResult } from '../types';
 import './CollegeCard.css';
+
+const FICHE_RECTORAT_URL =
+  'https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=';
 
 interface CollegeCardProps {
   result: SectorResult;
@@ -8,6 +12,7 @@ interface CollegeCardProps {
 
 export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
+  const [activeSector, setActiveSector] = useState(1);
 
   // Group lycees by sector
   const lyceesBySector = lycees
@@ -16,6 +21,10 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
         return acc;
       }, {})
     : null;
+
+  const availableSectors = lyceesBySector
+    ? [1, 2, 3].filter((s) => lyceesBySector[s]?.length)
+    : [];
 
   return (
     <div className="college-card">
@@ -26,8 +35,17 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           </svg>
         </div>
         <div className="college-title">
-          <span className="label">Votre college de secteur</span>
-          <h2>{college.nom}</h2>
+          <span className="label">Votre collège de secteur</span>
+          <h2>
+            <a
+              href={`${FICHE_RECTORAT_URL}${college.uai}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="etablissement-link"
+            >
+              {college.nom}
+            </a>
+          </h2>
         </div>
       </div>
 
@@ -40,41 +58,34 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
         </div>
       )}
 
-      <div className="college-details">
-        <div className="detail-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-          <div>
-            <span className="detail-label">Code UAI</span>
-            <span className="detail-value">{college.uai}</span>
-          </div>
-        </div>
-      </div>
-
-      {lyceesBySector && (
+      {lyceesBySector && availableSectors.length > 0 && (
         <div className="lycees-section">
-          <h3 className="lycees-title">Lycees de secteur</h3>
-          {[1, 2, 3].map((secteur) => {
-            const lyceesInSector = lyceesBySector[secteur];
-            if (!lyceesInSector?.length) return null;
-            return (
-              <div key={secteur} className="sector-group">
-                <h4 className="sector-label">Secteur {secteur}</h4>
-                <ul className="lycee-list">
-                  {lyceesInSector.map((lycee) => (
-                    <li key={lycee.uai} className="lycee-item">
-                      <span className="lycee-name">{lycee.nom}</span>
-                      <span className="lycee-uai">{lycee.uai}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
+          <h3 className="lycees-title">Lycées de secteur</h3>
+          <div className="sector-tabs">
+            {availableSectors.map((secteur) => (
+              <button
+                key={secteur}
+                className={`sector-tab${activeSector === secteur ? ' active' : ''}`}
+                onClick={() => setActiveSector(secteur)}
+              >
+                Secteur {secteur}
+              </button>
+            ))}
+          </div>
+          <ul className="lycee-list">
+            {lyceesBySector[activeSector]?.map((lycee) => (
+              <li key={lycee.uai} className="lycee-item">
+                <a
+                  href={`${FICHE_RECTORAT_URL}${lycee.uai}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="etablissement-link lycee-name"
+                >
+                  {lycee.nom}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

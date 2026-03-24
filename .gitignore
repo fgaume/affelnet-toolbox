@@ -24,4 +24,3 @@ dist-ssr
 *.sw?
 .claude/settings.local.json
 test-results/.last-run.json
-
