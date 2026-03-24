@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { SectorResult } from '../types';
+import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
@@ -13,6 +14,26 @@ interface CollegeCardProps {
 export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [activeSector, setActiveSector] = useState(1);
+  const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
+
+  // Fetch seuils once and compute difficulties for displayed lycées
+  useEffect(() => {
+    if (!lycees) return;
+    fetchSeuils()
+      .then((seuils) => {
+        const map = new Map<string, AdmissionDifficulty>();
+        for (const lycee of lycees) {
+          const seuil = seuils.get(lycee.uai);
+          if (seuil != null) {
+            map.set(lycee.uai, getAdmissionDifficulty(seuil));
+          }
+        }
+        setDifficulties(map);
+      })
+      .catch(() => {
+        // Silently ignore — badges just won't show
+      });
+  }, [lycees]);
 
   // Group lycees by sector
   const lyceesBySector = lycees
@@ -73,19 +94,51 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
             ))}
           </div>
           <ul className="lycee-list">
-            {lyceesBySector[activeSector]?.map((lycee) => (
-              <li key={lycee.uai} className="lycee-item">
-                <a
-                  href={`${FICHE_RECTORAT_URL}${lycee.uai}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="etablissement-link lycee-name"
-                >
-                  {lycee.nom}
-                </a>
-              </li>
-            ))}
+            {lyceesBySector[activeSector]?.map((lycee) => {
+              const diff = activeSector === 1 ? difficulties.get(lycee.uai) : undefined;
+              return (
+                <li key={lycee.uai} className="lycee-item">
+                  {diff && (
+                    <span
+                      className="difficulty-badge"
+                      style={{ backgroundColor: diff.color }}
+                      title={diff.label}
+                    />
+                  )}
+                  <a
+                    href={`${FICHE_RECTORAT_URL}${lycee.uai}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="etablissement-link lycee-name"
+                  >
+                    {lycee.nom}
+                  </a>
+                  {diff && (
+                    <span className="difficulty-label">{diff.label}</span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
+          {activeSector === 1 && difficulties.size > 0 && (
+            <div className="difficulty-legend">
+              <span className="legend-title">Difficulté d'admission :</span>
+              <div className="legend-items">
+                {([
+                  ['#1a1a1a', 'Inaccessible sans bonus'],
+                  ['#dc2626', 'Difficile'],
+                  ['#f97316', 'Moyen'],
+                  ['#2563eb', 'Accessible'],
+                  ['#16a34a', 'Très accessible'],
+                ] as const).map(([color, label]) => (
+                  <span key={color} className="legend-item">
+                    <span className="difficulty-badge" style={{ backgroundColor: color }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
