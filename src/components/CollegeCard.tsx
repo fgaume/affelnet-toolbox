@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import type { SectorResult } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { detectNewSecteur1Lycees } from '../services/secteurChangesApi';
+import { useEffectifs } from '../hooks/useEffectifs';
+import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
@@ -17,6 +19,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const [activeSector, setActiveSector] = useState(1);
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const [newSecteur1, setNewSecteur1] = useState<Set<string>>(new Set());
+  const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
 
   // Fetch seuils once and compute difficulties for displayed lycées
   useEffect(() => {
@@ -105,6 +108,10 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
               </button>
             ))}
           </div>
+          {activeSector === 1 && effectifsLoading && <EffectifsLoading />}
+          {activeSector === 1 && effectifs.length > 0 && (
+            <EffectifsDonut effectifs={effectifs} requestedCount={requestedCount} />
+          )}
           <ul className="lycee-list">
             {lyceesBySector[activeSector]?.map((lycee) => {
               const diff = activeSector === 1 ? difficulties.get(lycee.uai) : undefined;
