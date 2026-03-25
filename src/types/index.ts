@@ -43,6 +43,13 @@ export interface LyceeSecteur {
   secteur: number;
 }
 
+export interface EffectifLycee {
+  uai: string;
+  nom: string;
+  effectif: number;
+  annee: string;
+}
+
 export interface SectorResult {
   college: CollegeSecteur;
   lycees: LyceeSecteur[] | null;
