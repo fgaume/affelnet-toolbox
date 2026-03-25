@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { SectorResult } from '../types';
+import type { SectorResult, LyceeSecteur } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { detectNewSecteur1Lycees } from '../services/secteurChangesApi';
 import { useEffectifs } from '../hooks/useEffectifs';
@@ -8,6 +8,18 @@ import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
   'https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=';
+
+const TOUS_SECTEURS_LYCEES: LyceeSecteur[] = [
+  { uai: '0750654D', nom: 'HENRI IV', secteur: 0 },
+  { uai: '0750655E', nom: 'LOUIS LE GRAND', secteur: 0 },
+  { uai: '0750685M', nom: 'P.G. DE GENNES', secteur: 0 },
+];
+
+const DIFFICULTY_HARD: AdmissionDifficulty = {
+  color: '#dc2626',
+  label: 'Difficilement accessible',
+  seuil: 0,
+};
 
 interface CollegeCardProps {
   result: SectorResult;
@@ -21,16 +33,22 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const [newSecteur1, setNewSecteur1] = useState<Set<string>>(new Set());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
 
-  // Fetch seuils once and compute difficulties for displayed lycées
+  // Fetch seuils once and compute difficulties for displayed lycées + tous secteurs
   useEffect(() => {
     if (!lycees) return;
     fetchSeuils()
       .then((seuils) => {
         const map = new Map<string, AdmissionDifficulty>();
-        for (const lycee of lycees) {
+        for (const lycee of [...lycees, ...TOUS_SECTEURS_LYCEES]) {
           const seuil = seuils.get(lycee.uai);
-          if (seuil != null) {
+          if (seuil != null && seuil > 0) {
             map.set(lycee.uai, getAdmissionDifficulty(seuil));
+          }
+        }
+        // Henri IV & Louis Le Grand have no scores → force hard difficulty
+        for (const lycee of TOUS_SECTEURS_LYCEES) {
+          if (!map.has(lycee.uai)) {
+            map.set(lycee.uai, DIFFICULTY_HARD);
           }
         }
         setDifficulties(map);
@@ -61,8 +79,14 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
     : null;
 
   const availableSectors = lyceesBySector
-    ? [1, 2, 3].filter((s) => lyceesBySector[s]?.length)
+    ? [1, 0, 2, 3].filter((s) => s === 0 || lyceesBySector[s]?.length)
     : [];
+
+  const sectorLabel = (s: number) => s === 0 ? 'Tous secteurs' : `Secteur ${s}`;
+
+  const activeLycees = activeSector === 0
+    ? TOUS_SECTEURS_LYCEES
+    : lyceesBySector?.[activeSector] ?? [];
 
   return (
     <div className="college-card">
@@ -106,7 +130,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
                 className={`sector-tab${activeSector === secteur ? ' active' : ''}`}
                 onClick={() => setActiveSector(secteur)}
               >
-                Secteur {secteur}
+                {sectorLabel(secteur)}
               </button>
             ))}
           </div>
@@ -115,8 +139,9 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
             <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} />
           )}
           <ul className="lycee-list">
-            {lyceesBySector[activeSector]?.map((lycee) => {
-              const diff = activeSector === 1 ? difficulties.get(lycee.uai) : undefined;
+            {activeLycees.map((lycee) => {
+              const showDiff = activeSector === 1 || activeSector === 0;
+              const diff = showDiff ? difficulties.get(lycee.uai) : undefined;
               return (
                 <li key={lycee.uai} className="lycee-item">
                   {diff && (
@@ -144,7 +169,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
               );
             })}
           </ul>
-          {activeSector === 1 && difficulties.size > 0 && (
+          {(activeSector === 1 || activeSector === 0) && difficulties.size > 0 && (
             <div className="difficulty-legend">
               <span className="legend-title">Difficulté d'admission :</span>
               <div className="legend-items">
