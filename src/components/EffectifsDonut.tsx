@@ -26,8 +26,9 @@ interface CenterLabelProps {
 }
 
 function CenterLabel({ viewBox, total }: CenterLabelProps) {
-  const cx = viewBox?.cx ?? 0;
-  const cy = viewBox?.cy ?? 0;
+  const cx = viewBox?.cx;
+  const cy = viewBox?.cy;
+  if (cx == null || cy == null) return null;
   return (
     <g>
       <text x={cx} y={cy - 8} textAnchor="middle" className="donut-center-total">
