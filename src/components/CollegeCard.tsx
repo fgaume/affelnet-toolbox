@@ -1,11 +1,24 @@
 import { useState, useEffect } from 'react';
-import type { SectorResult } from '../types';
+import type { SectorResult, LyceeSecteur } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
-import { detectNewSecteur1Lycees } from '../services/secteurChangesApi';
+import { useEffectifs } from '../hooks/useEffectifs';
+import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
   'https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=';
+
+const TOUS_SECTEURS_LYCEES: LyceeSecteur[] = [
+  { uai: '0750654D', nom: 'HENRI IV', secteur: 0 },
+  { uai: '0750655E', nom: 'LOUIS LE GRAND', secteur: 0 },
+  { uai: '0750685M', nom: 'P.G. DE GENNES', secteur: 0 },
+];
+
+const DIFFICULTY_HARD: AdmissionDifficulty = {
+  color: '#dc2626',
+  label: 'Difficilement accessible',
+  seuil: 0,
+};
 
 interface CollegeCardProps {
   result: SectorResult;
@@ -16,18 +29,24 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [activeSector, setActiveSector] = useState(1);
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
-  const [newSecteur1, setNewSecteur1] = useState<Set<string>>(new Set());
+  const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
 
-  // Fetch seuils once and compute difficulties for displayed lycées
+  // Fetch seuils once and compute difficulties for displayed lycées + tous secteurs
   useEffect(() => {
     if (!lycees) return;
     fetchSeuils()
       .then((seuils) => {
         const map = new Map<string, AdmissionDifficulty>();
-        for (const lycee of lycees) {
+        for (const lycee of [...lycees, ...TOUS_SECTEURS_LYCEES]) {
           const seuil = seuils.get(lycee.uai);
-          if (seuil != null) {
+          if (seuil != null && seuil > 0) {
             map.set(lycee.uai, getAdmissionDifficulty(seuil));
+          }
+        }
+        // Henri IV & Louis Le Grand have no scores → force hard difficulty
+        for (const lycee of TOUS_SECTEURS_LYCEES) {
+          if (!map.has(lycee.uai)) {
+            map.set(lycee.uai, DIFFICULTY_HARD);
           }
         }
         setDifficulties(map);
@@ -37,27 +56,25 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
       });
   }, [lycees]);
 
-  // Detect new sector 1 lycées compared to previous year
-  useEffect(() => {
-    if (!lycees || !college.uai) return;
-    detectNewSecteur1Lycees(college.uai, lycees)
-      .then(setNewSecteur1)
-      .catch(() => {
-        // Silently ignore — new badges just won't show
-      });
-  }, [lycees, college.uai]);
-
-  // Group lycees by sector
+  // Group lycees by sector, sorted alphabetically
   const lyceesBySector = lycees
-    ? lycees.reduce<Record<number, typeof lycees>>((acc, lycee) => {
-        (acc[lycee.secteur] ??= []).push(lycee);
-        return acc;
-      }, {})
+    ? [...lycees]
+        .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+        .reduce<Record<number, typeof lycees>>((acc, lycee) => {
+          (acc[lycee.secteur] ??= []).push(lycee);
+          return acc;
+        }, {})
     : null;
 
   const availableSectors = lyceesBySector
-    ? [1, 2, 3].filter((s) => lyceesBySector[s]?.length)
+    ? [1, 0, 2, 3].filter((s) => s === 0 || lyceesBySector[s]?.length)
     : [];
+
+  const sectorLabel = (s: number) => s === 0 ? 'Tous secteurs' : `Secteur ${s}`;
+
+  const activeLycees = activeSector === 0
+    ? TOUS_SECTEURS_LYCEES
+    : lyceesBySector?.[activeSector] ?? [];
 
   return (
     <div className="college-card">
@@ -101,41 +118,44 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
                 className={`sector-tab${activeSector === secteur ? ' active' : ''}`}
                 onClick={() => setActiveSector(secteur)}
               >
-                Secteur {secteur}
+                {sectorLabel(secteur)}
               </button>
             ))}
           </div>
-          <ul className="lycee-list">
-            {lyceesBySector[activeSector]?.map((lycee) => {
-              const diff = activeSector === 1 ? difficulties.get(lycee.uai) : undefined;
-              return (
-                <li key={lycee.uai} className="lycee-item">
-                  {diff && (
-                    <span
-                      className="difficulty-badge"
-                      style={{ backgroundColor: diff.color }}
-                      title={diff.label}
-                    />
-                  )}
-                  <a
-                    href={`${FICHE_RECTORAT_URL}${lycee.uai}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="etablissement-link lycee-name"
-                  >
-                    {lycee.nom}
-                  </a>
-                  {activeSector === 1 && newSecteur1.has(lycee.uai) && (
-                    <span className="new-sector-badge" title="Nouveau en secteur 1 cette année">Nouveau</span>
-                  )}
-                  {diff && (
-                    <span className="difficulty-label">{diff.label}</span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-          {activeSector === 1 && difficulties.size > 0 && (
+          {activeSector === 1 && effectifsLoading && <EffectifsLoading />}
+          {activeSector === 1 && effectifs.length > 0 && (
+            <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} />
+          )}
+          {activeSector !== 1 && (
+            <ul className="lycee-list">
+              {activeLycees.map((lycee) => {
+                const diff = activeSector === 0 ? difficulties.get(lycee.uai) : undefined;
+                return (
+                  <li key={lycee.uai} className="lycee-item">
+                    {diff && (
+                      <span
+                        className="difficulty-badge"
+                        style={{ backgroundColor: diff.color }}
+                        title={diff.label}
+                      />
+                    )}
+                    <a
+                      href={`${FICHE_RECTORAT_URL}${lycee.uai}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="etablissement-link lycee-name"
+                    >
+                      {lycee.nom}
+                    </a>
+                    {diff && (
+                      <span className="difficulty-label">{diff.label}</span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {(activeSector === 1 || activeSector === 0) && difficulties.size > 0 && (
             <div className="difficulty-legend">
               <span className="legend-title">Difficulté d'admission :</span>
               <div className="legend-items">

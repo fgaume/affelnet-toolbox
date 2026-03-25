@@ -4,3 +4,4 @@ export { SearchHistory } from './SearchHistory';
 export { LoadingState } from './LoadingState';
 export { ErrorMessage } from './ErrorMessage';
 export { ThemeToggle } from './ThemeToggle';
+export { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
