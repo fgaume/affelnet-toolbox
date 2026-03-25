@@ -67,6 +67,38 @@ export async function findCollegeUAI(nomCollege: string): Promise<string> {
   return data.features[0].attributes.Réseau as string;
 }
 
+// ----- TEMPORARY: Rabelais closure workaround (remove when Rectorat API is updated) -----
+const RABELAIS_UAI = '0750688R';
+const RABELAIS_REPLACEMENT: Record<string, LyceeSecteur> = {
+  // COYSEVOX, BERLIOZ → DECOUR
+  '0752319N': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1 },
+  '0752252R': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1 },
+  // MALLARMÉ, DORGELÈS, BALZAC → QUINET
+  '0752554U': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1 },
+  '0750429J': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1 },
+  '0752553T': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1 },
+  // BORIS VIAN → FERRY
+  '0752958H': { uai: '0750669V', nom: 'JULES FERRY', secteur: 1 },
+  // UTRILLO, FERRY, CLEMENCEAU → COLBERT
+  '0751793S': { uai: '0750673Z', nom: 'COLBERT', secteur: 1 },
+  '0752533W': { uai: '0750673Z', nom: 'COLBERT', secteur: 1 },
+  '0750546L': { uai: '0750673Z', nom: 'COLBERT', secteur: 1 },
+  // Gérard PHILIPE, Marie CURIE → BALZAC
+  '0752195D': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1 },
+  '0754706H': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1 },
+};
+
+function applyRabelaisClosure(lycees: LyceeSecteur[], uaiCollege: string): LyceeSecteur[] {
+  if (!lycees.some((l) => l.uai === RABELAIS_UAI)) return lycees;
+  const filtered = lycees.filter((l) => l.uai !== RABELAIS_UAI);
+  const replacement = RABELAIS_REPLACEMENT[uaiCollege];
+  if (replacement && !filtered.some((l) => l.uai === replacement.uai)) {
+    filtered.push(replacement);
+  }
+  return filtered;
+}
+// ----- END TEMPORARY -----
+
 export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSecteur[]> {
   const params = new URLSearchParams({
     outFields: 'UAI,Nom,secteur',
@@ -83,11 +115,13 @@ export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSect
 
   const data = await response.json();
 
-  return (data.features || []).map(
+  const lycees = (data.features || []).map(
     (f: { attributes: { UAI: string; Nom: string; secteur: string } }) => ({
       uai: f.attributes.UAI,
       nom: f.attributes.Nom,
       secteur: parseInt(f.attributes.secteur, 10),
     })
   );
+
+  return applyRabelaisClosure(lycees, uaiCollege);
 }
