@@ -154,15 +154,6 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount }: Effe
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div className="effectifs-legend">
-        {data.map((entry) => (
-          <span key={entry.uai} className="effectifs-legend-item">
-            <span className="effectifs-legend-dot" style={{ backgroundColor: entry.color }} />
-            {entry.nom}
-            <span className="effectifs-legend-pct">{entry.effectif} ({entry.pct}%)</span>
-          </span>
-        ))}
-      </div>
       <p className="effectifs-year">{yearLabel}</p>
       {requestedCount != null && requestedCount > effectifs.length && (
         <p className="effectifs-note">
