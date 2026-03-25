@@ -7,6 +7,14 @@
     <meta name="description" content="Trouvez votre collège de secteur en fonction de votre adresse" />
     <meta name="theme-color" content="#1e40af" />
     <title>Mon Collège de Secteur</title>
+    <script>
+      (function() {
+        var mode = localStorage.getItem('theme-mode') || 'system';
+        var dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#0f172a' : '#1e40af';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

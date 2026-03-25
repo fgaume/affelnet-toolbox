@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { SectorResult } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
+import { detectNewSecteur1Lycees } from '../services/secteurChangesApi';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
@@ -15,6 +16,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [activeSector, setActiveSector] = useState(1);
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
+  const [newSecteur1, setNewSecteur1] = useState<Set<string>>(new Set());
 
   // Fetch seuils once and compute difficulties for displayed lycées
   useEffect(() => {
@@ -34,6 +36,16 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
         // Silently ignore — badges just won't show
       });
   }, [lycees]);
+
+  // Detect new sector 1 lycées compared to previous year
+  useEffect(() => {
+    if (!lycees || !college.uai) return;
+    detectNewSecteur1Lycees(college.uai, lycees)
+      .then(setNewSecteur1)
+      .catch(() => {
+        // Silently ignore — new badges just won't show
+      });
+  }, [lycees, college.uai]);
 
   // Group lycees by sector
   const lyceesBySector = lycees
@@ -113,6 +125,9 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
                   >
                     {lycee.nom}
                   </a>
+                  {activeSector === 1 && newSecteur1.has(lycee.uai) && (
+                    <span className="new-sector-badge" title="Nouveau en secteur 1 cette année">Nouveau</span>
+                  )}
                   {diff && (
                     <span className="difficulty-label">{diff.label}</span>
                   )}

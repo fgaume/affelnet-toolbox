@@ -5,9 +5,10 @@
   gap: 20px;
   padding: 40px 20px;
   margin-top: 24px;
-  background: #fff;
+  background: var(--color-bg-card);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px var(--color-shadow-md);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .loading-animation {
@@ -53,7 +54,7 @@
 .loading-dots span {
   width: 8px;
   height: 8px;
-  background: #3b82f6;
+  background: var(--color-primary);
   border-radius: 50%;
   animation: bounce 1.2s ease-in-out infinite;
 }
@@ -78,5 +79,5 @@
 .loading-state p {
   margin: 0;
   font-size: 15px;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
