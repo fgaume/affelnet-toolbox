@@ -1,9 +1,11 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Label } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Label, type PieLabelRenderProps } from 'recharts';
 import type { EffectifLycee } from '../types';
 import type { AdmissionDifficulty } from '../services/seuilsApi';
 import './EffectifsDonut.css';
 
 const DEFAULT_COLOR = '#9ca3af';
+const RADIAN = Math.PI / 180;
+const LABEL_OFFSET = 20;
 
 interface EffectifsDonutProps {
   effectifs: EffectifLycee[];
@@ -15,11 +17,6 @@ interface CenterLabelProps {
   viewBox?: {
     cx?: number;
     cy?: number;
-    innerRadius?: number;
-    outerRadius?: number;
-    startAngle?: number;
-    endAngle?: number;
-    midAngle?: number;
     [key: string]: unknown;
   };
   total: number;
@@ -41,44 +38,60 @@ function CenterLabel({ viewBox, total }: CenterLabelProps) {
   );
 }
 
-interface TooltipPayloadItem {
-  payload: {
-    nom: string;
-    effectif: number;
-    pct: number;
-    color: string;
-    difficultyLabel?: string;
-  };
-}
+function SliceLabel(props: PieLabelRenderProps) {
+  const p = props as unknown as Record<string, unknown>;
+  const cx = Number(p.cx ?? 0);
+  const cy = Number(p.cy ?? 0);
+  const midAngle = Number(p.midAngle ?? 0);
+  const outerRadius = Number(p.outerRadius ?? 0);
+  const nom = String(p.nom ?? '');
+  const pct = Number(p.pct ?? 0);
+  const effectif = Number(p.effectif ?? 0);
+  const color = String(p.color ?? DEFAULT_COLOR);
+  const sin = Math.sin(-midAngle * RADIAN);
+  const cos = Math.cos(-midAngle * RADIAN);
 
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: TooltipPayloadItem[];
-}
+  // Point on the outer edge of the slice
+  const ex = cx + (outerRadius + 8) * cos;
+  const ey = cy + (outerRadius + 8) * sin;
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
-  if (!active || !payload?.[0]) return null;
-  const { nom, effectif, pct, difficultyLabel } = payload[0].payload;
+  // End of the leader line
+  const tx = cx + (outerRadius + LABEL_OFFSET) * cos;
+  const ty = cy + (outerRadius + LABEL_OFFSET) * sin;
+
+  // Horizontal extension
+  const isRight = cos >= 0;
+  const hx = tx + (isRight ? 12 : -12);
+
+  const textAnchor = isRight ? 'start' : 'end';
+
   return (
-    <div style={{
-      background: 'var(--color-bg-card)',
-      border: '1px solid var(--color-border)',
-      borderRadius: 8,
-      padding: '8px 12px',
-      fontSize: 13,
-      color: 'var(--color-text-primary)',
-      boxShadow: '0 2px 8px var(--color-shadow-md)',
-    }}>
-      <strong>{nom}</strong>
-      <br />
-      {effectif} places ({pct}%)
-      {difficultyLabel && (
-        <>
-          <br />
-          <span style={{ fontSize: 11, opacity: 0.8 }}>{difficultyLabel}</span>
-        </>
-      )}
-    </div>
+    <g>
+      <path
+        d={`M${ex},${ey}L${tx},${ty}L${hx},${ty}`}
+        stroke={color}
+        strokeWidth={1}
+        fill="none"
+      />
+      <text
+        x={hx + (isRight ? 4 : -4)}
+        y={ty}
+        textAnchor={textAnchor}
+        dominantBaseline="central"
+        className="donut-slice-label"
+      >
+        {nom}
+      </text>
+      <text
+        x={hx + (isRight ? 4 : -4)}
+        y={ty + 14}
+        textAnchor={textAnchor}
+        dominantBaseline="central"
+        className="donut-slice-sublabel"
+      >
+        {effectif} ({pct}%)
+      </text>
+    </g>
   );
 }
 
@@ -132,7 +145,7 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount }: Effe
       aria-label={`Répartition des ${total} places de seconde entre ${effectifs.length} lycées de secteur 1`}
     >
       <div className="effectifs-donut-chart">
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
               data={data}
@@ -140,17 +153,18 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount }: Effe
               nameKey="nom"
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={90}
+              innerRadius={50}
+              outerRadius={75}
               paddingAngle={2}
               animationDuration={600}
+              label={(p: PieLabelRenderProps) => SliceLabel(p)}
+              labelLine={false}
             >
               {data.map((entry) => (
                 <Cell key={entry.uai} fill={entry.color} />
               ))}
               <Label content={(props) => <CenterLabel viewBox={props.viewBox as CenterLabelProps['viewBox']} total={total} />} position="center" />
             </Pie>
-            <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       </div>
