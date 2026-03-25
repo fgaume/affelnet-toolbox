@@ -50,12 +50,14 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
       });
   }, [lycees, college.uai]);
 
-  // Group lycees by sector
+  // Group lycees by sector, sorted alphabetically
   const lyceesBySector = lycees
-    ? lycees.reduce<Record<number, typeof lycees>>((acc, lycee) => {
-        (acc[lycee.secteur] ??= []).push(lycee);
-        return acc;
-      }, {})
+    ? [...lycees]
+        .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+        .reduce<Record<number, typeof lycees>>((acc, lycee) => {
+          (acc[lycee.secteur] ??= []).push(lycee);
+          return acc;
+        }, {})
     : null;
 
   const availableSectors = lyceesBySector
