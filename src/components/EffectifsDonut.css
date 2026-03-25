@@ -1,0 +1,95 @@
+.effectifs-donut {
+  margin-bottom: 20px;
+  padding: 16px 0;
+}
+
+.effectifs-donut-chart {
+  display: flex;
+  justify-content: center;
+}
+
+.donut-center-total {
+  font-size: 22px;
+  font-weight: 700;
+  fill: var(--color-text-primary);
+}
+
+.donut-center-label {
+  font-size: 12px;
+  fill: var(--color-text-muted);
+}
+
+.effectifs-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.effectifs-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.effectifs-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.effectifs-legend-pct {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.effectifs-year {
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-faint);
+  margin-top: 8px;
+}
+
+.effectifs-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-faint);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.effectifs-loading {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 24px 0;
+}
+
+.effectifs-loading span {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  animation: effectifsBounce 1.2s ease-in-out infinite;
+}
+
+.effectifs-loading span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.effectifs-loading span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes effectifsBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+}
