@@ -5,7 +5,9 @@ import './EffectifsDonut.css';
 
 const DEFAULT_COLOR = '#9ca3af';
 const RADIAN = Math.PI / 180;
-const LABEL_OFFSET = 20;
+const LABEL_OFFSET = 25;
+const FICHE_RECTORAT_URL =
+  'https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=';
 
 interface EffectifsDonutProps {
   effectifs: EffectifLycee[];
@@ -38,6 +40,9 @@ function CenterLabel({ viewBox, total }: CenterLabelProps) {
   );
 }
 
+const LABEL_WIDTH = 160;
+const LABEL_HEIGHT = 36;
+
 function SliceLabel(props: PieLabelRenderProps) {
   const p = props as unknown as Record<string, unknown>;
   const cx = Number(p.cx ?? 0);
@@ -48,6 +53,7 @@ function SliceLabel(props: PieLabelRenderProps) {
   const pct = Number(p.pct ?? 0);
   const effectif = Number(p.effectif ?? 0);
   const color = String(p.color ?? DEFAULT_COLOR);
+  const uai = String(p.uai ?? '');
   const sin = Math.sin(-midAngle * RADIAN);
   const cos = Math.cos(-midAngle * RADIAN);
 
@@ -61,9 +67,10 @@ function SliceLabel(props: PieLabelRenderProps) {
 
   // Horizontal extension
   const isRight = cos >= 0;
-  const hx = tx + (isRight ? 12 : -12);
+  const hx = tx + (isRight ? 14 : -14);
 
-  const textAnchor = isRight ? 'start' : 'end';
+  const foX = isRight ? hx + 4 : hx - 4 - LABEL_WIDTH;
+  const foY = ty - LABEL_HEIGHT / 2;
 
   return (
     <g>
@@ -73,24 +80,19 @@ function SliceLabel(props: PieLabelRenderProps) {
         strokeWidth={1}
         fill="none"
       />
-      <text
-        x={hx + (isRight ? 4 : -4)}
-        y={ty}
-        textAnchor={textAnchor}
-        dominantBaseline="central"
-        className="donut-slice-label"
-      >
-        {nom}
-      </text>
-      <text
-        x={hx + (isRight ? 4 : -4)}
-        y={ty + 14}
-        textAnchor={textAnchor}
-        dominantBaseline="central"
-        className="donut-slice-sublabel"
-      >
-        {effectif} ({pct}%)
-      </text>
+      <foreignObject x={foX} y={foY} width={LABEL_WIDTH} height={LABEL_HEIGHT}>
+        <div className={`donut-label-box ${isRight ? 'donut-label-left' : 'donut-label-right'}`}>
+          <a
+            href={`${FICHE_RECTORAT_URL}${uai}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="donut-label-link"
+          >
+            {nom}
+          </a>
+          <span className="donut-label-detail">{effectif} ({pct}%)</span>
+        </div>
+      </foreignObject>
     </g>
   );
 }
@@ -145,7 +147,7 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount }: Effe
       aria-label={`Répartition des ${total} places de seconde entre ${effectifs.length} lycées de secteur 1`}
     >
       <div className="effectifs-donut-chart">
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={380}>
           <PieChart>
             <Pie
               data={data}
@@ -153,8 +155,8 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount }: Effe
               nameKey="nom"
               cx="50%"
               cy="50%"
-              innerRadius={50}
-              outerRadius={75}
+              innerRadius={65}
+              outerRadius={95}
               paddingAngle={2}
               animationDuration={600}
               label={(p: PieLabelRenderProps) => SliceLabel(p)}
