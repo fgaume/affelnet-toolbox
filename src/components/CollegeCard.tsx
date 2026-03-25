@@ -110,7 +110,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           </div>
           {activeSector === 1 && effectifsLoading && <EffectifsLoading />}
           {activeSector === 1 && effectifs.length > 0 && (
-            <EffectifsDonut effectifs={effectifs} requestedCount={requestedCount} />
+            <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} />
           )}
           <ul className="lycee-list">
             {lyceesBySector[activeSector]?.map((lycee) => {

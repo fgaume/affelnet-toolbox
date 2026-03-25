@@ -1,11 +1,13 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Label } from 'recharts';
 import type { EffectifLycee } from '../types';
+import type { AdmissionDifficulty } from '../services/seuilsApi';
 import './EffectifsDonut.css';
 
-const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+const DEFAULT_COLOR = '#9ca3af';
 
 interface EffectifsDonutProps {
   effectifs: EffectifLycee[];
+  difficulties: Map<string, AdmissionDifficulty>;
   requestedCount?: number;
 }
 
@@ -43,6 +45,8 @@ interface TooltipPayloadItem {
     nom: string;
     effectif: number;
     pct: number;
+    color: string;
+    difficultyLabel?: string;
   };
 }
 
@@ -53,7 +57,7 @@ interface CustomTooltipProps {
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.[0]) return null;
-  const { nom, effectif, pct } = payload[0].payload;
+  const { nom, effectif, pct, difficultyLabel } = payload[0].payload;
   return (
     <div style={{
       background: 'var(--color-bg-card)',
@@ -67,17 +71,52 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
       <strong>{nom}</strong>
       <br />
       {effectif} places ({pct}%)
+      {difficultyLabel && (
+        <>
+          <br />
+          <span style={{ fontSize: 11, opacity: 0.8 }}>{difficultyLabel}</span>
+        </>
+      )}
     </div>
   );
 }
 
-export function EffectifsDonut({ effectifs, requestedCount }: EffectifsDonutProps) {
+/**
+ * Sort entries so that slices with the same difficulty color are never adjacent.
+ * Uses a greedy approach: pick the largest remaining entry whose color differs
+ * from the last placed one. Falls back to any remaining entry if no different
+ * color is available.
+ */
+function separateColors<T>(entries: T[], colorOf: (e: T) => string): T[] {
+  const remaining = [...entries];
+  const result: T[] = [];
+  let lastColor = '';
+  while (remaining.length > 0) {
+    // Find best candidate: different color from last, largest effectif first
+    const idx = remaining.findIndex((e) => colorOf(e) !== lastColor);
+    const pick = idx >= 0 ? idx : 0;
+    const item = remaining.splice(pick, 1)[0];
+    result.push(item);
+    lastColor = colorOf(item);
+  }
+  return result;
+}
+
+export function EffectifsDonut({ effectifs, difficulties, requestedCount }: EffectifsDonutProps) {
   const total = effectifs.reduce((sum, e) => sum + e.effectif, 0);
   if (total === 0) return null;
 
-  const data = effectifs.map((e) => ({
+  const colorOf = (e: EffectifLycee) => difficulties.get(e.uai)?.color ?? DEFAULT_COLOR;
+
+  // Sort by effectif desc, then separate same colors
+  const sorted = [...effectifs].sort((a, b) => b.effectif - a.effectif);
+  const separated = separateColors(sorted, colorOf);
+
+  const data = separated.map((e) => ({
     ...e,
     pct: Math.round((e.effectif / total) * 100),
+    color: colorOf(e),
+    difficultyLabel: difficulties.get(e.uai)?.label,
   }));
 
   const years = [...new Set(effectifs.map((e) => e.annee))].sort();
@@ -105,8 +144,8 @@ export function EffectifsDonut({ effectifs, requestedCount }: EffectifsDonutProp
               paddingAngle={2}
               animationDuration={600}
             >
-              {data.map((_, i) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              {data.map((entry) => (
+                <Cell key={entry.uai} fill={entry.color} />
               ))}
               <Label content={(props) => <CenterLabel viewBox={props.viewBox as CenterLabelProps['viewBox']} total={total} />} position="center" />
             </Pie>
@@ -115,9 +154,9 @@ export function EffectifsDonut({ effectifs, requestedCount }: EffectifsDonutProp
         </ResponsiveContainer>
       </div>
       <div className="effectifs-legend">
-        {data.map((entry, i) => (
+        {data.map((entry) => (
           <span key={entry.uai} className="effectifs-legend-item">
-            <span className="effectifs-legend-dot" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+            <span className="effectifs-legend-dot" style={{ backgroundColor: entry.color }} />
             {entry.nom}
             <span className="effectifs-legend-pct">{entry.effectif} ({entry.pct}%)</span>
           </span>
