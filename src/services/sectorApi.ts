@@ -92,8 +92,11 @@ function applyRabelaisClosure(lycees: LyceeSecteur[], uaiCollege: string): Lycee
   if (!lycees.some((l) => l.uai === RABELAIS_UAI)) return lycees;
   const filtered = lycees.filter((l) => l.uai !== RABELAIS_UAI);
   const replacement = RABELAIS_REPLACEMENT[uaiCollege];
-  if (replacement && !filtered.some((l) => l.uai === replacement.uai)) {
-    filtered.push(replacement);
+  if (replacement) {
+    // If replacement lycée already exists in another sector, keep it there too
+    if (!filtered.some((l) => l.uai === replacement.uai && l.secteur === 1)) {
+      filtered.push(replacement);
+    }
   }
   return filtered;
 }
