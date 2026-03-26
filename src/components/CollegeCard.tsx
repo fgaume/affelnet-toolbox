@@ -3,6 +3,7 @@ import type { SectorResult, LyceeSecteur } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
+import { LyceeDetail } from './LyceeDetail';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
@@ -29,6 +30,14 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [activeSector, setActiveSector] = useState(1);
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
+  const [selectedLycee, setSelectedLycee] = useState<{ uai: string; nom: string } | null>(null);
+
+  // Reset selected lycée when search result changes
+  useEffect(() => setSelectedLycee(null), [result]);
+
+  const handleLyceeSelect = (uai: string, nom: string) => {
+    setSelectedLycee((prev) => prev?.uai === uai ? null : { uai, nom });
+  };
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
 
   // Fetch seuils once and compute difficulties for displayed lycées + tous secteurs
@@ -128,7 +137,14 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           </div>
           {activeSector === 1 && effectifsLoading && <EffectifsLoading />}
           {activeSector === 1 && effectifs.length > 0 && (
-            <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} newLyceeUais={newLyceeUais} />
+            <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} newLyceeUais={newLyceeUais} onLyceeSelect={handleLyceeSelect} />
+          )}
+          {activeSector === 1 && (
+            <div className={`lycee-detail-wrapper${selectedLycee ? ' open' : ''}`}>
+              {selectedLycee && (
+                <LyceeDetail uai={selectedLycee.uai} nom={selectedLycee.nom} onClose={() => setSelectedLycee(null)} />
+              )}
+            </div>
           )}
           {activeSector !== 1 && (
             <ul className="lycee-list">
