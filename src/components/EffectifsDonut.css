@@ -1,6 +1,6 @@
 .effectifs-donut {
   margin-bottom: 20px;
-  padding: 16px 0;
+  padding: 0;
 }
 
 .effectifs-donut-chart {
@@ -91,13 +91,6 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-}
-
-.effectifs-year {
-  text-align: center;
-  font-size: 12px;
-  color: var(--color-text-faint);
-  margin-top: 8px;
 }
 
 .effectifs-note {

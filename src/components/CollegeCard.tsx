@@ -3,6 +3,7 @@ import type { SectorResult, LyceeSecteur } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
+import { LyceesIndicateurs } from './LyceeDetail';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
@@ -130,6 +131,34 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           {activeSector === 1 && effectifs.length > 0 && (
             <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} newLyceeUais={newLyceeUais} />
           )}
+          {activeSector === 1 && difficulties.size > 0 && (
+            <div className="difficulty-legend">
+              <span className="legend-title">Difficulté d'admission sans bonus IPS :</span>
+              <div className="legend-items">
+                {([
+                  ['#1a1a1a', 'Inaccessible'],
+                  ['#dc2626', 'Difficile'],
+                  ['#f97316', 'Moyen'],
+                  ['#2563eb', 'Accessible'],
+                  ['#16a34a', 'Très accessible'],
+                ] as const).map(([color, label]) => (
+                  <span key={color} className="legend-item">
+                    <span className="difficulty-badge" style={{ backgroundColor: color }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {activeSector === 1 && effectifs.length > 0 && (
+            <LyceesIndicateurs
+              lycees={effectifs.map((e) => ({
+                uai: e.uai,
+                nom: e.nom,
+                color: difficulties.get(e.uai)?.color ?? '#9ca3af',
+              }))}
+            />
+          )}
           {activeSector !== 1 && (
             <ul className="lycee-list">
               {activeLycees.map((lycee) => {
@@ -162,12 +191,12 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
               })}
             </ul>
           )}
-          {(activeSector === 1 || activeSector === 0) && difficulties.size > 0 && (
+          {activeSector === 0 && difficulties.size > 0 && (
             <div className="difficulty-legend">
-              <span className="legend-title">Difficulté d'admission :</span>
+              <span className="legend-title">Difficulté d'admission sans bonus IPS :</span>
               <div className="legend-items">
                 {([
-                  ['#1a1a1a', 'Inaccessible sans bonus'],
+                  ['#1a1a1a', 'Inaccessible'],
                   ['#dc2626', 'Difficile'],
                   ['#f97316', 'Moyen'],
                   ['#2563eb', 'Accessible'],

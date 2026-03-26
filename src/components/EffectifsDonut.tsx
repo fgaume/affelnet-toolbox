@@ -3,6 +3,20 @@ import type { EffectifLycee } from '../types';
 import type { AdmissionDifficulty } from '../services/seuilsApi';
 import './EffectifsDonut.css';
 
+const PARTICLES = new Set(['DE', 'DU', 'LE', 'LA', 'DES', 'LES']);
+
+function shortenName(nom: string): string {
+  const words = nom.split(' ');
+  if (words.length < 2) return nom;
+  // Abbreviate first name if followed by a last name (skip particles)
+  const firstWord = words[0];
+  if (PARTICLES.has(firstWord)) return nom;
+  if (nom.length <= 10) return nom;
+  // Already abbreviated (e.g. "P.G.")
+  if (firstWord.includes('.')) return nom;
+  return `${firstWord[0]}. ${words.slice(1).join(' ')}`;
+}
+
 const DEFAULT_COLOR = '#9ca3af';
 const RADIAN = Math.PI / 180;
 const LABEL_OFFSET = 25;
@@ -89,7 +103,7 @@ function SliceLabel(props: PieLabelRenderProps) {
             rel="noopener noreferrer"
             className="donut-label-link"
           >
-            {nom}
+            {shortenName(nom)}
           </a>
           <span className="donut-label-detail">{effectif} ({pct}%)</span>
         </div>
@@ -140,11 +154,6 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
     ? effectifs.filter((e) => newLyceeUais.has(e.uai)).map((e) => e.nom)
     : [];
 
-  const years = [...new Set(effectifs.map((e) => e.annee))].sort();
-  const yearLabel = years.length === 1
-    ? `Données rentrée ${years[0]}`
-    : `Données rentrées ${years[0]}-${years[years.length - 1]}`;
-
   return (
     <div
       className="effectifs-donut"
@@ -152,7 +161,7 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
       aria-label={`Répartition des ${total} places de seconde entre ${effectifs.length} lycées de secteur 1`}
     >
       <div className="effectifs-donut-chart">
-        <ResponsiveContainer width="100%" height={380}>
+        <ResponsiveContainer width="100%" height={290}>
           <PieChart>
             <Pie
               data={data}
@@ -181,7 +190,6 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
           {' '}{newLyceeNames.join(', ')} — remplace Rabelais (fermé)
         </p>
       )}
-      <p className="effectifs-year">{yearLabel}</p>
       {requestedCount != null && requestedCount > effectifs.length && (
         <p className="effectifs-note">
           Données indisponibles pour {requestedCount - effectifs.length} lycée{requestedCount - effectifs.length > 1 ? 's' : ''}
