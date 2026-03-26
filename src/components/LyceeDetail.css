@@ -1,0 +1,87 @@
+/* src/components/LyceeDetail.css */
+.lycee-detail-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.lycee-detail-wrapper.open {
+  grid-template-rows: 1fr;
+}
+
+.lycee-detail {
+  overflow: hidden;
+  padding: 0;
+}
+
+.lycee-detail-wrapper.open .lycee-detail {
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.lycee-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.lycee-detail-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.lycee-detail-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.lycee-detail-close:hover {
+  color: var(--color-text-primary);
+  background: var(--color-border);
+}
+
+.lycee-detail-chart {
+  margin-bottom: 20px;
+}
+
+.lycee-detail-chart h5 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0 0 8px 0;
+}
+
+.lycee-detail-loading {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 24px 0;
+}
+
+.lycee-detail-loading span {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  animation: detailBounce 1.2s ease-in-out infinite;
+}
+
+.lycee-detail-loading span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.lycee-detail-loading span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes detailBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
