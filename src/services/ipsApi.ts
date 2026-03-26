@@ -26,10 +26,33 @@ export interface IpsResult {
 
 let cache: ApiRow[] | null = null;
 
-async function fetchDataset(dataset: string): Promise<ApiRow[]> {
+interface OldApiRow {
+  uai: string;
+  rentree_scolaire: string;
+  ips_voie_gt: string | null;
+  ecart_type_de_l_ips_voie_gt: string | null;
+}
+
+async function fetchOldDataset(): Promise<ApiRow[]> {
+  const select = 'uai,rentree_scolaire,ips_voie_gt,ecart_type_de_l_ips_voie_gt';
+  const where = encodeURIComponent("academie = 'PARIS' AND ips_voie_gt is not null");
+  const url = `${API_BASE}/${DATASET_OLD}/exports/json?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Erreur chargement IPS ancien: ${response.status}`);
+  const rows = (await response.json()) as OldApiRow[];
+  return rows.map((r) => ({
+    uai: r.uai,
+    rentree_scolaire: r.rentree_scolaire,
+    ips_voie_gt: r.ips_voie_gt,
+    ecart_type_voie_gt: r.ecart_type_de_l_ips_voie_gt,
+  }));
+}
+
+async function fetchNewDataset(): Promise<ApiRow[]> {
   const select = 'uai,rentree_scolaire,ips_voie_gt,ecart_type_voie_gt';
   const where = encodeURIComponent("academie = 'PARIS' AND ips_voie_gt is not null");
-  const url = `${API_BASE}/${dataset}/exports/json?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
+  const url = `${API_BASE}/${DATASET_NEW}/exports/json?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Erreur chargement IPS: ${response.status}`);
@@ -41,8 +64,8 @@ async function fetchAllParis(): Promise<ApiRow[]> {
 
   // Merge old (2016-2022) and new (2023+) datasets, dedup by uai+year
   const [oldRows, newRows] = await Promise.all([
-    fetchDataset(DATASET_OLD),
-    fetchDataset(DATASET_NEW),
+    fetchOldDataset(),
+    fetchNewDataset(),
   ]);
   const seen = new Set<string>();
   cache = [];
