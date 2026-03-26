@@ -14,6 +14,7 @@ interface EffectifsDonutProps {
   difficulties: Map<string, AdmissionDifficulty>;
   requestedCount?: number;
   newLyceeUais?: Set<string>;
+  onLyceeSelect?: (uai: string, nom: string) => void;
 }
 
 interface CenterLabelProps {
@@ -119,7 +120,7 @@ function separateColors<T>(entries: T[], colorOf: (e: T) => string): T[] {
   return result;
 }
 
-export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyceeUais }: EffectifsDonutProps) {
+export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyceeUais, onLyceeSelect }: EffectifsDonutProps) {
   const total = effectifs.reduce((sum, e) => sum + e.effectif, 0);
   if (total === 0) return null;
 
@@ -166,6 +167,11 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
               animationDuration={600}
               label={(p: PieLabelRenderProps) => SliceLabel(p)}
               labelLine={false}
+              onClick={(_, index) => {
+                const entry = data[index];
+                onLyceeSelect?.(entry.uai, entry.nom);
+              }}
+              style={{ cursor: onLyceeSelect ? 'pointer' : undefined }}
             >
               {data.map((entry) => (
                 <Cell key={entry.uai} fill={entry.color} />
