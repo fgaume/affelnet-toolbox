@@ -1,8 +1,10 @@
 // src/services/ipsApi.ts
 import { computeDecile } from './decile';
 
-const API_URL =
-  'https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-ips-lycees-ap2023/exports/json';
+const API_BASE =
+  'https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets';
+const DATASET_OLD = 'fr-en-ips_lycees';
+const DATASET_NEW = 'fr-en-ips-lycees-ap2023';
 
 interface ApiRow {
   uai: string;
@@ -24,17 +26,35 @@ export interface IpsResult {
 
 let cache: ApiRow[] | null = null;
 
-async function fetchAllParis(): Promise<ApiRow[]> {
-  if (cache) return cache;
-
+async function fetchDataset(dataset: string): Promise<ApiRow[]> {
   const select = 'uai,rentree_scolaire,ips_voie_gt,ecart_type_voie_gt';
   const where = encodeURIComponent("academie = 'PARIS' AND ips_voie_gt is not null");
-  const url = `${API_URL}?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
+  const url = `${API_BASE}/${dataset}/exports/json?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Erreur chargement IPS: ${response.status}`);
+  return (await response.json()) as ApiRow[];
+}
 
-  cache = (await response.json()) as ApiRow[];
+async function fetchAllParis(): Promise<ApiRow[]> {
+  if (cache) return cache;
+
+  // Merge old (2016-2022) and new (2023+) datasets, dedup by uai+year
+  const [oldRows, newRows] = await Promise.all([
+    fetchDataset(DATASET_OLD),
+    fetchDataset(DATASET_NEW),
+  ]);
+  const seen = new Set<string>();
+  cache = [];
+  // New dataset takes precedence for overlapping years
+  for (const r of [...newRows, ...oldRows]) {
+    const key = `${r.uai}_${r.rentree_scolaire}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      cache.push(r);
+    }
+  }
+  cache.sort((a, b) => a.rentree_scolaire.localeCompare(b.rentree_scolaire));
   return cache;
 }
 
