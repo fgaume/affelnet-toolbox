@@ -167,7 +167,7 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
       aria-label={`Répartition des ${total} places de seconde entre ${effectifs.length} lycées de secteur 1`}
     >
       <div className="effectifs-donut-chart">
-        <ResponsiveContainer width="100%" height={320}>
+        <ResponsiveContainer width="100%" height={290}>
           <PieChart>
             <Pie
               data={data}
