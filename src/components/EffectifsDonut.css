@@ -82,6 +82,17 @@
   font-size: 12px;
 }
 
+.effectifs-new-lycees {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
 .effectifs-year {
   text-align: center;
   font-size: 12px;

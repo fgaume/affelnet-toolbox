@@ -41,6 +41,7 @@ export interface LyceeSecteur {
   uai: string;
   nom: string;
   secteur: number;
+  isNew?: boolean;
 }
 
 export interface EffectifLycee {
