@@ -54,10 +54,10 @@ describe('fetchNiveauScolaire', () => {
   it('fetches TB history and decile for a lycée', async () => {
     // Flat array — matches /exports/json format
     const mockData = [
-      { annee: '2022-01-01', uai: '0750680G', nb_mentions_tb_sansf_g: 20, nb_mentions_tb_avecf_g: 10, presents_gnle: 200 },
-      { annee: '2023-01-01', uai: '0750680G', nb_mentions_tb_sansf_g: 25, nb_mentions_tb_avecf_g: 15, presents_gnle: 200 },
-      { annee: '2022-01-01', uai: '0750693W', nb_mentions_tb_sansf_g: 10, nb_mentions_tb_avecf_g: 5, presents_gnle: 100 },
-      { annee: '2023-01-01', uai: '0750693W', nb_mentions_tb_sansf_g: 12, nb_mentions_tb_avecf_g: 8, presents_gnle: 100 },
+      { annee: '2022', uai: '0750680G', nb_mentions_tb_sansf_g: 20, nb_mentions_tb_avecf_g: 10, presents_gnle: 200 },
+      { annee: '2023', uai: '0750680G', nb_mentions_tb_sansf_g: 25, nb_mentions_tb_avecf_g: 15, presents_gnle: 200 },
+      { annee: '2022', uai: '0750693W', nb_mentions_tb_sansf_g: 10, nb_mentions_tb_avecf_g: 5, presents_gnle: 100 },
+      { annee: '2023', uai: '0750693W', nb_mentions_tb_sansf_g: 12, nb_mentions_tb_avecf_g: 8, presents_gnle: 100 },
     ];
 
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
@@ -81,7 +81,7 @@ describe('fetchNiveauScolaire', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([
-        { annee: '2023-01-01', uai: '0750680G', nb_mentions_tb_sansf_g: 20, nb_mentions_tb_avecf_g: 10, presents_gnle: 200 },
+        { annee: '2023', uai: '0750680G', nb_mentions_tb_sansf_g: 20, nb_mentions_tb_avecf_g: 10, presents_gnle: 200 },
       ]),
     }));
 

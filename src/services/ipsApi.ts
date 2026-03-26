@@ -7,8 +7,8 @@ const API_URL =
 interface ApiRow {
   uai: string;
   rentree_scolaire: string;
-  ips: number;
-  ecart_type: number;
+  ips_voie_gt: string | null;
+  ecart_type_voie_gt: string | null;
 }
 
 export interface IpsPoint {
@@ -27,8 +27,9 @@ let cache: ApiRow[] | null = null;
 async function fetchAllParis(): Promise<ApiRow[]> {
   if (cache) return cache;
 
-  const select = 'uai,rentree_scolaire,ips,ecart_type';
-  const url = `${API_URL}?select=${select}&refine=academie:PARIS&order_by=rentree_scolaire&limit=-1`;
+  const select = 'uai,rentree_scolaire,ips_voie_gt,ecart_type_voie_gt';
+  const where = encodeURIComponent("academie = 'PARIS' AND ips_voie_gt is not null");
+  const url = `${API_URL}?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Erreur chargement IPS: ${response.status}`);
@@ -41,13 +42,13 @@ export async function fetchIps(uai: string): Promise<IpsResult | null> {
   try {
     const allRows = await fetchAllParis();
 
-    const lyceeRows = allRows.filter((r) => r.uai === uai);
+    const lyceeRows = allRows.filter((r) => r.uai === uai && r.ips_voie_gt != null);
     if (lyceeRows.length === 0) return null;
 
     const history: IpsPoint[] = lyceeRows.map((r) => ({
       annee: r.rentree_scolaire,
-      ips: r.ips,
-      ecartType: r.ecart_type,
+      ips: parseFloat(r.ips_voie_gt!),
+      ecartType: parseFloat(r.ecart_type_voie_gt ?? '0'),
     }));
 
     // Decile: compare latest year across all Paris lycées
@@ -55,10 +56,12 @@ export async function fetchIps(uai: string): Promise<IpsResult | null> {
       (max, r) => (r.rentree_scolaire > max ? r.rentree_scolaire : max),
       ''
     );
-    const latestRows = allRows.filter((r) => r.rentree_scolaire === latestYear);
-    const allIps = latestRows.map((r) => r.ips);
+    const latestRows = allRows.filter((r) => r.rentree_scolaire === latestYear && r.ips_voie_gt != null);
+    const allIps = latestRows.map((r) => parseFloat(r.ips_voie_gt!));
     const lyceeLatestRow = latestRows.find((r) => r.uai === uai);
-    const lyceeIps = lyceeLatestRow ? lyceeLatestRow.ips : history[history.length - 1]?.ips ?? 0;
+    const lyceeIps = lyceeLatestRow
+      ? parseFloat(lyceeLatestRow.ips_voie_gt!)
+      : history[history.length - 1]?.ips ?? 0;
     const decile = computeDecile(lyceeIps, allIps);
 
     return { history, decile };

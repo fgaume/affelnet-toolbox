@@ -7,8 +7,8 @@ const API_URL =
 interface ApiRow {
   annee: string;
   uai: string;
-  nb_mentions_tb_sansf_g: number;
-  nb_mentions_tb_avecf_g: number;
+  nb_mentions_tb_sansf_g: number | null;
+  nb_mentions_tb_avecf_g: number | null;
   presents_gnle: number;
 }
 
@@ -24,9 +24,9 @@ export interface NiveauScolaireResult {
 
 let cache: ApiRow[] | null = null;
 
-export function computeTauxTB(sansF: number, avecF: number, presents: number): number {
+export function computeTauxTB(sansF: number | null, avecF: number | null, presents: number): number {
   if (presents === 0) return 0;
-  return ((sansF + avecF) / presents) * 100;
+  return (((sansF ?? 0) + (avecF ?? 0)) / presents) * 100;
 }
 
 async function fetchAllParis(): Promise<ApiRow[]> {
@@ -34,7 +34,7 @@ async function fetchAllParis(): Promise<ApiRow[]> {
 
   const select = 'annee,uai,nb_mentions_tb_sansf_g,nb_mentions_tb_avecf_g,presents_gnle';
   const where = encodeURIComponent(
-    "(code_departement = '075') AND (secteur = 'public') AND (presents_gnle > 0)"
+    "(code_departement = '75') AND (secteur = 'public') AND (nb_mentions_tb_sansf_g is not null) AND (presents_gnle > 0)"
   );
   const url = `${API_URL}?select=${select}&where=${where}&order_by=annee&limit=-1`;
 
@@ -54,7 +54,7 @@ export async function fetchNiveauScolaire(uai: string): Promise<NiveauScolaireRe
     if (lyceeRows.length === 0) return null;
 
     const history: NiveauScolairePoint[] = lyceeRows.map((r) => ({
-      annee: r.annee.substring(0, 4),
+      annee: r.annee.slice(0, 4),
       tauxTB: computeTauxTB(r.nb_mentions_tb_sansf_g, r.nb_mentions_tb_avecf_g, r.presents_gnle),
     }));
 

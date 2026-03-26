@@ -9,10 +9,10 @@ describe('fetchIps', () => {
 
   it('fetches IPS history and decile for a lycée', async () => {
     const mockData = [
-      { uai: '0750680G', rentree_scolaire: '2023', ips: 120.5, ecart_type: 28.3 },
-      { uai: '0750680G', rentree_scolaire: '2024', ips: 122.0, ecart_type: 27.1 },
-      { uai: '0750693W', rentree_scolaire: '2023', ips: 110.0, ecart_type: 30.0 },
-      { uai: '0750693W', rentree_scolaire: '2024', ips: 112.0, ecart_type: 29.5 },
+      { uai: '0750680G', rentree_scolaire: '2023-2024', ips_voie_gt: '120.5', ecart_type_voie_gt: '28.3' },
+      { uai: '0750680G', rentree_scolaire: '2024-2025', ips_voie_gt: '122.0', ecart_type_voie_gt: '27.1' },
+      { uai: '0750693W', rentree_scolaire: '2023-2024', ips_voie_gt: '110.0', ecart_type_voie_gt: '30.0' },
+      { uai: '0750693W', rentree_scolaire: '2024-2025', ips_voie_gt: '112.0', ecart_type_voie_gt: '29.5' },
     ];
 
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
@@ -25,7 +25,7 @@ describe('fetchIps', () => {
 
     expect(result).not.toBeNull();
     expect(result!.history).toHaveLength(2);
-    expect(result!.history[0].annee).toBe('2023');
+    expect(result!.history[0].annee).toBe('2023-2024');
     expect(result!.history[0].ips).toBe(120.5);
     expect(result!.history[0].ecartType).toBe(28.3);
     expect(result!.history[1].ips).toBe(122.0);
