@@ -170,17 +170,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 formatter={(key: string) => formatName(key)}
                 wrapperStyle={{ fontSize: 11 }}
               />
-              <Line
-                key={MEDIAN_KEY}
-                type="monotone"
-                dataKey={MEDIAN_KEY}
-                stroke={MEDIAN_COLOR}
-                strokeWidth={1.5}
-                strokeDasharray="6 3"
-                dot={false}
-                connectNulls
-              />
-              {lycees.map((l) => (
+              {[...lycees].sort((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"
@@ -191,6 +181,16 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                   connectNulls
                 />
               ))}
+              <Line
+                key={MEDIAN_KEY}
+                type="monotone"
+                dataKey={MEDIAN_KEY}
+                stroke={MEDIAN_COLOR}
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                connectNulls
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -215,17 +215,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 formatter={(key: string) => formatName(key)}
                 wrapperStyle={{ fontSize: 11 }}
               />
-              <Line
-                key={MEDIAN_KEY}
-                type="monotone"
-                dataKey={MEDIAN_KEY}
-                stroke={MEDIAN_COLOR}
-                strokeWidth={1.5}
-                strokeDasharray="6 3"
-                dot={false}
-                connectNulls
-              />
-              {lycees.map((l) => (
+              {[...lycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"
@@ -236,6 +226,16 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                   connectNulls
                 />
               ))}
+              <Line
+                key={MEDIAN_KEY}
+                type="monotone"
+                dataKey={MEDIAN_KEY}
+                stroke={MEDIAN_COLOR}
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                connectNulls
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
