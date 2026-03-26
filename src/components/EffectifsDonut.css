@@ -93,13 +93,6 @@
   gap: 6px;
 }
 
-.effectifs-year {
-  text-align: right;
-  font-size: 12px;
-  color: var(--color-text-faint);
-  margin: 0;
-}
-
 .effectifs-note {
   text-align: center;
   font-size: 11px;

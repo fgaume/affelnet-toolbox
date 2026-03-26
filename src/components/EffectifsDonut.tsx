@@ -154,18 +154,12 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
     ? effectifs.filter((e) => newLyceeUais.has(e.uai)).map((e) => e.nom)
     : [];
 
-  const years = [...new Set(effectifs.map((e) => e.annee))].sort();
-  const yearLabel = years.length === 1
-    ? `Données rentrée ${years[0]}`
-    : `Données rentrées ${years[0]}-${years[years.length - 1]}`;
-
   return (
     <div
       className="effectifs-donut"
       role="img"
       aria-label={`Répartition des ${total} places de seconde entre ${effectifs.length} lycées de secteur 1`}
     >
-      <p className="effectifs-year">{yearLabel}</p>
       <div className="effectifs-donut-chart">
         <ResponsiveContainer width="100%" height={290}>
           <PieChart>
