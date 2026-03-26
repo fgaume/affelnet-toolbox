@@ -35,7 +35,7 @@ interface OldApiRow {
 
 async function fetchOldDataset(): Promise<ApiRow[]> {
   const select = 'uai,rentree_scolaire,ips_voie_gt,ecart_type_de_l_ips_voie_gt';
-  const where = encodeURIComponent("academie = 'PARIS' AND ips_voie_gt is not null");
+  const where = encodeURIComponent("academie = 'PARIS' AND secteur = 'public' AND ips_voie_gt is not null");
   const url = `${API_BASE}/${DATASET_OLD}/exports/json?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
 
   const response = await fetch(url);
@@ -51,7 +51,7 @@ async function fetchOldDataset(): Promise<ApiRow[]> {
 
 async function fetchNewDataset(): Promise<ApiRow[]> {
   const select = 'uai,rentree_scolaire,ips_voie_gt,ecart_type_voie_gt';
-  const where = encodeURIComponent("academie = 'PARIS' AND ips_voie_gt is not null");
+  const where = encodeURIComponent("academie = 'PARIS' AND secteur = 'public' AND ips_voie_gt is not null");
   const url = `${API_BASE}/${DATASET_NEW}/exports/json?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
 
   const response = await fetch(url);
