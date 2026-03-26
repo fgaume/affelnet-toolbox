@@ -136,7 +136,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
               <span className="legend-title">Difficulté d'admission sans bonus IPS :</span>
               <div className="legend-items">
                 {([
-                  ['#1a1a1a', 'Inaccessible sans bonus'],
+                  ['#1a1a1a', 'Inaccessible'],
                   ['#dc2626', 'Difficile'],
                   ['#f97316', 'Moyen'],
                   ['#2563eb', 'Accessible'],
@@ -196,7 +196,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
               <span className="legend-title">Difficulté d'admission sans bonus IPS :</span>
               <div className="legend-items">
                 {([
-                  ['#1a1a1a', 'Inaccessible sans bonus'],
+                  ['#1a1a1a', 'Inaccessible'],
                   ['#dc2626', 'Difficile'],
                   ['#f97316', 'Moyen'],
                   ['#2563eb', 'Accessible'],
