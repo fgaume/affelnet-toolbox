@@ -3,6 +3,20 @@ import type { EffectifLycee } from '../types';
 import type { AdmissionDifficulty } from '../services/seuilsApi';
 import './EffectifsDonut.css';
 
+const PARTICLES = new Set(['DE', 'DU', 'LE', 'LA', 'DES', 'LES']);
+
+function shortenName(nom: string): string {
+  const words = nom.split(' ');
+  if (words.length < 2) return nom;
+  // Abbreviate first name if followed by a last name (skip particles)
+  const firstWord = words[0];
+  if (PARTICLES.has(firstWord)) return nom;
+  if (nom.length <= 10) return nom;
+  // Already abbreviated (e.g. "P.G.")
+  if (firstWord.includes('.')) return nom;
+  return `${firstWord[0]}. ${words.slice(1).join(' ')}`;
+}
+
 const DEFAULT_COLOR = '#9ca3af';
 const RADIAN = Math.PI / 180;
 const LABEL_OFFSET = 25;
@@ -90,7 +104,7 @@ function SliceLabel(props: PieLabelRenderProps) {
             rel="noopener noreferrer"
             className="donut-label-link"
           >
-            {nom}
+            {shortenName(nom)}
           </a>
           <span className="donut-label-detail">{effectif} ({pct}%)</span>
         </div>
