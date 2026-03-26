@@ -76,6 +76,10 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
     ? TOUS_SECTEURS_LYCEES
     : lyceesBySector?.[activeSector] ?? [];
 
+  const newLyceeUais = new Set(
+    lycees?.filter((l) => l.isNew).map((l) => l.uai) ?? []
+  );
+
   return (
     <div className="college-card">
       <div className="college-header">
@@ -124,7 +128,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           </div>
           {activeSector === 1 && effectifsLoading && <EffectifsLoading />}
           {activeSector === 1 && effectifs.length > 0 && (
-            <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} />
+            <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} newLyceeUais={newLyceeUais} />
           )}
           {activeSector !== 1 && (
             <ul className="lycee-list">
@@ -147,6 +151,9 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
                     >
                       {lycee.nom}
                     </a>
+                    {newLyceeUais.has(lycee.uai) && (
+                      <span className="new-sector-badge">Nouveau</span>
+                    )}
                     {diff && (
                       <span className="difficulty-label">{diff.label}</span>
                     )}

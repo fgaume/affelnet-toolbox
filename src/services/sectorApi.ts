@@ -71,21 +71,21 @@ export async function findCollegeUAI(nomCollege: string): Promise<string> {
 const RABELAIS_UAI = '0750688R';
 const RABELAIS_REPLACEMENT: Record<string, LyceeSecteur> = {
   // COYSEVOX, BERLIOZ → DECOUR
-  '0752319N': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1 },
-  '0752252R': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1 },
+  '0752319N': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1, isNew: true },
+  '0752252R': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1, isNew: true },
   // MALLARMÉ, DORGELÈS, BALZAC → QUINET
-  '0752554U': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1 },
-  '0750429J': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1 },
-  '0752553T': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1 },
+  '0752554U': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true },
+  '0750429J': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true },
+  '0752553T': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true },
   // BORIS VIAN → FERRY
-  '0752958H': { uai: '0750669V', nom: 'JULES FERRY', secteur: 1 },
+  '0752958H': { uai: '0750669V', nom: 'JULES FERRY', secteur: 1, isNew: true },
   // UTRILLO, FERRY, CLEMENCEAU → COLBERT
-  '0751793S': { uai: '0750673Z', nom: 'COLBERT', secteur: 1 },
-  '0752533W': { uai: '0750673Z', nom: 'COLBERT', secteur: 1 },
-  '0750546L': { uai: '0750673Z', nom: 'COLBERT', secteur: 1 },
+  '0751793S': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true },
+  '0752533W': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true },
+  '0750546L': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true },
   // Gérard PHILIPE, Marie CURIE → BALZAC
-  '0752195D': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1 },
-  '0754706H': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1 },
+  '0752195D': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1, isNew: true },
+  '0754706H': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1, isNew: true },
 };
 
 function applyRabelaisClosure(lycees: LyceeSecteur[], uaiCollege: string): LyceeSecteur[] {
@@ -93,8 +93,11 @@ function applyRabelaisClosure(lycees: LyceeSecteur[], uaiCollege: string): Lycee
   const filtered = lycees.filter((l) => l.uai !== RABELAIS_UAI);
   const replacement = RABELAIS_REPLACEMENT[uaiCollege];
   if (replacement) {
-    // If replacement lycée already exists in another sector, keep it there too
-    if (!filtered.some((l) => l.uai === replacement.uai && l.secteur === 1)) {
+    const existing = filtered.find((l) => l.uai === replacement.uai && l.secteur === 1);
+    if (existing) {
+      // Lycée already in sector 1 — just mark it as new
+      existing.isNew = true;
+    } else {
       filtered.push(replacement);
     }
   }
