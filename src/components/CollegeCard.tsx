@@ -133,7 +133,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           )}
           {activeSector === 1 && difficulties.size > 0 && (
             <div className="difficulty-legend">
-              <span className="legend-title">Difficulté d'admission :</span>
+              <span className="legend-title">Difficulté d'admission sans bonus IPS :</span>
               <div className="legend-items">
                 {([
                   ['#1a1a1a', 'Inaccessible sans bonus'],
@@ -193,7 +193,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           )}
           {activeSector === 0 && difficulties.size > 0 && (
             <div className="difficulty-legend">
-              <span className="legend-title">Difficulté d'admission :</span>
+              <span className="legend-title">Difficulté d'admission sans bonus IPS :</span>
               <div className="legend-items">
                 {([
                   ['#1a1a1a', 'Inaccessible sans bonus'],
