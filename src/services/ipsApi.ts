@@ -81,6 +81,35 @@ async function fetchAllParis(): Promise<ApiRow[]> {
   return cache;
 }
 
+function median(values: number[]): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+export async function fetchMedianIpsByYear(): Promise<Map<string, number>> {
+  try {
+    const allRows = await fetchAllParis();
+    const byYear = new Map<string, number[]>();
+    for (const r of allRows) {
+      if (r.ips_voie_gt == null) continue;
+      const annee = r.rentree_scolaire;
+      const ips = parseFloat(r.ips_voie_gt);
+      const arr = byYear.get(annee);
+      if (arr) arr.push(ips);
+      else byYear.set(annee, [ips]);
+    }
+    const result = new Map<string, number>();
+    for (const [annee, values] of byYear) {
+      result.set(annee, median(values));
+    }
+    return result;
+  } catch {
+    return new Map();
+  }
+}
+
 export async function fetchIps(uai: string): Promise<IpsResult | null> {
   try {
     const allRows = await fetchAllParis();

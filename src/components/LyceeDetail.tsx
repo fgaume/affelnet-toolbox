@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts';
-import { fetchNiveauScolaire, type NiveauScolaireResult } from '../services/niveauScolaireApi';
-import { fetchIps, type IpsResult } from '../services/ipsApi';
-import { DecileGauge, type DecileMarker } from './DecileGauge';
+import { fetchNiveauScolaire, fetchMedianTBByYear, type NiveauScolaireResult } from '../services/niveauScolaireApi';
+import { fetchIps, fetchMedianIpsByYear, type IpsResult } from '../services/ipsApi';
 import './LyceeDetail.css';
 
 interface LyceeInfo {
@@ -23,6 +22,8 @@ interface LyceeData {
 }
 
 const SHORT_NAME_LIMIT = 14;
+const MEDIAN_KEY = '__median__';
+const MEDIAN_COLOR = '#9ca3af';
 
 function shortName(nom: string): string {
   if (nom.length <= SHORT_NAME_LIMIT) return nom;
@@ -33,25 +34,33 @@ function shortName(nom: string): string {
 
 export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   const [data, setData] = useState<Map<string, LyceeData>>(new Map());
+  const [medianTB, setMedianTB] = useState<Map<string, number>>(new Map());
+  const [medianIPS, setMedianIPS] = useState<Map<string, number>>(new Map());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     setData(new Map());
 
-    Promise.allSettled(
-      lycees.map(async (l) => {
-        const [niveau, ips] = await Promise.allSettled([
-          fetchNiveauScolaire(l.uai),
-          fetchIps(l.uai),
-        ]);
-        return {
-          uai: l.uai,
-          niveau: niveau.status === 'fulfilled' ? niveau.value : null,
-          ips: ips.status === 'fulfilled' ? ips.value : null,
-        };
-      }),
-    ).then((results) => {
+    Promise.all([
+      // Fetch per-lycée data
+      Promise.allSettled(
+        lycees.map(async (l) => {
+          const [niveau, ips] = await Promise.allSettled([
+            fetchNiveauScolaire(l.uai),
+            fetchIps(l.uai),
+          ]);
+          return {
+            uai: l.uai,
+            niveau: niveau.status === 'fulfilled' ? niveau.value : null,
+            ips: ips.status === 'fulfilled' ? ips.value : null,
+          };
+        }),
+      ),
+      // Fetch medians
+      fetchMedianTBByYear(),
+      fetchMedianIpsByYear(),
+    ]).then(([results, tbMedians, ipsMedians]) => {
       const map = new Map<string, LyceeData>();
       for (const r of results) {
         if (r.status === 'fulfilled') {
@@ -59,6 +68,8 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
         }
       }
       setData(map);
+      setMedianTB(tbMedians);
+      setMedianIPS(ipsMedians);
       setLoading(false);
     });
   }, [lycees]);
@@ -76,6 +87,8 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   for (const [, d] of data) {
     d.niveau?.history.forEach((p) => allYearsTB.add(p.annee));
   }
+  for (const annee of medianTB.keys()) allYearsTB.add(annee);
+
   const tbChartData = [...allYearsTB].sort().map((annee) => {
     const point: Record<string, unknown> = { annee };
     for (const l of lycees) {
@@ -83,6 +96,8 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
       const p = d?.niveau?.history.find((h) => h.annee === annee);
       if (p) point[l.uai] = p.tauxTB;
     }
+    const med = medianTB.get(annee);
+    if (med != null) point[MEDIAN_KEY] = med;
     return point;
   });
 
@@ -91,6 +106,8 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   for (const [, d] of data) {
     d.ips?.history.forEach((p) => allYearsIPS.add(p.annee));
   }
+  for (const annee of medianIPS.keys()) allYearsIPS.add(annee);
+
   const ipsChartData = [...allYearsIPS].sort().map((annee) => {
     const point: Record<string, unknown> = { annee };
     for (const l of lycees) {
@@ -98,23 +115,21 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
       const p = d?.ips?.history.find((h) => h.annee === annee);
       if (p) point[l.uai] = p.ips;
     }
+    const med = medianIPS.get(annee);
+    if (med != null) point[MEDIAN_KEY] = med;
     return point;
   });
 
-  // Decile markers
-  const tbMarkers: DecileMarker[] = [];
-  const ipsMarkers: DecileMarker[] = [];
-  for (const l of lycees) {
-    const d = data.get(l.uai);
-    const sn = shortName(l.nom);
-    if (d?.niveau) tbMarkers.push({ nom: sn, decile: d.niveau.decile, color: l.color });
-    if (d?.ips) ipsMarkers.push({ nom: sn, decile: d.ips.decile, color: l.color });
-  }
-
-  const hasTB = tbChartData.length > 0 && tbMarkers.length > 0;
-  const hasIPS = ipsChartData.length > 0 && ipsMarkers.length > 0;
+  const hasTB = tbChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.niveau);
+  const hasIPS = ipsChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.ips);
 
   if (!hasTB && !hasIPS) return null;
+
+  const formatName = (key: string) => {
+    if (key === MEDIAN_KEY) return 'Médiane Paris';
+    const lycee = lycees.find((l) => l.uai === key);
+    return lycee ? shortName(lycee.nom) : key;
+  };
 
   return (
     <div className="lycee-detail">
@@ -127,18 +142,24 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
               <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} unit="%" />
               <Tooltip
-                formatter={(v: unknown, name: unknown) => {
-                  const uai = String(name ?? '');
-                  const lycee = lycees.find((l) => l.uai === uai);
-                  return [`${Number(v).toFixed(1)}%`, lycee ? shortName(lycee.nom) : uai];
-                }}
+                formatter={(v: unknown, name: unknown) => [
+                  `${Number(v).toFixed(1)}%`,
+                  formatName(String(name ?? '')),
+                ]}
               />
               <Legend
-                formatter={(uai: string) => {
-                  const lycee = lycees.find((l) => l.uai === uai);
-                  return lycee ? shortName(lycee.nom) : uai;
-                }}
+                formatter={(key: string) => formatName(key)}
                 wrapperStyle={{ fontSize: 11 }}
+              />
+              <Line
+                key={MEDIAN_KEY}
+                type="monotone"
+                dataKey={MEDIAN_KEY}
+                stroke={MEDIAN_COLOR}
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                connectNulls
               />
               {lycees.map((l) => (
                 <Line
@@ -153,7 +174,6 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
               ))}
             </LineChart>
           </ResponsiveContainer>
-          <DecileGauge markers={tbMarkers} label="parmi les lycées publics parisiens" />
         </div>
       )}
 
@@ -166,18 +186,24 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
               <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} domain={['auto', 'auto']} />
               <Tooltip
-                formatter={(v: unknown, name: unknown) => {
-                  const uai = String(name ?? '');
-                  const lycee = lycees.find((l) => l.uai === uai);
-                  return [Number(v).toFixed(1), lycee ? shortName(lycee.nom) : uai];
-                }}
+                formatter={(v: unknown, name: unknown) => [
+                  Number(v).toFixed(1),
+                  formatName(String(name ?? '')),
+                ]}
               />
               <Legend
-                formatter={(uai: string) => {
-                  const lycee = lycees.find((l) => l.uai === uai);
-                  return lycee ? shortName(lycee.nom) : uai;
-                }}
+                formatter={(key: string) => formatName(key)}
                 wrapperStyle={{ fontSize: 11 }}
+              />
+              <Line
+                key={MEDIAN_KEY}
+                type="monotone"
+                dataKey={MEDIAN_KEY}
+                stroke={MEDIAN_COLOR}
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                connectNulls
               />
               {lycees.map((l) => (
                 <Line
@@ -192,7 +218,6 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
               ))}
             </LineChart>
           </ResponsiveContainer>
-          <DecileGauge markers={ipsMarkers} label="parmi les lycées publics parisiens" />
         </div>
       )}
     </div>
