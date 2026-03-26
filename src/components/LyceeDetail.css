@@ -53,6 +53,8 @@
 
 .lycee-detail-chart:first-child {
   margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
 }
 
 .lycee-detail-chart h5 {
