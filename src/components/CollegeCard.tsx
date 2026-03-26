@@ -131,6 +131,25 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           {activeSector === 1 && effectifs.length > 0 && (
             <EffectifsDonut effectifs={effectifs} difficulties={difficulties} requestedCount={requestedCount} newLyceeUais={newLyceeUais} />
           )}
+          {activeSector === 1 && difficulties.size > 0 && (
+            <div className="difficulty-legend">
+              <span className="legend-title">Difficulté d'admission :</span>
+              <div className="legend-items">
+                {([
+                  ['#1a1a1a', 'Inaccessible sans bonus'],
+                  ['#dc2626', 'Difficile'],
+                  ['#f97316', 'Moyen'],
+                  ['#2563eb', 'Accessible'],
+                  ['#16a34a', 'Très accessible'],
+                ] as const).map(([color, label]) => (
+                  <span key={color} className="legend-item">
+                    <span className="difficulty-badge" style={{ backgroundColor: color }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           {activeSector === 1 && effectifs.length > 0 && (
             <LyceesIndicateurs
               lycees={effectifs.map((e) => ({
@@ -172,7 +191,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
               })}
             </ul>
           )}
-          {(activeSector === 1 || activeSector === 0) && difficulties.size > 0 && (
+          {activeSector === 0 && difficulties.size > 0 && (
             <div className="difficulty-legend">
               <span className="legend-title">Difficulté d'admission :</span>
               <div className="legend-items">
