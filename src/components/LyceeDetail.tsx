@@ -120,6 +120,24 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
     return point;
   });
 
+  // Compute sort rank based on last year value (descending), median always last
+  function lastYearRank(chartData: Record<string, unknown>[]): Map<string, number> {
+    const lastPoint = chartData[chartData.length - 1];
+    if (!lastPoint) return new Map();
+    const entries: [string, number][] = [];
+    for (const [key, val] of Object.entries(lastPoint)) {
+      if (key === 'annee') continue;
+      entries.push([key, typeof val === 'number' ? val : -Infinity]);
+    }
+    entries.sort((a, b) => b[1] - a[1]);
+    const rank = new Map<string, number>();
+    entries.forEach(([key], i) => rank.set(key, key === MEDIAN_KEY ? 9999 : i));
+    return rank;
+  }
+
+  const tbRank = lastYearRank(tbChartData);
+  const ipsRank = lastYearRank(ipsChartData);
+
   const hasTB = tbChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.niveau);
   const hasIPS = ipsChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.ips);
 
@@ -146,6 +164,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                   `${Number(v).toFixed(1)}%`,
                   formatName(String(name ?? '')),
                 ]}
+                itemSorter={(item) => tbRank.get(String(item.dataKey ?? '')) ?? 9999}
               />
               <Legend
                 formatter={(key: string) => formatName(key)}
@@ -190,6 +209,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                   Number(v).toFixed(1),
                   formatName(String(name ?? '')),
                 ]}
+                itemSorter={(item) => ipsRank.get(String(item.dataKey ?? '')) ?? 9999}
               />
               <Legend
                 formatter={(key: string) => formatName(key)}
