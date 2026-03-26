@@ -165,6 +165,7 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
       role="img"
       aria-label={`Répartition des ${total} places de seconde entre ${effectifs.length} lycées de secteur 1`}
     >
+      <p className="effectifs-year">{yearLabel}</p>
       <div className="effectifs-donut-chart">
         <ResponsiveContainer width="100%" height={290}>
           <PieChart>
@@ -195,7 +196,6 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
           {' '}{newLyceeNames.join(', ')} — remplace Rabelais (fermé)
         </p>
       )}
-      <p className="effectifs-year">{yearLabel}</p>
       {requestedCount != null && requestedCount > effectifs.length && (
         <p className="effectifs-note">
           Données indisponibles pour {requestedCount - effectifs.length} lycée{requestedCount - effectifs.length > 1 ? 's' : ''}
