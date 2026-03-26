@@ -1,14 +1,14 @@
 .decile-gauge {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 8px;
+  gap: 6px;
+  margin-top: 12px;
 }
 
 .decile-bar {
   display: flex;
   gap: 2px;
-  height: 12px;
+  height: 14px;
 }
 
 .decile-segment {
@@ -16,17 +16,57 @@
   border-radius: 2px;
   background-color: var(--color-border);
   transition: background-color 0.3s;
+  position: relative;
 }
 
 .decile-segment.active {
   transform: scaleY(1.3);
 }
 
-.decile-label {
-  font-size: 12px;
-  color: var(--color-text-muted);
+.decile-markers {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
 }
 
-.decile-label sup {
-  font-size: 9px;
+.decile-marker {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2.5px solid;
+  background: var(--color-bg);
+}
+
+.decile-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: center;
+}
+
+.decile-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.decile-legend-item sup {
+  font-size: 8px;
+}
+
+.decile-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.decile-legend-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
 }

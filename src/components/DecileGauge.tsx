@@ -1,32 +1,69 @@
 import './DecileGauge.css';
 
-interface DecileGaugeProps {
-  decile: number; // 1-10
-  label: string;  // e.g. "parmi les lycées parisiens"
+export interface DecileMarker {
+  nom: string;
+  decile: number;
+  color: string;
 }
 
-const COLORS = [
+interface DecileGaugeProps {
+  markers: DecileMarker[];
+  label: string;
+}
+
+const SEGMENT_COLORS = [
   '#dc2626', '#ef4444', '#f97316', '#fb923c', '#facc15',
   '#a3e635', '#4ade80', '#22c55e', '#16a34a', '#15803d',
 ];
 
-export function DecileGauge({ decile, label }: DecileGaugeProps) {
+export function DecileGauge({ markers, label }: DecileGaugeProps) {
+  // Group markers by decile for positioning
+  const byDecile = new Map<number, DecileMarker[]>();
+  for (const m of markers) {
+    const list = byDecile.get(m.decile) ?? [];
+    list.push(m);
+    byDecile.set(m.decile, list);
+  }
+
   return (
     <div className="decile-gauge">
       <div className="decile-bar">
-        {Array.from({ length: 10 }, (_, i) => (
-          <div
-            key={i}
-            className={`decile-segment${i + 1 === decile ? ' active' : ''}`}
-            style={{
-              backgroundColor: i + 1 === decile ? COLORS[i] : undefined,
-            }}
-          />
-        ))}
+        {Array.from({ length: 10 }, (_, i) => {
+          const segmentMarkers = byDecile.get(i + 1);
+          const hasMarker = !!segmentMarkers;
+          return (
+            <div
+              key={i}
+              className={`decile-segment${hasMarker ? ' active' : ''}`}
+              style={{
+                backgroundColor: hasMarker ? SEGMENT_COLORS[i] : undefined,
+              }}
+            >
+              {segmentMarkers && (
+                <div className="decile-markers">
+                  {segmentMarkers.map((m) => (
+                    <span
+                      key={m.nom}
+                      className="decile-marker"
+                      style={{ borderColor: m.color }}
+                      title={`${m.nom} — ${m.decile}e décile`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-      <span className="decile-label">
-        {decile}<sup>e</sup> décile {label}
-      </span>
+      <div className="decile-legend">
+        {markers.map((m) => (
+          <span key={m.nom} className="decile-legend-item">
+            <span className="decile-legend-dot" style={{ backgroundColor: m.color }} />
+            {m.nom}: {m.decile}<sup>e</sup>
+          </span>
+        ))}
+        <span className="decile-legend-label">{label}</span>
+      </div>
     </div>
   );
 }

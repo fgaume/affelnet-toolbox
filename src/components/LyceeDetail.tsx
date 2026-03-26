@@ -1,35 +1,67 @@
-// src/components/LyceeDetail.tsx
 import { useState, useEffect } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  ComposedChart, Area, CartesianGrid,
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts';
 import { fetchNiveauScolaire, type NiveauScolaireResult } from '../services/niveauScolaireApi';
 import { fetchIps, type IpsResult } from '../services/ipsApi';
-import { DecileGauge } from './DecileGauge';
+import { DecileGauge, type DecileMarker } from './DecileGauge';
 import './LyceeDetail.css';
 
-interface LyceeDetailProps {
+interface LyceeInfo {
   uai: string;
   nom: string;
-  onClose: () => void;
+  color: string;
 }
 
-export function LyceeDetail({ uai, nom, onClose }: LyceeDetailProps) {
-  const [niveau, setNiveau] = useState<NiveauScolaireResult | null>(null);
-  const [ips, setIps] = useState<IpsResult | null>(null);
+interface LyceesIndicateursProps {
+  lycees: LyceeInfo[];
+}
+
+interface LyceeData {
+  niveau: NiveauScolaireResult | null;
+  ips: IpsResult | null;
+}
+
+const SHORT_NAME_LIMIT = 14;
+
+function shortName(nom: string): string {
+  if (nom.length <= SHORT_NAME_LIMIT) return nom;
+  const words = nom.split(' ');
+  if (words.length < 2 || words[0].includes('.')) return nom;
+  return `${words[0][0]}. ${words.slice(1).join(' ')}`;
+}
+
+export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
+  const [data, setData] = useState<Map<string, LyceeData>>(new Map());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    setNiveau(null);
-    setIps(null);
+    setData(new Map());
 
-    Promise.allSettled([
-      fetchNiveauScolaire(uai).then((result) => { if (result) setNiveau(result); }),
-      fetchIps(uai).then((result) => { if (result) setIps(result); }),
-    ]).finally(() => setLoading(false));
-  }, [uai]);
+    Promise.allSettled(
+      lycees.map(async (l) => {
+        const [niveau, ips] = await Promise.allSettled([
+          fetchNiveauScolaire(l.uai),
+          fetchIps(l.uai),
+        ]);
+        return {
+          uai: l.uai,
+          niveau: niveau.status === 'fulfilled' ? niveau.value : null,
+          ips: ips.status === 'fulfilled' ? ips.value : null,
+        };
+      }),
+    ).then((results) => {
+      const map = new Map<string, LyceeData>();
+      for (const r of results) {
+        if (r.status === 'fulfilled') {
+          map.set(r.value.uai, { niveau: r.value.niveau, ips: r.value.ips });
+        }
+      }
+      setData(map);
+      setLoading(false);
+    });
+  }, [lycees]);
 
   if (loading) {
     return (
@@ -39,73 +71,128 @@ export function LyceeDetail({ uai, nom, onClose }: LyceeDetailProps) {
     );
   }
 
-  if (!niveau && !ips) return null;
+  // Build merged chart data for TB
+  const allYearsTB = new Set<string>();
+  for (const [, d] of data) {
+    d.niveau?.history.forEach((p) => allYearsTB.add(p.annee));
+  }
+  const tbChartData = [...allYearsTB].sort().map((annee) => {
+    const point: Record<string, unknown> = { annee };
+    for (const l of lycees) {
+      const d = data.get(l.uai);
+      const p = d?.niveau?.history.find((h) => h.annee === annee);
+      if (p) point[l.uai] = p.tauxTB;
+    }
+    return point;
+  });
+
+  // Build merged chart data for IPS
+  const allYearsIPS = new Set<string>();
+  for (const [, d] of data) {
+    d.ips?.history.forEach((p) => allYearsIPS.add(p.annee));
+  }
+  const ipsChartData = [...allYearsIPS].sort().map((annee) => {
+    const point: Record<string, unknown> = { annee };
+    for (const l of lycees) {
+      const d = data.get(l.uai);
+      const p = d?.ips?.history.find((h) => h.annee === annee);
+      if (p) point[l.uai] = p.ips;
+    }
+    return point;
+  });
+
+  // Decile markers
+  const tbMarkers: DecileMarker[] = [];
+  const ipsMarkers: DecileMarker[] = [];
+  for (const l of lycees) {
+    const d = data.get(l.uai);
+    const sn = shortName(l.nom);
+    if (d?.niveau) tbMarkers.push({ nom: sn, decile: d.niveau.decile, color: l.color });
+    if (d?.ips) ipsMarkers.push({ nom: sn, decile: d.ips.decile, color: l.color });
+  }
+
+  const hasTB = tbChartData.length > 0 && tbMarkers.length > 0;
+  const hasIPS = ipsChartData.length > 0 && ipsMarkers.length > 0;
+
+  if (!hasTB && !hasIPS) return null;
 
   return (
     <div className="lycee-detail">
-      <div className="lycee-detail-header">
-        <h4 className="lycee-detail-title">{nom}</h4>
-        <button className="lycee-detail-close" onClick={onClose} aria-label="Fermer">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-          </svg>
-        </button>
-      </div>
-
-      {niveau && (
+      {hasTB && (
         <div className="lycee-detail-chart">
           <h5>Taux de mentions TB au Bac (%)</h5>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={niveau.history}>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={tbChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="annee" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} unit="%" />
-              <Tooltip formatter={(v: unknown) => [`${Number(v).toFixed(1)}%`, 'Taux TB']} />
-              <Line
-                type="monotone"
-                dataKey="tauxTB"
-                stroke="#2563eb"
-                strokeWidth={2}
-                dot={{ r: 3 }}
+              <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} unit="%" />
+              <Tooltip
+                formatter={(v: unknown, name: unknown) => {
+                  const uai = String(name ?? '');
+                  const lycee = lycees.find((l) => l.uai === uai);
+                  return [`${Number(v).toFixed(1)}%`, lycee ? shortName(lycee.nom) : uai];
+                }}
               />
+              <Legend
+                formatter={(uai: string) => {
+                  const lycee = lycees.find((l) => l.uai === uai);
+                  return lycee ? shortName(lycee.nom) : uai;
+                }}
+                wrapperStyle={{ fontSize: 11 }}
+              />
+              {lycees.map((l) => (
+                <Line
+                  key={l.uai}
+                  type="monotone"
+                  dataKey={l.uai}
+                  stroke={l.color}
+                  strokeWidth={2}
+                  dot={{ r: 2.5 }}
+                  connectNulls
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
-          <DecileGauge decile={niveau.decile} label="parmi les lycées parisiens" />
+          <DecileGauge markers={tbMarkers} label="parmi les lycées publics parisiens" />
         </div>
       )}
 
-      {ips && (
+      {hasIPS && (
         <div className="lycee-detail-chart">
           <h5>Indice de Position Sociale (IPS)</h5>
-          <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={ips.history.map((p) => ({
-              ...p,
-              ipsRange: [p.ips - p.ecartType, p.ips + p.ecartType],
-            }))}>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={ipsChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="annee" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} domain={['auto', 'auto']} />
-              <Tooltip formatter={(v: unknown, name: unknown) => {
-                if (name !== 'ips') return null;
-                return [Number(v).toFixed(1), 'IPS moyen'];
-              }} />
-              <Area
-                type="monotone"
-                dataKey="ipsRange"
-                stroke="none"
-                fill="#2563eb"
-                fillOpacity={0.15}
+              <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} domain={['auto', 'auto']} />
+              <Tooltip
+                formatter={(v: unknown, name: unknown) => {
+                  const uai = String(name ?? '');
+                  const lycee = lycees.find((l) => l.uai === uai);
+                  return [Number(v).toFixed(1), lycee ? shortName(lycee.nom) : uai];
+                }}
               />
-              <Line
-                type="monotone"
-                dataKey="ips"
-                stroke="#2563eb"
-                strokeWidth={2}
-                dot={{ r: 3 }}
+              <Legend
+                formatter={(uai: string) => {
+                  const lycee = lycees.find((l) => l.uai === uai);
+                  return lycee ? shortName(lycee.nom) : uai;
+                }}
+                wrapperStyle={{ fontSize: 11 }}
               />
-            </ComposedChart>
+              {lycees.map((l) => (
+                <Line
+                  key={l.uai}
+                  type="monotone"
+                  dataKey={l.uai}
+                  stroke={l.color}
+                  strokeWidth={2}
+                  dot={{ r: 2.5 }}
+                  connectNulls
+                />
+              ))}
+            </LineChart>
           </ResponsiveContainer>
-          <DecileGauge decile={ips.decile} label="parmi les lycées parisiens" />
+          <DecileGauge markers={ipsMarkers} label="parmi les lycées publics parisiens" />
         </div>
       )}
     </div>
