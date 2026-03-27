@@ -43,4 +43,43 @@ describe('collegesConcurrenceApi', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('fetchBonusIpsColleges', () => {
+    it('returns a Map of UAI to bonus IPS 2026', async () => {
+      const mockData = [
+        { Identifiant: '0752536Z', Nom: 'CLG VOLTAIRE', Secteur: 'Public', Bonus_IPS_2026: 800 },
+        { Identifiant: '0752319N', Nom: 'CLG COYSEVOX', Secteur: 'Public', Bonus_IPS_2026: 1200 },
+        { Identifiant: '0750182R', Nom: 'CLG PRIVE', Secteur: 'Privé', Bonus_IPS_2026: null },
+      ];
+
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockData),
+      }));
+
+      const { fetchBonusIpsColleges } = await import('../collegesConcurrenceApi');
+      const result = await fetchBonusIpsColleges();
+
+      expect(result.get('0752536Z')).toBe(800);
+      expect(result.get('0752319N')).toBe(1200);
+      // null bonus → not in map
+      expect(result.has('0750182R')).toBe(false);
+    });
+
+    it('caches results across calls', async () => {
+      const mockFn = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([
+          { Identifiant: '0752536Z', Bonus_IPS_2026: 400 },
+        ]),
+      });
+      vi.stubGlobal('fetch', mockFn);
+
+      const { fetchBonusIpsColleges } = await import('../collegesConcurrenceApi');
+      await fetchBonusIpsColleges();
+      await fetchBonusIpsColleges();
+
+      expect(mockFn).toHaveBeenCalledTimes(1);
+    });
+  });
 });

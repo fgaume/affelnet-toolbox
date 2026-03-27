@@ -28,3 +28,29 @@ export async function fetchCollegesForLycee(uaiLycee: string): Promise<CollegeRe
     })
   );
 }
+
+const IPS_COLLEGES_URL =
+  'https://huggingface.co/datasets/fgaume/affelnet-paris-bonus-ips-colleges/raw/main/affelnet-paris-bonus-ips-colleges.json';
+
+interface IpsCollegeRow {
+  Identifiant: string;
+  Bonus_IPS_2026: number | null;
+}
+
+let ipsCache: Map<string, number> | null = null;
+
+export async function fetchBonusIpsColleges(): Promise<Map<string, number>> {
+  if (ipsCache) return ipsCache;
+
+  const response = await fetch(IPS_COLLEGES_URL);
+  if (!response.ok) throw new Error(`Erreur chargement bonus IPS: ${response.status}`);
+
+  const rows = (await response.json()) as IpsCollegeRow[];
+  ipsCache = new Map();
+  for (const row of rows) {
+    if (row.Bonus_IPS_2026 != null) {
+      ipsCache.set(row.Identifiant, row.Bonus_IPS_2026);
+    }
+  }
+  return ipsCache;
+}
