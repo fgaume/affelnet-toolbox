@@ -1,0 +1,218 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - 'button "Thème : automatique" [ref=e5] [cursor=pointer]':
+        - img [ref=e6]
+      - img [ref=e9]
+      - heading "Mon Collège de Secteur" [level=1] [ref=e11]
+      - paragraph [ref=e12]: Trouvez le collège public de votre secteur en fonction de votre adresse
+    - main [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - img [ref=e17]
+          - generic [ref=e19]:
+            - generic [ref=e20]: Votre collège de secteur
+            - heading "GUILLAUME APOLLINAIRE" [level=2] [ref=e21]:
+              - link "GUILLAUME APOLLINAIRE" [ref=e22] [cursor=pointer]:
+                - /url: https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=0752190Y
+            - generic [ref=e23]: 0752190Y
+        - generic [ref=e24]:
+          - img [ref=e25]
+          - generic [ref=e27]: 8 Avenue de Suffren 75015 Paris
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic:
+              - generic:
+                - button [ref=e30] [cursor=pointer]:
+                  - img [ref=e31]
+                - button [ref=e33] [cursor=pointer]:
+                  - img [ref=e34]
+                - button [ref=e36] [cursor=pointer]:
+                  - img [ref=e37]
+                - button [ref=e40] [cursor=pointer]:
+                  - img [ref=e41]
+                - button [ref=e44] [cursor=pointer]:
+                  - img [ref=e45]
+                - button [ref=e48] [cursor=pointer]:
+                  - img [ref=e49]
+                - button [ref=e52] [cursor=pointer]:
+                  - img [ref=e53]
+                - button [ref=e56] [cursor=pointer]:
+                  - img [ref=e57]
+                - button [ref=e60] [cursor=pointer]:
+                  - img [ref=e61]
+                - button [ref=e64] [cursor=pointer]:
+                  - img [ref=e65]
+            - generic:
+              - generic [ref=e68]:
+                - button "Zoom in" [ref=e69] [cursor=pointer]: +
+                - button "Zoom out" [ref=e70] [cursor=pointer]: −
+              - generic [ref=e71]:
+                - link "Leaflet" [ref=e72] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                  - img [ref=e73]
+                  - text: Leaflet
+                - text: "| ©"
+                - link "OpenStreetMap" [ref=e77] [cursor=pointer]:
+                  - /url: https://www.openstreetmap.org/copyright
+                - text: contributors
+          - generic [ref=e78]:
+            - generic [ref=e79]: Domicile
+            - generic [ref=e81]: Collège
+            - generic [ref=e83]: Lycée Secteur 1
+            - generic [ref=e85]: Tous secteurs
+        - generic [ref=e87]:
+          - heading "Lycées de secteur" [level=3] [ref=e88]
+          - generic [ref=e89]:
+            - button "Secteur 1" [ref=e90] [cursor=pointer]
+            - button "Tous secteurs" [ref=e91] [cursor=pointer]
+            - button "Secteur 2" [ref=e92] [cursor=pointer]
+            - button "Secteur 3" [ref=e93] [cursor=pointer]
+          - img "Répartition des 1652 places de seconde entre 5 lycées de secteur 1" [ref=e94]:
+            - application [ref=e98]:
+              - generic [ref=e117]:
+                - generic [ref=e122]:
+                  - link "V. DURUY" [ref=e123] [cursor=pointer]:
+                    - /url: https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=0750662M
+                  - generic [ref=e124]: 381 (23%)
+                - generic [ref=e129]:
+                  - link "J. DE SAILLY" [ref=e130] [cursor=pointer]:
+                    - /url: https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=0750699C
+                  - generic [ref=e131]: 360 (22%)
+                - generic [ref=e136]:
+                  - link "BUFFON" [ref=e137] [cursor=pointer]:
+                    - /url: https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=0750693W
+                  - generic [ref=e138]: 356 (22%)
+                - generic [ref=e143]:
+                  - link "J. SAY" [ref=e144] [cursor=pointer]:
+                    - /url: https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=0750700D
+                  - generic [ref=e145]: 286 (17%)
+                - generic [ref=e150]:
+                  - link "J. DE LA FONTAINE" [ref=e151] [cursor=pointer]:
+                    - /url: https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=0750702F
+                  - generic [ref=e152]: 269 (16%)
+          - generic [ref=e153]:
+            - generic [ref=e154]: "Difficulté d'admission sans bonus IPS :"
+            - generic [ref=e155]:
+              - generic [ref=e156]: Inaccessible
+              - generic [ref=e158]: Difficile
+              - generic [ref=e160]: Moyen
+              - generic [ref=e162]: Accessible
+              - generic [ref=e164]: Très accessible
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - heading "Taux de mentions TB au Bac (%)" [level=5] [ref=e168]
+              - generic [ref=e170]:
+                - list [ref=e172]:
+                  - listitem [ref=e173]:
+                    - img "VICTOR DURUY legend icon" [ref=e174]
+                    - text: VICTOR DURUY
+                  - listitem [ref=e176]:
+                    - img "BUFFON legend icon" [ref=e177]
+                    - text: BUFFON
+                  - listitem [ref=e179]:
+                    - img "J. DE SAILLY legend icon" [ref=e180]
+                    - text: J. DE SAILLY
+                  - listitem [ref=e182]:
+                    - img "J. SAY legend icon" [ref=e183]
+                    - text: J. SAY
+                  - listitem [ref=e185]:
+                    - img "J. DE LA FONTAINE legend icon" [ref=e186]
+                    - text: J. DE LA FONTAINE
+                  - listitem [ref=e188]:
+                    - img "Médiane Paris legend icon" [ref=e189]
+                    - text: Médiane Paris
+                - application [ref=e191]:
+                  - generic [ref=e243]:
+                    - generic [ref=e244]:
+                      - generic [ref=e246]: "2022"
+                      - generic [ref=e248]: "2023"
+                      - generic [ref=e250]: "2024"
+                    - generic [ref=e251]:
+                      - generic [ref=e253]: 0%
+                      - generic [ref=e255]: 9%
+                      - generic [ref=e257]: 18%
+                      - generic [ref=e259]: 27%
+                      - generic [ref=e261]: 36%
+            - generic [ref=e262]:
+              - heading "Indice de Position Sociale (IPS)" [level=5] [ref=e263]
+              - generic [ref=e265]:
+                - list [ref=e267]:
+                  - listitem [ref=e268]:
+                    - img "VICTOR DURUY legend icon" [ref=e269]
+                    - text: VICTOR DURUY
+                  - listitem [ref=e271]:
+                    - img "BUFFON legend icon" [ref=e272]
+                    - text: BUFFON
+                  - listitem [ref=e274]:
+                    - img "J. DE SAILLY legend icon" [ref=e275]
+                    - text: J. DE SAILLY
+                  - listitem [ref=e277]:
+                    - img "J. SAY legend icon" [ref=e278]
+                    - text: J. SAY
+                  - listitem [ref=e280]:
+                    - img "J. DE LA FONTAINE legend icon" [ref=e281]
+                    - text: J. DE LA FONTAINE
+                  - listitem [ref=e283]:
+                    - img "Médiane Paris legend icon" [ref=e284]
+                    - text: Médiane Paris
+                - application [ref=e286]:
+                  - generic [ref=e363]:
+                    - generic [ref=e364]:
+                      - generic [ref=e366]: 2017-2018
+                      - generic [ref=e368]: 2019-2020
+                      - generic [ref=e370]: 2021-2022
+                      - generic [ref=e372]: 2024-2025
+                    - generic [ref=e373]:
+                      - generic [ref=e375]: "119"
+                      - generic [ref=e377]: "126"
+                      - generic [ref=e379]: "133"
+                      - generic [ref=e381]: "140"
+                      - generic [ref=e383]: "147"
+          - generic [ref=e384]:
+            - heading "Collèges en concurrence" [level=5] [ref=e385]
+            - list [ref=e386]:
+              - listitem [ref=e387]:
+                - button "Moyennement accessible JANSON DE SAILLY" [ref=e388] [cursor=pointer]:
+                  - generic "Moyennement accessible" [ref=e389]
+                  - generic [ref=e390]: JANSON DE SAILLY
+                  - img [ref=e391]
+              - listitem [ref=e393]:
+                - button "Facilement accessible (secteur 1) JEAN DE LA FONTAINE" [ref=e394] [cursor=pointer]:
+                  - generic "Facilement accessible (secteur 1)" [ref=e395]
+                  - generic [ref=e396]: JEAN DE LA FONTAINE
+                  - img [ref=e397]
+              - listitem [ref=e399]:
+                - button "Facilement accessible (secteur 1) JEAN-BAPTISTE SAY" [ref=e400] [cursor=pointer]:
+                  - generic "Facilement accessible (secteur 1)" [ref=e401]
+                  - generic [ref=e402]: JEAN-BAPTISTE SAY
+                  - img [ref=e403]
+              - listitem [ref=e405]:
+                - button "Difficilement accessible BUFFON" [ref=e406] [cursor=pointer]:
+                  - generic "Difficilement accessible" [ref=e407]
+                  - generic [ref=e408]: BUFFON
+                  - img [ref=e409]
+              - listitem [ref=e411]:
+                - button "Facilement accessible (secteur 1) VICTOR DURUY" [ref=e412] [cursor=pointer]:
+                  - generic "Facilement accessible (secteur 1)" [ref=e413]
+                  - generic [ref=e414]: VICTOR DURUY
+                  - img [ref=e415]
+      - button "Nouvelle recherche" [ref=e417] [cursor=pointer]:
+        - img [ref=e418]
+        - text: Nouvelle recherche
+    - contentinfo [ref=e421]:
+      - paragraph [ref=e422]:
+        - text: Donnees fournies par
+        - link "CapGeo Paris" [ref=e423] [cursor=pointer]:
+          - /url: https://capgeo2.paris.fr
+        - text: et
+        - link "Rectorat de Paris" [ref=e424] [cursor=pointer]:
+          - /url: https://services9.arcgis.com
+        - text: via
+        - link "api-adresse.data.gouv.fr" [ref=e425] [cursor=pointer]:
+          - /url: https://api-adresse.data.gouv.fr
+  - generic [ref=e426]: "119"
+```

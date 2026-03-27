@@ -1,19 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { SectorResult, LyceeSecteur } from '../types';
+import type { SectorResult, LyceeSecteur, Address } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
 import { LyceesIndicateurs } from './LyceeDetail';
 import { CollegesConcurrence } from './CollegesConcurrence';
+import { SectorMap } from './SectorMap';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
   'https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=';
 
 const TOUS_SECTEURS_LYCEES: LyceeSecteur[] = [
-  { uai: '0750654D', nom: 'HENRI IV', secteur: 0 },
-  { uai: '0750655E', nom: 'LOUIS LE GRAND', secteur: 0 },
-  { uai: '0750685M', nom: 'P.G. DE GENNES', secteur: 0 },
+  { uai: '0750654D', nom: 'HENRI IV', secteur: 0, coordinates: [2.3473, 48.8464] },
+  { uai: '0750655E', nom: 'LOUIS LE GRAND', secteur: 0, coordinates: [2.3443, 48.8475] },
+  { uai: '0750685M', nom: 'P.G. DE GENNES', secteur: 0, coordinates: [2.3483, 48.8410] },
 ];
 
 const DIFFICULTY_HARD: AdmissionDifficulty = {
@@ -24,10 +25,10 @@ const DIFFICULTY_HARD: AdmissionDifficulty = {
 
 interface CollegeCardProps {
   result: SectorResult;
-  addressLabel?: string;
+  address?: Address;
 }
 
-export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
+export function CollegeCard({ result, address }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [activeSector, setActiveSector] = useState(1);
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
@@ -42,6 +43,12 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
       color: difficulties.get(e.uai)?.color ?? '#9ca3af',
     })),
     [effectifs, difficulties],
+  );
+
+  // Filter lycees of sector 1 for the map
+  const lyceesSecteur1 = useMemo(
+    () => lycees?.filter(l => l.secteur === 1) ?? [],
+    [lycees]
   );
 
   // Fetch seuils once and compute difficulties for displayed lycées + tous secteurs
@@ -113,16 +120,26 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
               {college.nom}
             </a>
           </h2>
+          <span className="uai-badge">{college.uai}</span>
         </div>
       </div>
 
-      {addressLabel && (
+      {address && (
         <div className="address-searched">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
-          <span>{addressLabel}</span>
+          <span>{address.label}</span>
         </div>
+      )}
+
+      {address && (
+        <SectorMap 
+          homeCoords={address.coordinates}
+          college={college}
+          lyceesSecteur1={lyceesSecteur1}
+          lyceesTousSecteurs={TOUS_SECTEURS_LYCEES}
+        />
       )}
 
       {lyceesBySector && availableSectors.length > 0 && (

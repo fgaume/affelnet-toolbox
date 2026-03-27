@@ -65,7 +65,7 @@ function App() {
 
         {result && searchedAddress && (
           <>
-            <CollegeCard result={result} addressLabel={searchedAddress.label} />
+            <CollegeCard result={result} address={searchedAddress} />
             <button className="new-search-button" onClick={handleNewSearch}>
               <svg
                 viewBox="0 0 24 24"

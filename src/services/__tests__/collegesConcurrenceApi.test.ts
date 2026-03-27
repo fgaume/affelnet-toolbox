@@ -13,8 +13,8 @@ describe('collegesConcurrenceApi', () => {
         ok: true,
         json: () => Promise.resolve({
           features: [
-            { attributes: { Réseau: '0752536Z', Nom_Tete: 'VOLTAIRE' } },
-            { attributes: { Réseau: '0752319N', Nom_Tete: 'COYSEVOX' } },
+            { attributes: { Réseau: '0752536Z', Nom_tete: 'VOLTAIRE' } },
+            { attributes: { Réseau: '0752319N', Nom_tete: 'COYSEVOX' } },
           ],
         }),
       }));
@@ -130,8 +130,8 @@ describe('collegesConcurrenceApi', () => {
             ok: true,
             json: () => Promise.resolve({
               features: [
-                { attributes: { Réseau: '0752536Z', Nom_Tete: 'VOLTAIRE' } },
-                { attributes: { Réseau: '0752319N', Nom_Tete: 'COYSEVOX' } },
+                { attributes: { Réseau: '0752536Z', Nom_tete: 'VOLTAIRE' } },
+                { attributes: { Réseau: '0752319N', Nom_tete: 'COYSEVOX' } },
               ],
             }),
           });
@@ -183,7 +183,7 @@ describe('collegesConcurrenceApi', () => {
             ok: true,
             json: () => Promise.resolve({
               features: [
-                { attributes: { Réseau: '0752536Z', Nom_Tete: 'VOLTAIRE' } },
+                { attributes: { Réseau: '0752536Z', Nom_tete: 'VOLTAIRE' } },
               ],
             }),
           });

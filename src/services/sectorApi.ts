@@ -44,15 +44,14 @@ function normalizeCollegeName(libelle: string): string {
     .trim();
 }
 
-export async function findCollegeUAI(nomCollege: string): Promise<string> {
+export async function findCollegeUAI(nomCollege: string): Promise<{ uai: string; coordinates?: [number, number] }> {
   const normalizedName = normalizeCollegeName(nomCollege);
 
   const params = new URLSearchParams({
-    outFields: 'Réseau,Nom_Tete',
+    outFields: 'UAI,Nom,X,Y,secteur',
     returnGeometry: 'false',
     f: 'pjson',
-    returnDistinctValues: 'true',
-    where: `Nom_Tete like '%${normalizedName}'`,
+    where: `Nom like '%${normalizedName}' and secteur='Tête'`,
   });
 
   const response = await fetch(`${ARCGIS_BASE}?${params}`);
@@ -61,31 +60,56 @@ export async function findCollegeUAI(nomCollege: string): Promise<string> {
   const data = await response.json();
 
   if (!data.features?.length) {
-    throw new Error('Collège non référencé dans l\'annuaire Affelnet');
+    // Fallback search without secteur='Tête' if not found
+    const fallbackParams = new URLSearchParams({
+      outFields: 'Réseau,Nom_Tete,X,Y',
+      returnGeometry: 'false',
+      f: 'pjson',
+      returnDistinctValues: 'true',
+      where: `Nom_Tete like '%${normalizedName}'`,
+    });
+    const fallbackResponse = await fetch(`${ARCGIS_BASE}?${fallbackParams}`);
+    const fallbackData = await fallbackResponse.json();
+    
+    if (!fallbackData.features?.length) {
+      throw new Error('Collège non référencé dans l\'annuaire Affelnet');
+    }
+    
+    const attr = fallbackData.features[0].attributes;
+    return { 
+      uai: attr.Réseau as string,
+      coordinates: attr.X && attr.Y ? [attr.X, attr.Y] : undefined 
+    };
   }
 
-  return data.features[0].attributes.Réseau as string;
+  const attributes = data.features[0].attributes;
+  const uai = attributes.UAI as string;
+  const coordinates: [number, number] | undefined = attributes.X && attributes.Y 
+    ? [attributes.X, attributes.Y] 
+    : undefined;
+
+  return { uai, coordinates };
 }
 
 // ----- TEMPORARY: Rabelais closure workaround (remove when Rectorat API is updated) -----
 const RABELAIS_UAI = '0750688R';
 const RABELAIS_REPLACEMENT: Record<string, LyceeSecteur> = {
   // COYSEVOX, BERLIOZ → DECOUR
-  '0752319N': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1, isNew: true },
-  '0752252R': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1, isNew: true },
+  '0752319N': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1, isNew: true, coordinates: [2.3426829, 48.8817204] },
+  '0752252R': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1, isNew: true, coordinates: [2.3426829, 48.8817204] },
   // MALLARMÉ, DORGELÈS, BALZAC → QUINET
-  '0752554U': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true },
-  '0750429J': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true },
-  '0752553T': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true },
+  '0752554U': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true, coordinates: [2.3274218, 48.8824345] },
+  '0750429J': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true, coordinates: [2.3274218, 48.8824345] },
+  '0752553T': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true, coordinates: [2.3274218, 48.8824345] },
   // BORIS VIAN → FERRY
-  '0752958H': { uai: '0750669V', nom: 'JULES FERRY', secteur: 1, isNew: true },
+  '0752958H': { uai: '0750669V', nom: 'JULES FERRY', secteur: 1, isNew: true, coordinates: [2.3308332, 48.8841496] },
   // UTRILLO, FERRY, CLEMENCEAU → COLBERT
-  '0751793S': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true },
-  '0752533W': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true },
-  '0750546L': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true },
+  '0751793S': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true, coordinates: [2.3683884, 48.8770514] },
+  '0752533W': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true, coordinates: [2.3683884, 48.8770514] },
+  '0750546L': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true, coordinates: [2.3683884, 48.8770514] },
   // Gérard PHILIPE, Marie CURIE → BALZAC
-  '0752195D': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1, isNew: true },
-  '0754706H': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1, isNew: true },
+  '0752195D': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1, isNew: true, coordinates: [2.3134106, 48.8920405] },
+  '0754706H': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1, isNew: true, coordinates: [2.3134106, 48.8920405] },
 };
 
 function applyRabelaisClosure(lycees: LyceeSecteur[], uaiCollege: string): LyceeSecteur[] {
@@ -107,7 +131,7 @@ function applyRabelaisClosure(lycees: LyceeSecteur[], uaiCollege: string): Lycee
 
 export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSecteur[]> {
   const params = new URLSearchParams({
-    outFields: 'UAI,Nom,secteur',
+    outFields: 'UAI,Nom,secteur,X,Y',
     returnGeometry: 'false',
     f: 'pjson',
     orderByFields: 'secteur',
@@ -122,10 +146,11 @@ export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSect
   const data = await response.json();
 
   const lycees = (data.features || []).map(
-    (f: { attributes: { UAI: string; Nom: string; secteur: string } }) => ({
+    (f: { attributes: { UAI: string; Nom: string; secteur: string; X?: number; Y?: number } }) => ({
       uai: f.attributes.UAI,
       nom: f.attributes.Nom,
       secteur: parseInt(f.attributes.secteur, 10),
+      coordinates: f.attributes.X && f.attributes.Y ? [f.attributes.X, f.attributes.Y] as [number, number] : undefined,
     })
   );
 

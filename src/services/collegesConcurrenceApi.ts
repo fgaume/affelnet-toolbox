@@ -9,10 +9,10 @@ interface CollegeRef {
 
 export async function fetchCollegesForLycee(uaiLycee: string): Promise<CollegeRef[]> {
   const params = new URLSearchParams({
-    outFields: 'Réseau,Nom_Tete',
+    outFields: 'Réseau,Nom_tete',
     returnGeometry: 'false',
     f: 'pjson',
-    orderByFields: 'Nom_Tete',
+    orderByFields: 'Nom_tete',
   });
   const whereClause = `secteur='1' and UAI='${uaiLycee}'`;
   const url = `${ARCGIS_BASE}?${params}&where=${encodeURIComponent(whereClause).replace(/%27/g, "'").replace(/%3D/g, '=')}`;
@@ -22,9 +22,9 @@ export async function fetchCollegesForLycee(uaiLycee: string): Promise<CollegeRe
 
   const data = await response.json();
   return (data.features || []).map(
-    (f: { attributes: { Réseau: string; Nom_Tete: string } }) => ({
+    (f: { attributes: { Réseau: string; Nom_tete: string } }) => ({
       uai: f.attributes.Réseau,
-      nom: f.attributes.Nom_Tete,
+      nom: f.attributes.Nom_tete,
     })
   );
 }

@@ -1,0 +1,85 @@
+.sector-map-container {
+  margin: 1.5rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.sector-map {
+  height: 400px;
+  width: 100%;
+  z-index: 1;
+}
+
+@media (min-width: 1024px) {
+  .sector-map {
+    height: 500px;
+  }
+}
+
+.popup-itinerary {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.popup-itinerary a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.popup-itinerary a:hover {
+  text-decoration: underline;
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-dot.home { background-color: #1e40af; }
+.legend-dot.college { background-color: #16a34a; }
+.legend-dot.lycee { background-color: #9333ea; }
+.legend-dot.tous { background-color: #ea580c; }
+
+/* Only filter the map tiles in dark mode, not the whole container */
+[data-theme='dark'] .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) contrast(0.9) opacity(0.8);
+}
+
+/* Ensure markers are always above the tiles and not filtered */
+.leaflet-marker-pane {
+  filter: none !important;
+}
+
+@media (max-width: 640px) {
+  .sector-map {
+    height: 300px;
+  }
+  
+  .map-legend {
+    gap: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
