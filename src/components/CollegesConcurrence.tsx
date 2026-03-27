@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useReducer, useEffect, type Dispatch } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell,
 } from 'recharts';
@@ -74,26 +74,39 @@ function CustomTooltip({ active, payload }: {
   );
 }
 
+type State =
+  | { status: 'loading' }
+  | { status: 'error'; message: string }
+  | { status: 'success'; colleges: CollegeConcurrent[] };
+
+type Action =
+  | { type: 'FETCH_START' }
+  | { type: 'FETCH_SUCCESS'; colleges: CollegeConcurrent[] }
+  | { type: 'FETCH_ERROR'; message: string };
+
+function reducer(_state: State, action: Action): State {
+  switch (action.type) {
+    case 'FETCH_START': return { status: 'loading' };
+    case 'FETCH_SUCCESS': return { status: 'success', colleges: action.colleges };
+    case 'FETCH_ERROR': return { status: 'error', message: action.message };
+  }
+}
+
+function doFetch(uaiLycee: string, dispatch: Dispatch<Action>) {
+  dispatch({ type: 'FETCH_START' });
+  fetchCollegesConcurrents(uaiLycee)
+    .then((result) => dispatch({ type: 'FETCH_SUCCESS', colleges: result }))
+    .catch((err) => dispatch({ type: 'FETCH_ERROR', message: err instanceof Error ? err.message : 'Erreur de chargement' }));
+}
+
 export function CollegesConcurrence({ uaiLycee, uaiCollegeUtilisateur }: CollegesConcurrenceProps) {
-  const [colleges, setColleges] = useState<CollegeConcurrent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(reducer, { status: 'loading' });
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetchCollegesConcurrents(uaiLycee)
-      .then((result) => {
-        setColleges(result);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Erreur de chargement');
-        setLoading(false);
-      });
+    doFetch(uaiLycee, dispatch);
   }, [uaiLycee]);
 
-  if (loading) {
+  if (state.status === 'loading') {
     return (
       <div className="concurrence-panel">
         <div className="concurrence-loading"><span /><span /><span /></div>
@@ -101,23 +114,18 @@ export function CollegesConcurrence({ uaiLycee, uaiCollegeUtilisateur }: College
     );
   }
 
-  if (error) {
+  if (state.status === 'error') {
     return (
       <div className="concurrence-panel">
         <div className="concurrence-error">
-          {error}
-          <button onClick={() => {
-            setLoading(true);
-            setError(null);
-            fetchCollegesConcurrents(uaiLycee)
-              .then(setColleges)
-              .catch((e) => setError(e instanceof Error ? e.message : 'Erreur'))
-              .finally(() => setLoading(false));
-          }}>Réessayer</button>
+          {state.message}
+          <button onClick={() => doFetch(uaiLycee, dispatch)}>Réessayer</button>
         </div>
       </div>
     );
   }
+
+  const colleges = state.colleges;
 
   if (colleges.length === 0) return null;
 

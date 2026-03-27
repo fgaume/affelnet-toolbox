@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useReducer, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts';
@@ -32,15 +32,34 @@ function shortName(nom: string): string {
   return `${words[0][0]}. ${words.slice(1).join(' ')}`;
 }
 
+interface FetchState {
+  loading: boolean;
+  data: Map<string, LyceeData>;
+  medianTB: Map<string, number>;
+  medianIPS: Map<string, number>;
+}
+
+type FetchAction =
+  | { type: 'FETCH_START' }
+  | { type: 'FETCH_SUCCESS'; data: Map<string, LyceeData>; medianTB: Map<string, number>; medianIPS: Map<string, number> };
+
+function fetchReducer(_state: FetchState, action: FetchAction): FetchState {
+  switch (action.type) {
+    case 'FETCH_START':
+      return { loading: true, data: new Map(), medianTB: new Map(), medianIPS: new Map() };
+    case 'FETCH_SUCCESS':
+      return { loading: false, data: action.data, medianTB: action.medianTB, medianIPS: action.medianIPS };
+  }
+}
+
+const INITIAL_STATE: FetchState = { loading: true, data: new Map(), medianTB: new Map(), medianIPS: new Map() };
+
 export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
-  const [data, setData] = useState<Map<string, LyceeData>>(new Map());
-  const [medianTB, setMedianTB] = useState<Map<string, number>>(new Map());
-  const [medianIPS, setMedianIPS] = useState<Map<string, number>>(new Map());
-  const [loading, setLoading] = useState(true);
+  const [state, dispatch] = useReducer(fetchReducer, INITIAL_STATE);
 
   useEffect(() => {
-    setLoading(true);
-    setData(new Map());
+    let cancelled = false;
+    dispatch({ type: 'FETCH_START' });
 
     Promise.all([
       // Fetch per-lycée data
@@ -61,18 +80,20 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
       fetchMedianTBByYear(),
       fetchMedianIpsByYear(),
     ]).then(([results, tbMedians, ipsMedians]) => {
+      if (cancelled) return;
       const map = new Map<string, LyceeData>();
       for (const r of results) {
         if (r.status === 'fulfilled') {
           map.set(r.value.uai, { niveau: r.value.niveau, ips: r.value.ips });
         }
       }
-      setData(map);
-      setMedianTB(tbMedians);
-      setMedianIPS(ipsMedians);
-      setLoading(false);
+      dispatch({ type: 'FETCH_SUCCESS', data: map, medianTB: tbMedians, medianIPS: ipsMedians });
     });
+
+    return () => { cancelled = true; };
   }, [lycees]);
+
+  const { loading, data, medianTB, medianIPS } = state;
 
   if (loading) {
     return (
