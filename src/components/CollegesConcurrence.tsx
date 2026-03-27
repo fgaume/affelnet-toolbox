@@ -11,10 +11,10 @@ interface CollegesConcurrenceProps {
 }
 
 const BONUS_COLORS: Record<number, string> = {
-  1200: '#dc2626',
-  800: '#f97316',
-  400: '#3b82f6',
-  0: '#16a34a',
+  0: '#dc2626',     // red — no bonus = most advantaged socially
+  400: '#f97316',   // orange
+  800: '#3b82f6',   // blue
+  1200: '#16a34a',  // green — highest bonus = most disadvantaged
 };
 const UNKNOWN_COLOR = '#9ca3af';
 const USER_STROKE = '#fbbf24';
@@ -161,8 +161,8 @@ export function CollegesConcurrence({ uaiLycee, uaiCollegeUtilisateur }: College
 
   return (
     <div className="concurrence-panel">
-      <ResponsiveContainer width="100%" height={Math.max(200, chartData.length * 60 + 80)}>
-        <BarChart data={stackedData} layout="vertical" margin={{ left: 10, right: 20, top: 10, bottom: 10 }}>
+      <ResponsiveContainer width="100%" height={Math.max(150, chartData.length * 40 + 60)}>
+        <BarChart data={stackedData} layout="vertical" barSize={20} margin={{ left: 10, right: 20, top: 10, bottom: 10 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
           <XAxis type="number" tick={{ fontSize: 11 }} label={{ value: 'Admis DNB', position: 'insideBottom', offset: -5, fontSize: 11 }} />
           <YAxis type="category" dataKey="bonusLabel" tick={{ fontSize: 11 }} width={80} />

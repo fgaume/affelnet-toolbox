@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { SectorResult, LyceeSecteur } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
@@ -33,6 +33,16 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
   const [expandedLycee, setExpandedLycee] = useState<string | null>(null);
+
+  // Memoize lycees prop for LyceesIndicateurs to avoid re-fetching on unrelated re-renders
+  const lyceesIndicateursData = useMemo(
+    () => effectifs.map((e) => ({
+      uai: e.uai,
+      nom: e.nom,
+      color: difficulties.get(e.uai)?.color ?? '#9ca3af',
+    })),
+    [effectifs, difficulties],
+  );
 
   // Fetch seuils once and compute difficulties for displayed lycées + tous secteurs
   useEffect(() => {
@@ -154,11 +164,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           )}
           {activeSector === 1 && effectifs.length > 0 && (
             <LyceesIndicateurs
-              lycees={effectifs.map((e) => ({
-                uai: e.uai,
-                nom: e.nom,
-                color: difficulties.get(e.uai)?.color ?? '#9ca3af',
-              }))}
+              lycees={lyceesIndicateursData}
             />
           )}
           {activeSector === 1 && effectifs.length > 0 && (
