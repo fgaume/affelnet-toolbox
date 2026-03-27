@@ -82,4 +82,40 @@ describe('collegesConcurrenceApi', () => {
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('fetchDnbAdmisColleges', () => {
+    it('returns a Map of UAI to nb admis (candidats * taux / 100)', async () => {
+      const mockData = [
+        { uai: '0752536Z', nb_candidats_g: 100, taux_de_reussite_g: 92.0 },
+        { uai: '0752319N', nb_candidats_g: 80, taux_de_reussite_g: 95.0 },
+      ];
+
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockData),
+      }));
+
+      const { fetchDnbAdmisColleges } = await import('../collegesConcurrenceApi');
+      const result = await fetchDnbAdmisColleges();
+
+      expect(result.get('0752536Z')).toBe(92); // Math.round(100 * 92 / 100)
+      expect(result.get('0752319N')).toBe(76); // Math.round(80 * 95 / 100)
+    });
+
+    it('caches results across calls', async () => {
+      const mockFn = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([
+          { uai: '0752536Z', nb_candidats_g: 100, taux_de_reussite_g: 90.0 },
+        ]),
+      });
+      vi.stubGlobal('fetch', mockFn);
+
+      const { fetchDnbAdmisColleges } = await import('../collegesConcurrenceApi');
+      await fetchDnbAdmisColleges();
+      await fetchDnbAdmisColleges();
+
+      expect(mockFn).toHaveBeenCalledTimes(1);
+    });
+  });
 });
