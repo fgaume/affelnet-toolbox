@@ -86,3 +86,35 @@ export async function fetchDnbAdmisColleges(): Promise<Map<string, number>> {
   }
   return dnbCache;
 }
+
+export interface CollegeConcurrent {
+  uai: string;
+  nom: string;
+  bonusIps: number;  // 0, 400, 800, 1200, or -1 if unknown
+  nbAdmis: number;   // 0 if unknown
+}
+
+const concurrentsCache = new Map<string, CollegeConcurrent[]>();
+
+export async function fetchCollegesConcurrents(uaiLycee: string): Promise<CollegeConcurrent[]> {
+  const cached = concurrentsCache.get(uaiLycee);
+  if (cached) return cached;
+
+  const colleges = await fetchCollegesForLycee(uaiLycee);
+  if (colleges.length === 0) return [];
+
+  const [ipsMap, dnbMap] = await Promise.all([
+    fetchBonusIpsColleges(),
+    fetchDnbAdmisColleges(),
+  ]);
+
+  const result: CollegeConcurrent[] = colleges.map((c) => ({
+    uai: c.uai,
+    nom: c.nom,
+    bonusIps: ipsMap.get(c.uai) ?? -1,
+    nbAdmis: dnbMap.get(c.uai) ?? 0,
+  }));
+
+  concurrentsCache.set(uaiLycee, result);
+  return result;
+}

@@ -118,4 +118,100 @@ describe('collegesConcurrenceApi', () => {
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('fetchCollegesConcurrents', () => {
+    it('joins ArcGIS + IPS + DNB data into CollegeConcurrent[]', async () => {
+      let callIndex = 0;
+      vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
+        callIndex++;
+        if (callIndex === 1) {
+          // ArcGIS call
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              features: [
+                { attributes: { Réseau: '0752536Z', Nom_Tete: 'VOLTAIRE' } },
+                { attributes: { Réseau: '0752319N', Nom_Tete: 'COYSEVOX' } },
+              ],
+            }),
+          });
+        }
+        if (callIndex === 2) {
+          // HuggingFace IPS
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve([
+              { Identifiant: '0752536Z', Bonus_IPS_2026: 800 },
+              { Identifiant: '0752319N', Bonus_IPS_2026: 1200 },
+            ]),
+          });
+        }
+        // OpenData DNB
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            { uai: '0752536Z', nb_candidats_g: 100, taux_de_reussite_g: 92.0 },
+            { uai: '0752319N', nb_candidats_g: 80, taux_de_reussite_g: 95.0 },
+          ]),
+        });
+      }));
+
+      const { fetchCollegesConcurrents } = await import('../collegesConcurrenceApi');
+      const result = await fetchCollegesConcurrents('0750676C');
+
+      expect(result).toHaveLength(2);
+      expect(result).toContainEqual({
+        uai: '0752536Z',
+        nom: 'VOLTAIRE',
+        bonusIps: 800,
+        nbAdmis: 92,
+      });
+      expect(result).toContainEqual({
+        uai: '0752319N',
+        nom: 'COYSEVOX',
+        bonusIps: 1200,
+        nbAdmis: 76,
+      });
+    });
+
+    it('handles missing IPS/DNB data gracefully', async () => {
+      let callIndex = 0;
+      vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
+        callIndex++;
+        if (callIndex === 1) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              features: [
+                { attributes: { Réseau: '0752536Z', Nom_Tete: 'VOLTAIRE' } },
+              ],
+            }),
+          });
+        }
+        if (callIndex === 2) {
+          // IPS — no data for this college
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve([]),
+          });
+        }
+        // DNB — no data either
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        });
+      }));
+
+      const { fetchCollegesConcurrents } = await import('../collegesConcurrenceApi');
+      const result = await fetchCollegesConcurrents('0750676C');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        uai: '0752536Z',
+        nom: 'VOLTAIRE',
+        bonusIps: -1,
+        nbAdmis: 0,
+      });
+    });
+  });
 });
