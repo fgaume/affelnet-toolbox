@@ -1,0 +1,192 @@
+import { useState, useEffect } from 'react';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell,
+} from 'recharts';
+import { fetchCollegesConcurrents, type CollegeConcurrent } from '../services/collegesConcurrenceApi';
+import './CollegesConcurrence.css';
+
+interface CollegesConcurrenceProps {
+  uaiLycee: string;
+  uaiCollegeUtilisateur: string;
+}
+
+const BONUS_COLORS: Record<number, string> = {
+  1200: '#dc2626',
+  800: '#f97316',
+  400: '#3b82f6',
+  0: '#16a34a',
+};
+const UNKNOWN_COLOR = '#9ca3af';
+const USER_STROKE = '#fbbf24';
+const USER_STROKE_WIDTH = 2;
+
+const BONUS_LABELS: Record<number, string> = {
+  1200: 'Bonus 1200',
+  800: 'Bonus 800',
+  400: 'Bonus 400',
+  0: 'Bonus 0',
+  [-1]: 'Inconnu',
+};
+
+interface BarDataPoint {
+  bonusLabel: string;
+  bonusIps: number;
+  total: number;
+  colleges: CollegeConcurrent[];
+}
+
+function buildChartData(colleges: CollegeConcurrent[]): BarDataPoint[] {
+  const groups = new Map<number, CollegeConcurrent[]>();
+  for (const c of colleges) {
+    const key = c.bonusIps;
+    const arr = groups.get(key) ?? [];
+    arr.push(c);
+    groups.set(key, arr);
+  }
+
+  return [...groups.entries()]
+    .sort((a, b) => b[0] - a[0])
+    .map(([bonus, cols]) => ({
+      bonusLabel: BONUS_LABELS[bonus] ?? `Bonus ${bonus}`,
+      bonusIps: bonus,
+      total: cols.reduce((sum, c) => sum + c.nbAdmis, 0),
+      colleges: cols.sort((a, b) => b.nbAdmis - a.nbAdmis),
+    }));
+}
+
+function CustomTooltip({ active, payload }: {
+  active?: boolean;
+  payload?: Array<{ payload: BarDataPoint & Record<string, unknown> }>;
+}) {
+  if (!active || !payload?.[0]) return null;
+  const data = payload[0].payload;
+  return (
+    <div className="concurrence-tooltip">
+      <div className="concurrence-tooltip-title">{data.bonusLabel}</div>
+      {data.colleges.map((c) => (
+        <div key={c.uai} className="concurrence-tooltip-row">
+          <span>{c.nom}</span>
+          <span className="concurrence-tooltip-value">{c.nbAdmis} admis</span>
+        </div>
+      ))}
+      <div className="concurrence-tooltip-total">Total : {data.total} admis</div>
+    </div>
+  );
+}
+
+export function CollegesConcurrence({ uaiLycee, uaiCollegeUtilisateur }: CollegesConcurrenceProps) {
+  const [colleges, setColleges] = useState<CollegeConcurrent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetchCollegesConcurrents(uaiLycee)
+      .then((result) => {
+        setColleges(result);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Erreur de chargement');
+        setLoading(false);
+      });
+  }, [uaiLycee]);
+
+  if (loading) {
+    return (
+      <div className="concurrence-panel">
+        <div className="concurrence-loading"><span /><span /><span /></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="concurrence-panel">
+        <div className="concurrence-error">
+          {error}
+          <button onClick={() => {
+            setLoading(true);
+            setError(null);
+            fetchCollegesConcurrents(uaiLycee)
+              .then(setColleges)
+              .catch((e) => setError(e instanceof Error ? e.message : 'Erreur'))
+              .finally(() => setLoading(false));
+          }}>Réessayer</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (colleges.length === 0) return null;
+
+  const chartData = buildChartData(colleges);
+
+  // Transform data for stacked bars: each dataKey is a college UAI
+  const stackedData = chartData.map((group) => {
+    const point: Record<string, unknown> = {
+      bonusLabel: group.bonusLabel,
+      bonusIps: group.bonusIps,
+      colleges: group.colleges,
+      total: group.total,
+    };
+    for (const c of group.colleges) {
+      point[c.uai] = c.nbAdmis;
+    }
+    return point;
+  });
+
+  // Unique colleges across all groups
+  const uniqueColleges: { uai: string; nom: string; bonusIps: number }[] = [];
+  const seen = new Set<string>();
+  for (const group of chartData) {
+    for (const c of group.colleges) {
+      if (!seen.has(c.uai)) {
+        seen.add(c.uai);
+        uniqueColleges.push({ uai: c.uai, nom: c.nom, bonusIps: c.bonusIps });
+      }
+    }
+  }
+
+  const isUserCollege = (uai: string) => uai === uaiCollegeUtilisateur;
+
+  return (
+    <div className="concurrence-panel">
+      <ResponsiveContainer width="100%" height={Math.max(200, chartData.length * 60 + 80)}>
+        <BarChart data={stackedData} layout="vertical" margin={{ left: 10, right: 20, top: 10, bottom: 10 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+          <XAxis type="number" tick={{ fontSize: 11 }} label={{ value: 'Admis DNB', position: 'insideBottom', offset: -5, fontSize: 11 }} />
+          <YAxis type="category" dataKey="bonusLabel" tick={{ fontSize: 11 }} width={80} />
+          <Tooltip content={<CustomTooltip />} />
+          {uniqueColleges.map((c) => (
+            <Bar key={c.uai} dataKey={c.uai} stackId="stack" name={c.nom}>
+              {stackedData.map((_, index) => (
+                <Cell
+                  key={index}
+                  fill={BONUS_COLORS[c.bonusIps] ?? UNKNOWN_COLOR}
+                  stroke={isUserCollege(c.uai) ? USER_STROKE : 'none'}
+                  strokeWidth={isUserCollege(c.uai) ? USER_STROKE_WIDTH : 0}
+                />
+              ))}
+            </Bar>
+          ))}
+        </BarChart>
+      </ResponsiveContainer>
+      <div className="concurrence-legend">
+        <div className="concurrence-legend-items">
+          {Object.entries(BONUS_COLORS).map(([bonus, color]) => (
+            <span key={bonus} className="concurrence-legend-item">
+              <span className="concurrence-legend-dot" style={{ backgroundColor: color }} />
+              {BONUS_LABELS[Number(bonus)]}
+            </span>
+          ))}
+          <span className="concurrence-legend-item">
+            <span className="concurrence-legend-dot concurrence-legend-user" />
+            Votre collège
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
