@@ -332,3 +332,63 @@
     padding-left: 20px;
   }
 }
+
+.concurrence-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.concurrence-section-title {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.concurrence-lycee-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.concurrence-lycee-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--color-bg-subtle);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.concurrence-lycee-btn:hover {
+  background: var(--color-border);
+}
+
+.concurrence-lycee-name {
+  flex: 1;
+  text-align: left;
+}
+
+.concurrence-chevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  color: var(--color-text-muted);
+}
+
+.concurrence-lycee-btn.expanded .concurrence-chevron {
+  transform: rotate(180deg);
+}

@@ -4,6 +4,7 @@ import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '.
 import { useEffectifs } from '../hooks/useEffectifs';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
 import { LyceesIndicateurs } from './LyceeDetail';
+import { CollegesConcurrence } from './CollegesConcurrence';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
@@ -31,6 +32,7 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
   const [activeSector, setActiveSector] = useState(1);
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
+  const [expandedLycee, setExpandedLycee] = useState<string | null>(null);
 
   // Fetch seuils once and compute difficulties for displayed lycées + tous secteurs
   useEffect(() => {
@@ -158,6 +160,36 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
                 color: difficulties.get(e.uai)?.color ?? '#9ca3af',
               }))}
             />
+          )}
+          {activeSector === 1 && effectifs.length > 0 && (
+            <div className="concurrence-section">
+              <h5 className="concurrence-section-title">Collèges en concurrence</h5>
+              <ul className="concurrence-lycee-list">
+                {effectifs.map((e) => (
+                  <li key={e.uai}>
+                    <button
+                      className={`concurrence-lycee-btn${expandedLycee === e.uai ? ' expanded' : ''}`}
+                      onClick={() => setExpandedLycee(expandedLycee === e.uai ? null : e.uai)}
+                    >
+                      <span className="concurrence-lycee-name">{e.nom}</span>
+                      <svg
+                        className="concurrence-chevron"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                      </svg>
+                    </button>
+                    {expandedLycee === e.uai && (
+                      <CollegesConcurrence
+                        uaiLycee={e.uai}
+                        uaiCollegeUtilisateur={college.uai}
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
           {activeSector !== 1 && (
             <ul className="lycee-list">
