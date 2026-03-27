@@ -35,6 +35,7 @@ export interface AddressSuggestion {
 export interface CollegeSecteur {
   nom: string;
   uai: string;
+  coordinates?: [number, number]; // [longitude, latitude]
 }
 
 export interface LyceeSecteur {
@@ -42,6 +43,7 @@ export interface LyceeSecteur {
   nom: string;
   secteur: number;
   isNew?: boolean;
+  coordinates?: [number, number]; // [longitude, latitude]
 }
 
 export interface EffectifLycee {

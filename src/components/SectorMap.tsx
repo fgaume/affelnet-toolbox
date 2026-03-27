@@ -1,0 +1,160 @@
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { useEffect } from 'react';
+import type { CollegeSecteur, LyceeSecteur } from '../types';
+import 'leaflet/dist/leaflet.css';
+import './SectorMap.css';
+
+// Fix Leaflet marker icon issue in React
+// @ts-ignore
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
+interface SectorMapProps {
+  homeCoords: [number, number];
+  college: CollegeSecteur;
+  lyceesSecteur1: LyceeSecteur[];
+  lyceesTousSecteurs: LyceeSecteur[];
+}
+
+// Custom icons with white stroke for visibility
+const homeIcon = L.divIcon({
+  html: `<svg viewBox="0 0 24 24" fill="#1e40af" width="30" height="30" stroke="white" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+  className: 'custom-marker-icon',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30],
+});
+
+const collegeIcon = L.divIcon({
+  html: `<svg viewBox="0 0 24 24" fill="#16a34a" width="30" height="30" stroke="white" stroke-width="1.5"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>`,
+  className: 'custom-marker-icon',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30],
+});
+
+const lyceeIcon = L.divIcon({
+  html: `<svg viewBox="0 0 24 24" fill="#9333ea" width="24" height="24" stroke="white" stroke-width="1"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>`,
+  className: 'custom-marker-icon',
+  iconSize: [24, 24],
+  iconAnchor: [12, 24],
+  popupAnchor: [0, -24],
+});
+
+const tousSecteursIcon = L.divIcon({
+  html: `<svg viewBox="0 0 24 24" fill="#ea580c" width="24" height="24" stroke="white" stroke-width="1"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>`,
+  className: 'custom-marker-icon',
+  iconSize: [24, 24],
+  iconAnchor: [12, 24],
+  popupAnchor: [0, -24],
+});
+
+function MapResizer({ coords }: { coords: [number, number][] }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (coords.length > 0) {
+      const bounds = L.latLngBounds(coords.map(c => [c[1], c[0]]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [coords, map]);
+
+  return null;
+}
+
+function getItineraryUrl(from: [number, number], to: [number, number]) {
+  return `https://www.google.com/maps/dir/?api=1&origin=${from[1]},${from[0]}&destination=${to[1]},${to[0]}&travelmode=transit`;
+}
+
+export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecteurs }: SectorMapProps) {
+  const allCoords: [number, number][] = [
+    homeCoords,
+    ...(college.coordinates ? [college.coordinates] : []),
+    ...lyceesSecteur1.map(l => l.coordinates).filter((c): c is [number, number] => !!c),
+    ...lyceesTousSecteurs.map(l => l.coordinates).filter((c): c is [number, number] => !!c)
+  ];
+
+  return (
+    <div className="sector-map-container">
+      <MapContainer 
+        center={[homeCoords[1], homeCoords[0]]} 
+        zoom={14} 
+        scrollWheelZoom={false}
+        className="sector-map"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        
+        <Marker position={[homeCoords[1], homeCoords[0]]} icon={homeIcon}>
+          <Popup>Votre domicile</Popup>
+        </Marker>
+
+        {college.coordinates && (
+          <Marker position={[college.coordinates[1], college.coordinates[0]]} icon={collegeIcon}>
+            <Popup>
+              <strong>Collège de secteur</strong><br />
+              {college.nom}
+              <div className="popup-itinerary">
+                <a href={getItineraryUrl(homeCoords, college.coordinates)} target="_blank" rel="noopener noreferrer">
+                  Voir l'itinéraire
+                </a>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {lyceesSecteur1.map(lycee => lycee.coordinates && (
+          <Marker 
+            key={lycee.uai} 
+            position={[lycee.coordinates[1], lycee.coordinates[0]]} 
+            icon={lyceeIcon}
+          >
+            <Popup>
+              <strong>Lycée de secteur 1</strong><br />
+              {lycee.nom}
+              <div className="popup-itinerary">
+                <a href={getItineraryUrl(homeCoords, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
+                  Voir l'itinéraire
+                </a>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
+        {lyceesTousSecteurs.map(lycee => lycee.coordinates && (
+          <Marker 
+            key={lycee.uai} 
+            position={[lycee.coordinates[1], lycee.coordinates[0]]} 
+            icon={tousSecteursIcon}
+          >
+            <Popup>
+              <strong>Lycée tous secteurs</strong><br />
+              {lycee.nom}
+              <div className="popup-itinerary">
+                <a href={getItineraryUrl(homeCoords, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
+                  Voir l'itinéraire
+                </a>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
+        <MapResizer coords={allCoords} />
+      </MapContainer>
+      
+      <div className="map-legend">
+        <div className="legend-item"><span className="legend-dot home"></span> Domicile</div>
+        <div className="legend-item"><span className="legend-dot college"></span> Collège</div>
+        <div className="legend-item"><span className="legend-dot lycee"></span> Lycée Secteur 1</div>
+        <div className="legend-item"><span className="legend-dot tous"></span> Tous secteurs</div>
+      </div>
+    </div>
+  );
+}

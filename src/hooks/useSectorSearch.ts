@@ -23,7 +23,7 @@ export function useSectorSearch() {
       const collegeName = await findCollegeDeSecteur(lat, lon);
 
       // Step 2: Find college UAI from ArcGIS
-      const collegeUAI = await findCollegeUAI(collegeName);
+      const { uai: collegeUAI, coordinates: collegeCoordinates } = await findCollegeUAI(collegeName);
 
       // Step 3: Find lycees (graceful degradation if this fails)
       let lycees = null;
@@ -35,7 +35,11 @@ export function useSectorSearch() {
       }
 
       const sectorResult: SectorResult = {
-        college: { nom: collegeName, uai: collegeUAI },
+        college: { 
+          nom: collegeName, 
+          uai: collegeUAI,
+          coordinates: collegeCoordinates
+        },
         lycees,
         lyceeError,
       };

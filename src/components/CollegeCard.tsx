@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
-import type { SectorResult, LyceeSecteur } from '../types';
+import { useState, useEffect, useMemo } from 'react';
+import type { SectorResult, LyceeSecteur, Address } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
 import { LyceesIndicateurs } from './LyceeDetail';
+import { CollegesConcurrence } from './CollegesConcurrence';
+import { SectorMap } from './SectorMap';
 import './CollegeCard.css';
 
 const FICHE_RECTORAT_URL =
   'https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=';
 
 const TOUS_SECTEURS_LYCEES: LyceeSecteur[] = [
-  { uai: '0750654D', nom: 'HENRI IV', secteur: 0 },
-  { uai: '0750655E', nom: 'LOUIS LE GRAND', secteur: 0 },
-  { uai: '0750685M', nom: 'P.G. DE GENNES', secteur: 0 },
+  { uai: '0750654D', nom: 'HENRI IV', secteur: 0, coordinates: [2.3473, 48.8464] },
+  { uai: '0750655E', nom: 'LOUIS LE GRAND', secteur: 0, coordinates: [2.3443, 48.8475] },
+  { uai: '0750685M', nom: 'P.G. DE GENNES', secteur: 0, coordinates: [2.3483, 48.8410] },
 ];
 
 const DIFFICULTY_HARD: AdmissionDifficulty = {
@@ -23,14 +25,31 @@ const DIFFICULTY_HARD: AdmissionDifficulty = {
 
 interface CollegeCardProps {
   result: SectorResult;
-  addressLabel?: string;
+  address?: Address;
 }
 
-export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
+export function CollegeCard({ result, address }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [activeSector, setActiveSector] = useState(1);
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
+  const [expandedLycee, setExpandedLycee] = useState<string | null>(null);
+
+  // Memoize lycees prop for LyceesIndicateurs to avoid re-fetching on unrelated re-renders
+  const lyceesIndicateursData = useMemo(
+    () => effectifs.map((e) => ({
+      uai: e.uai,
+      nom: e.nom,
+      color: difficulties.get(e.uai)?.color ?? '#9ca3af',
+    })),
+    [effectifs, difficulties],
+  );
+
+  // Filter lycees of sector 1 for the map
+  const lyceesSecteur1 = useMemo(
+    () => lycees?.filter(l => l.secteur === 1) ?? [],
+    [lycees]
+  );
 
   // Fetch seuils once and compute difficulties for displayed lycées + tous secteurs
   useEffect(() => {
@@ -101,16 +120,26 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
               {college.nom}
             </a>
           </h2>
+          <span className="uai-badge">{college.uai}</span>
         </div>
       </div>
 
-      {addressLabel && (
+      {address && (
         <div className="address-searched">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
-          <span>{addressLabel}</span>
+          <span>{address.label}</span>
         </div>
+      )}
+
+      {address && (
+        <SectorMap 
+          homeCoords={address.coordinates}
+          college={college}
+          lyceesSecteur1={lyceesSecteur1}
+          lyceesTousSecteurs={TOUS_SECTEURS_LYCEES}
+        />
       )}
 
       {lyceesBySector && availableSectors.length > 0 && (
@@ -152,12 +181,48 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
           )}
           {activeSector === 1 && effectifs.length > 0 && (
             <LyceesIndicateurs
-              lycees={effectifs.map((e) => ({
-                uai: e.uai,
-                nom: e.nom,
-                color: difficulties.get(e.uai)?.color ?? '#9ca3af',
-              }))}
+              lycees={lyceesIndicateursData}
             />
+          )}
+          {activeSector === 1 && effectifs.length > 0 && (
+            <div className="concurrence-section">
+              <h5 className="concurrence-section-title">Collèges en concurrence</h5>
+              <ul className="concurrence-lycee-list">
+                {effectifs.map((e) => {
+                  const diff = difficulties.get(e.uai);
+                  return (
+                  <li key={e.uai}>
+                    <button
+                      className={`concurrence-lycee-btn${expandedLycee === e.uai ? ' expanded' : ''}`}
+                      onClick={() => setExpandedLycee(expandedLycee === e.uai ? null : e.uai)}
+                    >
+                      {diff && (
+                        <span
+                          className="difficulty-badge"
+                          style={{ backgroundColor: diff.color }}
+                          title={diff.label}
+                        />
+                      )}
+                      <span className="concurrence-lycee-name">{e.nom}</span>
+                      <svg
+                        className="concurrence-chevron"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                      </svg>
+                    </button>
+                    {expandedLycee === e.uai && (
+                      <CollegesConcurrence
+                        uaiLycee={e.uai}
+                        uaiCollegeUtilisateur={college.uai}
+                      />
+                    )}
+                  </li>
+                  );
+                })}
+              </ul>
+            </div>
           )}
           {activeSector !== 1 && (
             <ul className="lycee-list">

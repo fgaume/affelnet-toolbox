@@ -38,25 +38,33 @@ describe('findCollegeDeSecteur', () => {
 });
 
 describe('findCollegeUAI', () => {
-  it('returns UAI from ArcGIS Rectorat', async () => {
+  it('returns UAI and coordinates from ArcGIS Rectorat', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        features: [{ attributes: { Réseau: '0752536Z', Nom_Tete: 'VOLTAIRE' } }],
+        features: [{ attributes: { UAI: '0752536Z', Nom: 'VOLTAIRE', X: 2.377, Y: 48.863, secteur: 'Tête' } }],
       }),
     });
 
     const result = await findCollegeUAI('COLLEGE VOLTAIRE');
-    expect(result).toBe('0752536Z');
+    expect(result).toEqual({
+      uai: '0752536Z',
+      coordinates: [2.377, 48.863],
+    });
 
     const calledUrl = mockFetch.mock.calls[0][0] as string;
-    expect(calledUrl).toContain('Nom_Tete');
+    expect(calledUrl).toContain('Nom');
+    expect(calledUrl).toContain('secteur');
     // Should strip "COLLEGE " prefix
     expect(calledUrl).toContain('VOLTAIRE');
     expect(calledUrl).not.toContain('COLLEGE%20VOLTAIRE');
   });
 
   it('throws when no match found', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ features: [] }),
+    });
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ features: [] }),
@@ -69,23 +77,23 @@ describe('findCollegeUAI', () => {
 });
 
 describe('findLyceesDeSecteur', () => {
-  it('returns lycees sorted by sector', async () => {
+  it('returns lycees sorted by sector with coordinates', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         features: [
-          { attributes: { UAI: '0750676C', Nom: 'DORIAN', secteur: '1' } },
-          { attributes: { UAI: '0750652B', Nom: 'CHARLEMAGNE', secteur: '1' } },
-          { attributes: { UAI: '0750711R', Nom: 'BERGSON', secteur: '2' } },
+          { attributes: { UAI: '0750676C', Nom: 'DORIAN', secteur: '1', X: 2.39, Y: 48.85 } },
+          { attributes: { UAI: '0750652B', Nom: 'CHARLEMAGNE', secteur: '1', X: 2.36, Y: 48.85 } },
+          { attributes: { UAI: '0750711R', Nom: 'BERGSON', secteur: '2', X: 2.37, Y: 48.88 } },
         ],
       }),
     });
 
     const result = await findLyceesDeSecteur('0752536Z');
     expect(result).toHaveLength(3);
-    expect(result[0]).toEqual({ uai: '0750676C', nom: 'DORIAN', secteur: 1 });
-    expect(result[1]).toEqual({ uai: '0750652B', nom: 'CHARLEMAGNE', secteur: 1 });
-    expect(result[2]).toEqual({ uai: '0750711R', nom: 'BERGSON', secteur: 2 });
+    expect(result[0]).toEqual({ uai: '0750676C', nom: 'DORIAN', secteur: 1, coordinates: [2.39, 48.85] });
+    expect(result[1]).toEqual({ uai: '0750652B', nom: 'CHARLEMAGNE', secteur: 1, coordinates: [2.36, 48.85] });
+    expect(result[2]).toEqual({ uai: '0750711R', nom: 'BERGSON', secteur: 2, coordinates: [2.37, 48.88] });
 
     const calledUrl = mockFetch.mock.calls[0][0] as string;
     expect(calledUrl).toContain('0752536Z');

@@ -1,0 +1,157 @@
+<h2>Visualisation des collèges en concurrence</h2>
+<p class="subtitle">Pour un lycée donné, montrer les ~15-25 collèges qui l'ont en secteur 1, groupés par bonus IPS, avec leur poids (effectif DNB)</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#f8fafc">
+      <!-- Horizontal stacked bar -->
+      <svg viewBox="0 0 400 220" style="width:100%;font-family:system-ui">
+        <text x="200" y="18" text-anchor="middle" font-size="11" fill="#64748b">Lycée VICTOR HUGO — 22 collèges en concurrence</text>
+
+        <!-- Bonus IPS 600 -->
+        <text x="5" y="50" font-size="10" fill="#64748b" font-weight="600">Bonus 600</text>
+        <rect x="70" y="38" width="120" height="22" rx="3" fill="#dc2626" opacity="0.8"/>
+        <rect x="190" y="38" width="80" height="22" rx="3" fill="#ef4444" opacity="0.6"/>
+        <rect x="270" y="38" width="45" height="22" rx="3" fill="#f87171" opacity="0.5"/>
+        <text x="130" y="53" text-anchor="middle" font-size="9" fill="white">Collège A (180)</text>
+        <text x="230" y="53" text-anchor="middle" font-size="9" fill="white">Collège B (120)</text>
+        <text x="292" y="53" text-anchor="middle" font-size="9" fill="white">C (68)</text>
+
+        <!-- Bonus IPS 480 -->
+        <text x="5" y="82" font-size="10" fill="#64748b" font-weight="600">Bonus 480</text>
+        <rect x="70" y="70" width="100" height="22" rx="3" fill="#f97316" opacity="0.8"/>
+        <rect x="170" y="70" width="90" height="22" rx="3" fill="#fb923c" opacity="0.6"/>
+        <rect x="260" y="70" width="60" height="22" rx="3" fill="#fdba74" opacity="0.5"/>
+        <rect x="320" y="70" width="40" height="22" rx="3" fill="#fed7aa" opacity="0.4"/>
+        <text x="120" y="85" text-anchor="middle" font-size="9" fill="white">Collège D (150)</text>
+        <text x="215" y="85" text-anchor="middle" font-size="9" fill="white">Collège E (135)</text>
+
+        <!-- Bonus IPS 240 -->
+        <text x="5" y="114" font-size="10" fill="#64748b" font-weight="600">Bonus 240</text>
+        <rect x="70" y="102" width="140" height="22" rx="3" fill="#2563eb" opacity="0.7"/>
+        <rect x="210" y="102" width="70" height="22" rx="3" fill="#3b82f6" opacity="0.5"/>
+        <text x="140" y="117" text-anchor="middle" font-size="9" fill="white">Collège F (210)</text>
+        <text x="245" y="117" text-anchor="middle" font-size="9" fill="white">G (105)</text>
+
+        <!-- Bonus IPS 0 -->
+        <text x="5" y="146" font-size="10" fill="#64748b" font-weight="600">Bonus 0</text>
+        <rect x="70" y="134" width="200" height="22" rx="3" fill="#16a34a" opacity="0.7"/>
+        <rect x="270" y="134" width="50" height="22" rx="3" fill="#22c55e" opacity="0.5"/>
+        <text x="170" y="149" text-anchor="middle" font-size="9" fill="white">Collège H (300)</text>
+        <text x="295" y="149" text-anchor="middle" font-size="9" fill="white">I (75)</text>
+
+        <text x="200" y="180" text-anchor="middle" font-size="10" fill="#94a3b8">Largeur = effectif DNB (nb candidats)</text>
+        <text x="200" y="195" text-anchor="middle" font-size="10" fill="#94a3b8">Groupés par bonus IPS (du plus élevé au plus bas)</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A. Barres horizontales empilées par bonus IPS</h3>
+      <p>Une ligne par tranche de bonus IPS. Chaque segment = un collège, largeur proportionnelle à l'effectif. Lecture naturelle : les collèges les plus "avantagés" (bonus élevé) en haut.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#f8fafc">
+      <!-- Treemap -->
+      <svg viewBox="0 0 400 220" style="width:100%;font-family:system-ui">
+        <text x="200" y="18" text-anchor="middle" font-size="11" fill="#64748b">Lycée VICTOR HUGO — 22 collèges en concurrence</text>
+
+        <!-- Treemap rectangles, colored by bonus IPS -->
+        <rect x="10" y="30" width="150" height="80" rx="4" fill="#dc2626" opacity="0.75"/>
+        <text x="85" y="65" text-anchor="middle" font-size="11" fill="white" font-weight="600">Collège A</text>
+        <text x="85" y="80" text-anchor="middle" font-size="9" fill="white">180 élèves • IPS +600</text>
+
+        <rect x="165" y="30" width="120" height="80" rx="4" fill="#16a34a" opacity="0.75"/>
+        <text x="225" y="65" text-anchor="middle" font-size="11" fill="white" font-weight="600">Collège H</text>
+        <text x="225" y="80" text-anchor="middle" font-size="9" fill="white">300 élèves • IPS +0</text>
+
+        <rect x="290" y="30" width="100" height="45" rx="4" fill="#f97316" opacity="0.75"/>
+        <text x="340" y="55" text-anchor="middle" font-size="9" fill="white" font-weight="600">Collège D</text>
+        <text x="340" y="67" text-anchor="middle" font-size="8" fill="white">150 • +480</text>
+
+        <rect x="290" y="80" width="100" height="30" rx="4" fill="#2563eb" opacity="0.7"/>
+        <text x="340" y="99" text-anchor="middle" font-size="9" fill="white">Collège F • 210 • +240</text>
+
+        <rect x="10" y="115" width="90" height="50" rx="4" fill="#dc2626" opacity="0.6"/>
+        <text x="55" y="143" text-anchor="middle" font-size="9" fill="white">B (120) +600</text>
+
+        <rect x="105" y="115" width="70" height="50" rx="4" fill="#f97316" opacity="0.6"/>
+        <text x="140" y="143" text-anchor="middle" font-size="9" fill="white">E (135) +480</text>
+
+        <rect x="180" y="115" width="60" height="50" rx="4" fill="#2563eb" opacity="0.6"/>
+        <text x="210" y="143" text-anchor="middle" font-size="9" fill="white">G (105) +240</text>
+
+        <rect x="245" y="115" width="50" height="50" rx="4" fill="#dc2626" opacity="0.5"/>
+        <text x="270" y="143" text-anchor="middle" font-size="8" fill="white">C (68)</text>
+
+        <rect x="300" y="115" width="90" height="25" rx="4" fill="#16a34a" opacity="0.5"/>
+        <text x="345" y="131" text-anchor="middle" font-size="8" fill="white">I (75) +0</text>
+        <rect x="300" y="143" width="90" height="22" rx="4" fill="#f97316" opacity="0.4"/>
+        <text x="345" y="157" text-anchor="middle" font-size="8" fill="white">...</text>
+
+        <text x="200" y="190" text-anchor="middle" font-size="10" fill="#94a3b8">Surface = effectif • Couleur = bonus IPS</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B. Treemap (rectangles imbriqués)</h3>
+      <p>Chaque rectangle = un collège, surface proportionnelle à l'effectif, couleur selon le bonus IPS. Très visuel et compact. Mais moins lisible quand il y a beaucoup de petits collèges.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#f8fafc">
+      <!-- Bubble chart -->
+      <svg viewBox="0 0 400 220" style="width:100%;font-family:system-ui">
+        <text x="200" y="18" text-anchor="middle" font-size="11" fill="#64748b">Lycée VICTOR HUGO — 22 collèges en concurrence</text>
+
+        <!-- X axis = bonus IPS groups -->
+        <line x1="30" y1="185" x2="390" y2="185" stroke="#e2e8f0" stroke-width="1"/>
+        <text x="80" y="200" text-anchor="middle" font-size="9" fill="#94a3b8">Bonus 0</text>
+        <text x="170" y="200" text-anchor="middle" font-size="9" fill="#94a3b8">Bonus 240</text>
+        <text x="270" y="200" text-anchor="middle" font-size="9" fill="#94a3b8">Bonus 480</text>
+        <text x="360" y="200" text-anchor="middle" font-size="9" fill="#94a3b8">Bonus 600</text>
+
+        <!-- Y axis label -->
+        <text x="15" y="110" text-anchor="middle" font-size="9" fill="#94a3b8" transform="rotate(-90,15,110)">effectif</text>
+
+        <!-- Bubbles at bonus 0 -->
+        <circle cx="80" cy="60" r="28" fill="#16a34a" opacity="0.6"/>
+        <text x="80" y="58" text-anchor="middle" font-size="8" fill="white" font-weight="600">H</text>
+        <text x="80" y="68" text-anchor="middle" font-size="7" fill="white">300</text>
+        <circle cx="80" cy="140" r="14" fill="#16a34a" opacity="0.5"/>
+        <text x="80" y="143" text-anchor="middle" font-size="7" fill="white">I 75</text>
+
+        <!-- Bubbles at bonus 240 -->
+        <circle cx="170" cy="70" r="24" fill="#2563eb" opacity="0.6"/>
+        <text x="170" y="68" text-anchor="middle" font-size="8" fill="white" font-weight="600">F</text>
+        <text x="170" y="78" text-anchor="middle" font-size="7" fill="white">210</text>
+        <circle cx="170" cy="130" r="17" fill="#2563eb" opacity="0.5"/>
+        <text x="170" y="133" text-anchor="middle" font-size="7" fill="white">G 105</text>
+
+        <!-- Bubbles at bonus 480 -->
+        <circle cx="270" cy="75" r="20" fill="#f97316" opacity="0.6"/>
+        <text x="270" y="73" text-anchor="middle" font-size="8" fill="white" font-weight="600">D</text>
+        <text x="270" y="83" text-anchor="middle" font-size="7" fill="white">150</text>
+        <circle cx="270" cy="125" r="19" fill="#f97316" opacity="0.5"/>
+        <text x="270" y="128" text-anchor="middle" font-size="7" fill="white">E 135</text>
+
+        <!-- Bubbles at bonus 600 -->
+        <circle cx="355" cy="80" r="22" fill="#dc2626" opacity="0.6"/>
+        <text x="355" y="78" text-anchor="middle" font-size="8" fill="white" font-weight="600">A</text>
+        <text x="355" y="88" text-anchor="middle" font-size="7" fill="white">180</text>
+        <circle cx="360" cy="130" r="18" fill="#dc2626" opacity="0.5"/>
+        <text x="360" y="133" text-anchor="middle" font-size="7" fill="white">B 120</text>
+        <circle cx="340" cy="160" r="13" fill="#dc2626" opacity="0.4"/>
+        <text x="340" y="163" text-anchor="middle" font-size="7" fill="white">C 68</text>
+
+        <text x="200" y="215" text-anchor="middle" font-size="9" fill="#94a3b8">Taille bulle = effectif • Position X = bonus IPS</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C. Bulles groupées par bonus IPS</h3>
+      <p>Bulles disposées en colonnes par tranche de bonus IPS. Taille = effectif. Lecture claire du rapport entre avantage IPS et poids du collège. Bonne lisibilité même avec 20+ collèges.</p>
+    </div>
+  </div>
+
+</div>

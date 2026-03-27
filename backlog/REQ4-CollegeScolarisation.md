@@ -1,4 +1,3 @@
 Enrichir la recherche de secteur en ajoutant :
-- demander à l'utilisateur si il est vraiment scolarisé dans son collège de secteur. Si ce n'est pas le cas, lui demander de saisir son collège de scolarisation (avec complétion automatique du nom du collège, en t'aidant du skill AFFELNET-UAI par exemple)
+- demander à l'utilisateur si il est vraiment scolarisé dans son collège de secteur. Si ce n'est pas le cas, lui demander de saisir son collège de scolarisation (avec complétion automatique du nom du collège, en t'aidant du skill affelnet-uai-paris par exemple)
 - une fois le collège de scolarisation connu, présenter graphiquement l'évolution de son IPS moyen (voir historique via skill affelnet-ips) et évolution du niveau scolaire (voir skill affelnet-niveau-scolaire).
-- proposer un affichage permettant encore de situer l'établissement en déciles par rapport à l'ensemble des collèges parisiens.
