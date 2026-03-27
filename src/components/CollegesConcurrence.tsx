@@ -54,29 +54,29 @@ function buildChartData(colleges: CollegeConcurrent[]): BarDataPoint[] {
     }));
 }
 
-function CustomTooltip({ active, payload }: {
-  active?: boolean;
-  payload?: Array<{ name: string; dataKey: string; value: number; payload: BarDataPoint & Record<string, unknown> }>;
-}) {
-  if (!active || !payload?.[0]) return null;
-  const data = payload[0].payload;
-  const segments = payload.filter((p) => p.value > 0);
-  return (
-    <div className="concurrence-tooltip">
-      <div className="concurrence-tooltip-title">{data.bonusLabel}</div>
-      {segments.map((p) => {
-        // dataKey is the UAI, find the college name from the group
-        const college = data.colleges.find((c) => c.uai === p.dataKey);
-        return (
-          <div key={p.dataKey} className="concurrence-tooltip-row">
-            <span>{college?.nom ?? p.name}</span>
+function makeTooltip(uaiToName: Map<string, string>) {
+  return function CustomTooltip({ active, payload }: {
+    active?: boolean;
+    payload?: Array<{ name: string; value: number }>;
+  }) {
+    if (!active || !payload?.[0]) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (payload[0] as any).payload as BarDataPoint;
+    const segments = payload.filter((p) => p.value > 0);
+    const total = segments.reduce((sum, p) => sum + p.value, 0);
+    return (
+      <div className="concurrence-tooltip">
+        <div className="concurrence-tooltip-title">{data.bonusLabel}</div>
+        {segments.map((p) => (
+          <div key={p.name} className="concurrence-tooltip-row">
+            <span>{uaiToName.get(p.name) ?? p.name}</span>
             <span className="concurrence-tooltip-value">{p.value} admis</span>
           </div>
-        );
-      })}
-      <div className="concurrence-tooltip-total">Total : {data.total} admis</div>
-    </div>
-  );
+        ))}
+        <div className="concurrence-tooltip-total">Total : {total} admis</div>
+      </div>
+    );
+  };
 }
 
 type State =
@@ -162,6 +162,8 @@ export function CollegesConcurrence({ uaiLycee, uaiCollegeUtilisateur }: College
     }
   }
 
+  const uaiToName = new Map(uniqueColleges.map((c) => [c.uai, c.nom]));
+  const CustomTooltip = makeTooltip(uaiToName);
   const isUserCollege = (uai: string) => uai === uaiCollegeUtilisateur;
 
   return (

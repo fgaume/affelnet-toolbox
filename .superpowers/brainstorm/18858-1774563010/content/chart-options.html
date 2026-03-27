@@ -1,0 +1,160 @@
+<h2>Collèges en concurrence — Type de visualisation</h2>
+<p class="subtitle">Chaque lycée de secteur 1 afficherait ce graphique dans un panneau dépliable, montrant les collèges qui partagent ce lycée en secteur 1, regroupés par bonus IPS.</p>
+
+<div class="cards" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+  <!-- Option A: Horizontal bar chart -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#1a1a2e;">
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:12px;">Bonus IPS</div>
+      <!-- Group 1200 -->
+      <div style="margin-bottom:10px;">
+        <div style="font-size:10px;color:#f59e0b;margin-bottom:4px;font-weight:600;">Bonus 1200</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <span style="font-size:10px;color:#ccc;width:90px;text-align:right;">CLG Bergson</span>
+          <div style="height:16px;width:180px;background:#f59e0b;border-radius:3px;"></div>
+          <span style="font-size:10px;color:#ccc;">142</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <span style="font-size:10px;color:#ccc;width:90px;text-align:right;">CLG Pailleron</span>
+          <div style="height:16px;width:130px;background:#f59e0b;border-radius:3px;"></div>
+          <span style="font-size:10px;color:#ccc;">118</span>
+        </div>
+      </div>
+      <!-- Group 800 -->
+      <div style="margin-bottom:10px;">
+        <div style="font-size:10px;color:#3b82f6;margin-bottom:4px;font-weight:600;">Bonus 800</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <span style="font-size:10px;color:#ccc;width:90px;text-align:right;">CLG Condorcet</span>
+          <div style="height:16px;width:155px;background:#3b82f6;border-radius:3px;"></div>
+          <span style="font-size:10px;color:#ccc;">128</span>
+        </div>
+      </div>
+      <!-- Group 0 -->
+      <div>
+        <div style="font-size:10px;color:#10b981;margin-bottom:4px;font-weight:600;">Bonus 0</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <span style="font-size:10px;color:#ccc;width:90px;text-align:right;">CLG Lamartine</span>
+          <div style="height:16px;width:100px;background:#10b981;border-radius:3px;"></div>
+          <span style="font-size:10px;color:#ccc;">85</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:10px;color:#ccc;width:90px;text-align:right;">CLG J. Ferry</span>
+          <div style="height:16px;width:165px;background:#10b981;border-radius:3px;"></div>
+          <span style="font-size:10px;color:#ccc;">135</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Bar chart horizontal</h3>
+      <p>Chaque barre = un collège, groupé par bonus IPS. Lecture claire du poids individuel.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Stacked bar -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#1a1a2e;">
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:12px;">Effectifs par groupe de bonus IPS</div>
+      <div style="display:flex;align-items:flex-end;gap:24px;height:140px;padding-bottom:20px;border-bottom:1px solid #333;">
+        <!-- Bar 1200 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="display:flex;flex-direction:column;">
+            <div style="width:60px;height:55px;background:#f59e0b;border-radius:3px 3px 0 0;"></div>
+            <div style="width:60px;height:45px;background:#fbbf24;border-radius:0 0 3px 3px;"></div>
+          </div>
+          <span style="font-size:10px;color:#ccc;">1200</span>
+        </div>
+        <!-- Bar 800 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="width:60px;height:50px;background:#3b82f6;border-radius:3px;"></div>
+          <span style="font-size:10px;color:#ccc;">800</span>
+        </div>
+        <!-- Bar 400 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="display:flex;flex-direction:column;">
+            <div style="width:60px;height:30px;background:#8b5cf6;border-radius:3px 3px 0 0;"></div>
+            <div style="width:60px;height:35px;background:#a78bfa;border-radius:0 0 3px 3px;"></div>
+          </div>
+          <span style="font-size:10px;color:#ccc;">400</span>
+        </div>
+        <!-- Bar 0 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="display:flex;flex-direction:column;">
+            <div style="width:60px;height:33px;background:#10b981;border-radius:3px 3px 0 0;"></div>
+            <div style="width:60px;height:52px;background:#34d399;border-radius:0 0 3px 3px;"></div>
+          </div>
+          <span style="font-size:10px;color:#ccc;">0</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Stacked bar chart</h3>
+      <p>Une barre par groupe bonus, empilée avec les collèges. Compare les groupes entre eux.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Treemap -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#1a1a2e;">
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:8px;">Poids des collèges (taille = effectif, couleur = bonus IPS)</div>
+      <div style="display:grid;grid-template-columns:3fr 2fr;grid-template-rows:1fr 1fr;gap:3px;height:130px;">
+        <div style="background:#10b981;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+          <span style="font-size:10px;color:white;font-weight:600;">J. Ferry</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.7);">135 — bonus 0</span>
+        </div>
+        <div style="background:#f59e0b;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+          <span style="font-size:10px;color:white;font-weight:600;">Bergson</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.7);">142 — bonus 1200</span>
+        </div>
+        <div style="background:#3b82f6;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+          <span style="font-size:10px;color:white;font-weight:600;">Condorcet</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.7);">128 — bonus 800</span>
+        </div>
+        <div style="display:grid;grid-template-rows:1fr 1fr;gap:3px;">
+          <div style="background:#f59e0b;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+            <span style="font-size:9px;color:white;font-weight:600;">Pailleron</span>
+            <span style="font-size:8px;color:rgba(255,255,255,0.7);">118 — 1200</span>
+          </div>
+          <div style="background:#10b981;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+            <span style="font-size:9px;color:white;font-weight:600;">Lamartine</span>
+            <span style="font-size:8px;color:rgba(255,255,255,0.7);">85 — 0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Treemap</h3>
+      <p>Rectangles proportionnels. Impact visuel immédiat mais perd le regroupement par bonus.</p>
+    </div>
+  </div>
+
+  <!-- Option D: Donut -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;">
+      <div style="position:relative;width:160px;height:160px;">
+        <svg viewBox="0 0 160 160" style="transform:rotate(-90deg);">
+          <!-- Donut segments -->
+          <circle cx="80" cy="80" r="55" fill="none" stroke="#f59e0b" stroke-width="22" stroke-dasharray="86 260" stroke-dashoffset="0"/>
+          <circle cx="80" cy="80" fill="none" stroke="#3b82f6" stroke-width="22" stroke-dasharray="55 291" stroke-dashoffset="-88"/>
+          <circle cx="80" cy="80" fill="none" stroke="#8b5cf6" stroke-width="22" stroke-dasharray="45 301" stroke-dashoffset="-145"/>
+          <circle cx="80" cy="80" fill="none" stroke="#10b981" stroke-width="22" stroke-dasharray="70 276" stroke-dashoffset="-192"/>
+        </svg>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:white;">608</div>
+          <div style="font-size:9px;color:#9ca3af;">admis DNB</div>
+        </div>
+      </div>
+      <div style="margin-left:16px;font-size:10px;color:#ccc;line-height:1.8;">
+        <div><span style="display:inline-block;width:8px;height:8px;background:#f59e0b;border-radius:50%;margin-right:4px;"></span>Bonus 1200 (260)</div>
+        <div><span style="display:inline-block;width:8px;height:8px;background:#3b82f6;border-radius:50%;margin-right:4px;"></span>Bonus 800 (128)</div>
+        <div><span style="display:inline-block;width:8px;height:8px;background:#8b5cf6;border-radius:50%;margin-right:4px;"></span>Bonus 400 (100)</div>
+        <div><span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;margin-right:4px;"></span>Bonus 0 (220)</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>D — Donut par groupe bonus</h3>
+      <p>Similaire au donut lycées existant. Chaque segment = un groupe de bonus IPS, taille = effectif total du groupe.</p>
+    </div>
+  </div>
+
+</div>
