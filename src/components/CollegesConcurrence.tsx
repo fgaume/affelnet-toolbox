@@ -56,17 +56,19 @@ function buildChartData(colleges: CollegeConcurrent[]): BarDataPoint[] {
 
 function CustomTooltip({ active, payload }: {
   active?: boolean;
-  payload?: Array<{ payload: BarDataPoint & Record<string, unknown> }>;
+  payload?: Array<{ name: string; value: number; payload: BarDataPoint & Record<string, unknown> }>;
 }) {
   if (!active || !payload?.[0]) return null;
   const data = payload[0].payload;
+  // Filter to segments with actual values (colleges present in this bonus group)
+  const segments = payload.filter((p) => p.value > 0);
   return (
     <div className="concurrence-tooltip">
       <div className="concurrence-tooltip-title">{data.bonusLabel}</div>
-      {data.colleges.map((c) => (
-        <div key={c.uai} className="concurrence-tooltip-row">
-          <span>{c.nom}</span>
-          <span className="concurrence-tooltip-value">{c.nbAdmis} admis</span>
+      {segments.map((p) => (
+        <div key={p.name} className="concurrence-tooltip-row">
+          <span>{p.name}</span>
+          <span className="concurrence-tooltip-value">{p.value} admis</span>
         </div>
       ))}
       <div className="concurrence-tooltip-total">Total : {data.total} admis</div>
