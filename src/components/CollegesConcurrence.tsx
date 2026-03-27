@@ -161,8 +161,8 @@ export function CollegesConcurrence({ uaiLycee, uaiCollegeUtilisateur }: College
 
   return (
     <div className="concurrence-panel">
-      <ResponsiveContainer width="100%" height={Math.max(150, chartData.length * 40 + 60)}>
-        <BarChart data={stackedData} layout="vertical" barSize={20} margin={{ left: 10, right: 20, top: 10, bottom: 10 }}>
+      <ResponsiveContainer width="100%" height={Math.max(120, chartData.length * 32 + 50)}>
+        <BarChart data={stackedData} layout="vertical" barSize={18} barCategoryGap={4} margin={{ left: 10, right: 20, top: 5, bottom: 10 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
           <XAxis type="number" tick={{ fontSize: 11 }} label={{ value: 'Admis DNB', position: 'insideBottom', offset: -5, fontSize: 11 }} />
           <YAxis type="category" dataKey="bonusLabel" tick={{ fontSize: 11 }} width={80} />

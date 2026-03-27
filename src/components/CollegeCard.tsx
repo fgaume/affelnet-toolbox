@@ -171,12 +171,21 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
             <div className="concurrence-section">
               <h5 className="concurrence-section-title">Collèges en concurrence</h5>
               <ul className="concurrence-lycee-list">
-                {effectifs.map((e) => (
+                {effectifs.map((e) => {
+                  const diff = difficulties.get(e.uai);
+                  return (
                   <li key={e.uai}>
                     <button
                       className={`concurrence-lycee-btn${expandedLycee === e.uai ? ' expanded' : ''}`}
                       onClick={() => setExpandedLycee(expandedLycee === e.uai ? null : e.uai)}
                     >
+                      {diff && (
+                        <span
+                          className="difficulty-badge"
+                          style={{ backgroundColor: diff.color }}
+                          title={diff.label}
+                        />
+                      )}
                       <span className="concurrence-lycee-name">{e.nom}</span>
                       <svg
                         className="concurrence-chevron"
@@ -193,7 +202,8 @@ export function CollegeCard({ result, addressLabel }: CollegeCardProps) {
                       />
                     )}
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </div>
           )}
