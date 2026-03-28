@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { SectorResult, LyceeSecteur, Address } from '../types';
+import type { SectorResult, LyceeSecteur, Address, College, IpsInfo } from '../types';
+import { fetchCollegeIps } from '../services/collegeApi';
+import { CollegeAutocomplete } from './CollegeAutocomplete';
+import { IpsGauge } from './IpsGauge';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
@@ -34,6 +37,11 @@ export function CollegeCard({ result, address }: CollegeCardProps) {
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
   const [expandedLycee, setExpandedLycee] = useState<string | null>(null);
+  const [scolarisation, setScolarisation] = useState<'pending' | 'same' | 'other'>('pending');
+  const [collegeScolarisation, setCollegeScolarisation] = useState<College | null>(null);
+  const [ipsInfo, setIpsInfo] = useState<IpsInfo | null>(null);
+  const [ipsLoading, setIpsLoading] = useState(false);
+  const [ipsError, setIpsError] = useState<string | null>(null);
 
   // Memoize lycees prop for LyceesIndicateurs to avoid re-fetching on unrelated re-renders
   const lyceesIndicateursData = useMemo(
@@ -75,6 +83,43 @@ export function CollegeCard({ result, address }: CollegeCardProps) {
         // Silently ignore — badges just won't show
       });
   }, [lycees]);
+
+  // Fetch IPS when scolarisation college is determined
+  useEffect(() => {
+    const targetUai =
+      scolarisation === 'same' ? college.uai
+      : scolarisation === 'other' && collegeScolarisation ? collegeScolarisation.uai
+      : null;
+
+    if (!targetUai) {
+      setIpsInfo(null);
+      return;
+    }
+
+    setIpsLoading(true);
+    setIpsError(null);
+    fetchCollegeIps(targetUai)
+      .then((info) => {
+        setIpsInfo(info);
+        if (!info) setIpsError('Données IPS non disponibles pour ce collège');
+      })
+      .catch(() => setIpsError('Erreur lors du chargement des données IPS'))
+      .finally(() => setIpsLoading(false));
+  }, [scolarisation, collegeScolarisation, college.uai]);
+
+  const handleScolarisationSame = () => {
+    setScolarisation('same');
+    setCollegeScolarisation(null);
+  };
+
+  const handleScolarisationOther = () => {
+    setScolarisation('other');
+    setIpsInfo(null);
+  };
+
+  const handleCollegeScolarisationSelect = (c: College) => {
+    setCollegeScolarisation(c);
+  };
 
   // Group lycees by sector, sorted alphabetically
   const lyceesBySector = lycees
@@ -133,14 +178,68 @@ export function CollegeCard({ result, address }: CollegeCardProps) {
         </div>
       )}
 
-      {address && (
-        <SectorMap 
-          homeCoords={address.coordinates}
-          college={college}
-          lyceesSecteur1={lyceesSecteur1}
-          lyceesTousSecteurs={TOUS_SECTEURS_LYCEES}
-        />
-      )}
+      {/* Scolarisation question */}
+      <div className="scolarisation-section">
+        {scolarisation === 'pending' && (
+          <div className="scolarisation-question">
+            <p className="scolarisation-label">Êtes-vous scolarisé(e) dans ce collège ?</p>
+            <div className="scolarisation-buttons">
+              <button className="scolarisation-btn scolarisation-btn-yes" onClick={handleScolarisationSame}>
+                Oui
+              </button>
+              <button className="scolarisation-btn scolarisation-btn-no" onClick={handleScolarisationOther}>
+                Non
+              </button>
+            </div>
+          </div>
+        )}
+
+        {scolarisation === 'same' && (
+          <div className="scolarisation-result">
+            <span className="scolarisation-badge">Secteur · Scolarisation</span>
+            <button className="scolarisation-change" onClick={() => setScolarisation('pending')}>
+              Modifier
+            </button>
+          </div>
+        )}
+
+        {scolarisation === 'other' && (
+          <div className="scolarisation-other">
+            <p className="scolarisation-other-label">Collège de scolarisation</p>
+            <CollegeAutocomplete
+              onSelect={handleCollegeScolarisationSelect}
+              placeholder="Nom de votre collège de scolarisation..."
+            />
+            {collegeScolarisation && (
+              <div className="scolarisation-result" style={{ marginTop: 8 }}>
+                <span className="scolarisation-badge scolarisation-badge-other">{collegeScolarisation.nom}</span>
+                <button className="scolarisation-change" onClick={() => setScolarisation('pending')}>
+                  Modifier
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* IPS display */}
+        {ipsLoading && <p className="ips-loading">Chargement des données IPS...</p>}
+        {ipsError && <p className="ips-error">{ipsError}</p>}
+        {ipsInfo && (
+          <div className="ips-block">
+            <div className="ips-summary">
+              <div className="ips-value-block">
+                <span className="ips-label">IPS du collège</span>
+                <span className="ips-number">{ipsInfo.ips.toFixed(1).replace('.', ',')}</span>
+              </div>
+              <div className="ips-value-block">
+                <span className="ips-label">Bonus IPS Affelnet</span>
+                <span className="ips-number">{ipsInfo.bonus} pts</span>
+              </div>
+            </div>
+            <IpsGauge ips={ipsInfo.ips} />
+          </div>
+        )}
+      </div>
 
       {lyceesBySector && availableSectors.length > 0 && (
         <div className="lycees-section">
@@ -183,46 +282,6 @@ export function CollegeCard({ result, address }: CollegeCardProps) {
             <LyceesIndicateurs
               lycees={lyceesIndicateursData}
             />
-          )}
-          {activeSector === 1 && effectifs.length > 0 && (
-            <div className="concurrence-section">
-              <h5 className="concurrence-section-title">Collèges en concurrence</h5>
-              <ul className="concurrence-lycee-list">
-                {effectifs.map((e) => {
-                  const diff = difficulties.get(e.uai);
-                  return (
-                  <li key={e.uai}>
-                    <button
-                      className={`concurrence-lycee-btn${expandedLycee === e.uai ? ' expanded' : ''}`}
-                      onClick={() => setExpandedLycee(expandedLycee === e.uai ? null : e.uai)}
-                    >
-                      {diff && (
-                        <span
-                          className="difficulty-badge"
-                          style={{ backgroundColor: diff.color }}
-                          title={diff.label}
-                        />
-                      )}
-                      <span className="concurrence-lycee-name">{e.nom}</span>
-                      <svg
-                        className="concurrence-chevron"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
-                      </svg>
-                    </button>
-                    {expandedLycee === e.uai && (
-                      <CollegesConcurrence
-                        uaiLycee={e.uai}
-                        uaiCollegeUtilisateur={college.uai}
-                      />
-                    )}
-                  </li>
-                  );
-                })}
-              </ul>
-            </div>
           )}
           {activeSector !== 1 && (
             <ul className="lycee-list">
@@ -275,6 +334,56 @@ export function CollegeCard({ result, address }: CollegeCardProps) {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {address && (
+        <SectorMap 
+          homeCoords={address.coordinates}
+          college={college}
+          lyceesSecteur1={lyceesSecteur1}
+          lyceesTousSecteurs={TOUS_SECTEURS_LYCEES}
+        />
+      )}
+
+      {activeSector === 1 && effectifs.length > 0 && (
+        <div className="concurrence-section">
+          <h5 className="concurrence-section-title">Collèges en concurrence</h5>
+          <ul className="concurrence-lycee-list">
+            {effectifs.map((e) => {
+              const diff = difficulties.get(e.uai);
+              return (
+              <li key={e.uai}>
+                <button
+                  className={`concurrence-lycee-btn${expandedLycee === e.uai ? ' expanded' : ''}`}
+                  onClick={() => setExpandedLycee(expandedLycee === e.uai ? null : e.uai)}
+                >
+                  {diff && (
+                    <span
+                      className="difficulty-badge"
+                      style={{ backgroundColor: diff.color }}
+                      title={diff.label}
+                    />
+                  )}
+                  <span className="concurrence-lycee-name">{e.nom}</span>
+                  <svg
+                    className="concurrence-chevron"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                  </svg>
+                </button>
+                {expandedLycee === e.uai && (
+                  <CollegesConcurrence
+                    uaiLycee={e.uai}
+                    uaiCollegeUtilisateur={college.uai}
+                  />
+                )}
+              </li>
+              );
+            })}
+          </ul>
         </div>
       )}
 
