@@ -1,0 +1,67 @@
+.ips-gauge {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.ips-gauge-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.ips-gauge-bar-container {
+  position: relative;
+}
+
+.ips-gauge-marker {
+  position: absolute;
+  top: 0;
+  width: 3px;
+  height: 34px;
+  background: var(--color-text-primary);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.ips-gauge-labels {
+  position: relative;
+  height: 36px;
+}
+
+.ips-gauge-college-label {
+  position: absolute;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.ips-gauge-triangle {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 10px solid var(--color-text-primary);
+  margin: 0 auto;
+}
+
+.ips-gauge-value {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  margin-top: 2px;
+}
+
+.ips-gauge-threshold {
+  position: absolute;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  transform: translateX(-50%);
+}
+
+@media (max-width: 480px) {
+  .ips-gauge {
+    max-width: 280px;
+  }
+}
