@@ -337,14 +337,12 @@ export function CollegeCard({ result, address }: CollegeCardProps) {
         </div>
       )}
 
-      {address && (
-        <SectorMap 
-          homeCoords={address.coordinates}
-          college={college}
-          lyceesSecteur1={lyceesSecteur1}
-          lyceesTousSecteurs={TOUS_SECTEURS_LYCEES}
-        />
-      )}
+      <SectorMap
+        homeCoords={address?.coordinates}
+        college={college}
+        lyceesSecteur1={lyceesSecteur1}
+        lyceesTousSecteurs={TOUS_SECTEURS_LYCEES}
+      />
 
       {activeSector === 1 && effectifs.length > 0 && (
         <div className="concurrence-section">

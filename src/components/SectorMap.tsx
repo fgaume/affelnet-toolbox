@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
 });
 
 interface SectorMapProps {
-  homeCoords: [number, number];
+  homeCoords?: [number, number];
   college: CollegeSecteur;
   lyceesSecteur1: LyceeSecteur[];
   lyceesTousSecteurs: LyceeSecteur[];
@@ -73,17 +73,20 @@ function getItineraryUrl(from: [number, number], to: [number, number]) {
 
 export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecteurs }: SectorMapProps) {
   const allCoords: [number, number][] = [
-    homeCoords,
+    ...(homeCoords ? [homeCoords] : []),
     ...(college.coordinates ? [college.coordinates] : []),
     ...lyceesSecteur1.map(l => l.coordinates).filter((c): c is [number, number] => !!c),
     ...lyceesTousSecteurs.map(l => l.coordinates).filter((c): c is [number, number] => !!c)
   ];
 
+  // Center on home if available, otherwise on college, otherwise Paris default
+  const centerCoords: [number, number] = homeCoords ?? college.coordinates ?? [2.3488, 48.8534];
+
   return (
     <div className="sector-map-container">
-      <MapContainer 
-        center={[homeCoords[1], homeCoords[0]]} 
-        zoom={14} 
+      <MapContainer
+        center={[centerCoords[1], centerCoords[0]]}
+        zoom={14}
         scrollWheelZoom={false}
         className="sector-map"
       >
@@ -91,57 +94,65 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
-        <Marker position={[homeCoords[1], homeCoords[0]]} icon={homeIcon}>
-          <Popup>Votre domicile</Popup>
-        </Marker>
+
+        {homeCoords && (
+          <Marker position={[homeCoords[1], homeCoords[0]]} icon={homeIcon}>
+            <Popup>Votre domicile</Popup>
+          </Marker>
+        )}
 
         {college.coordinates && (
           <Marker position={[college.coordinates[1], college.coordinates[0]]} icon={collegeIcon}>
             <Popup>
               <strong>Collège de secteur</strong><br />
               {college.nom}
-              <div className="popup-itinerary">
-                <a href={getItineraryUrl(homeCoords, college.coordinates)} target="_blank" rel="noopener noreferrer">
-                  Voir l'itinéraire
-                </a>
-              </div>
+              {homeCoords && (
+                <div className="popup-itinerary">
+                  <a href={getItineraryUrl(homeCoords, college.coordinates)} target="_blank" rel="noopener noreferrer">
+                    Voir l'itinéraire
+                  </a>
+                </div>
+              )}
             </Popup>
           </Marker>
         )}
 
         {lyceesSecteur1.map(lycee => lycee.coordinates && (
-          <Marker 
-            key={lycee.uai} 
-            position={[lycee.coordinates[1], lycee.coordinates[0]]} 
+          <Marker
+            key={lycee.uai}
+            position={[lycee.coordinates[1], lycee.coordinates[0]]}
             icon={lyceeIcon}
           >
             <Popup>
               <strong>Lycée de secteur 1</strong><br />
               {lycee.nom}
-              <div className="popup-itinerary">
-                <a href={getItineraryUrl(homeCoords, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
-                  Voir l'itinéraire
-                </a>
-              </div>
+              {homeCoords && (
+                <div className="popup-itinerary">
+                  <a href={getItineraryUrl(homeCoords, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
+                    Voir l'itinéraire
+                  </a>
+                </div>
+              )}
             </Popup>
           </Marker>
         ))}
 
         {lyceesTousSecteurs.map(lycee => lycee.coordinates && (
-          <Marker 
-            key={lycee.uai} 
-            position={[lycee.coordinates[1], lycee.coordinates[0]]} 
+          <Marker
+            key={lycee.uai}
+            position={[lycee.coordinates[1], lycee.coordinates[0]]}
             icon={tousSecteursIcon}
           >
             <Popup>
               <strong>Lycée tous secteurs</strong><br />
               {lycee.nom}
-              <div className="popup-itinerary">
-                <a href={getItineraryUrl(homeCoords, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
-                  Voir l'itinéraire
-                </a>
-              </div>
+              {homeCoords && (
+                <div className="popup-itinerary">
+                  <a href={getItineraryUrl(homeCoords, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
+                    Voir l'itinéraire
+                  </a>
+                </div>
+              )}
             </Popup>
           </Marker>
         ))}
@@ -150,7 +161,7 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
       </MapContainer>
       
       <div className="map-legend">
-        <div className="legend-item"><span className="legend-dot home"></span> Domicile</div>
+        {homeCoords && <div className="legend-item"><span className="legend-dot home"></span> Domicile</div>}
         <div className="legend-item"><span className="legend-dot college"></span> Collège</div>
         <div className="legend-item"><span className="legend-dot lycee"></span> Lycée Secteur 1</div>
         <div className="legend-item"><span className="legend-dot tous"></span> Tous secteurs</div>
