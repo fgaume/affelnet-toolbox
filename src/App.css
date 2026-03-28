@@ -112,6 +112,43 @@
   text-decoration: underline;
 }
 
+.input-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.input-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.input-tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.input-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.input-tab svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* Responsive adjustments for iPhone 14 and similar devices */
 @media (max-width: 480px) {
   .app-header {
