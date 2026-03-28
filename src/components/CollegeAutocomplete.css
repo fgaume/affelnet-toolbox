@@ -1,0 +1,130 @@
+.college-autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+.college-autocomplete-container .input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.college-autocomplete-container .school-icon {
+  position: absolute;
+  left: 16px;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.college-autocomplete-container .college-input {
+  width: 100%;
+  padding: 16px 48px;
+  font-size: 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s ease;
+}
+
+.college-autocomplete-container .college-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.college-autocomplete-container .college-input::placeholder {
+  color: var(--color-text-faint);
+}
+
+.college-autocomplete-container .clear-button {
+  position: absolute;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: color 0.2s;
+}
+
+.college-autocomplete-container .clear-button:hover {
+  color: var(--color-text-secondary);
+}
+
+.college-autocomplete-container .clear-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.college-autocomplete-container .suggestions-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  background-color: var(--color-bg-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--color-shadow-lg);
+  z-index: 100;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.college-autocomplete-container .suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background-color 0.15s;
+}
+
+.college-autocomplete-container .suggestion-item:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.college-autocomplete-container .suggestion-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.college-autocomplete-container .loading-text {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .college-autocomplete-container .college-input {
+    padding: 14px 44px;
+    font-size: 16px;
+  }
+
+  .college-autocomplete-container .school-icon {
+    left: 14px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .college-autocomplete-container .clear-button {
+    right: 14px;
+  }
+}
