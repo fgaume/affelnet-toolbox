@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { Address, SectorResult } from '../types';
+import type { Address, College, SectorResult } from '../types';
 import { findCollegeDeSecteur, findCollegeUAI, findLyceesDeSecteur } from '../services/sectorApi';
 import { addToHistory } from '../services/storage';
 
@@ -54,6 +54,39 @@ export function useSectorSearch() {
     }
   }, []);
 
+  const searchByCollege = useCallback(async (college: College) => {
+    setIsLoading(true);
+    setError(null);
+    setResult(null);
+    setSearchedAddress(null);
+
+    try {
+      let lycees = null;
+      let lyceeError: string | undefined;
+      try {
+        lycees = await findLyceesDeSecteur(college.uai);
+      } catch (e) {
+        lyceeError = e instanceof Error ? e.message : 'Lycées de secteur non disponibles';
+      }
+
+      const sectorResult: SectorResult = {
+        college: {
+          nom: college.nom,
+          uai: college.uai,
+        },
+        lycees,
+        lyceeError,
+      };
+
+      setResult(sectorResult);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Erreur lors de la recherche.';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const showResult = useCallback((address: Address, sectorResult: SectorResult) => {
     setResult(sectorResult);
     setSearchedAddress(address);
@@ -72,6 +105,7 @@ export function useSectorSearch() {
     isLoading,
     error,
     searchSector,
+    searchByCollege,
     showResult,
     reset,
   };
