@@ -1,10 +1,11 @@
-import { useCallback } from 'react';
-import type { Address, SearchHistory as SearchHistoryType } from './types';
+import { useState, useCallback } from 'react';
+import type { Address, College, SearchHistory as SearchHistoryType } from './types';
 import { useSectorSearch } from './hooks/useSectorSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
 import { useTheme } from './hooks/useTheme';
 import {
   AddressInput,
+  CollegeAutocomplete,
   CollegeCard,
   SearchHistory,
   LoadingState,
@@ -13,17 +14,27 @@ import {
 } from './components';
 import './App.css';
 
+type InputMode = 'address' | 'college';
+
 function App() {
-  const { result, searchedAddress, isLoading, error, searchSector, showResult, reset } =
+  const { result, searchedAddress, isLoading, error, searchSector, searchByCollege, showResult, reset } =
     useSectorSearch();
   const { history, refresh, clearHistory, removeEntry } = useSearchHistory();
   const { mode, setMode } = useTheme();
+  const [inputMode, setInputMode] = useState<InputMode>('address');
 
   const handleAddressSelect = useCallback(
     (address: Address) => {
       searchSector(address);
     },
     [searchSector]
+  );
+
+  const handleCollegeSelect = useCallback(
+    (college: College) => {
+      searchByCollege(college);
+    },
+    [searchByCollege]
   );
 
   const handleHistorySelect = useCallback(
@@ -56,16 +67,48 @@ function App() {
 
       <main className="app-main">
         {!result && !isLoading && (
-          <AddressInput onAddressSelect={handleAddressSelect} disabled={isLoading} />
+          <>
+            <div className="input-tabs">
+              <button
+                className={`input-tab${inputMode === 'address' ? ' active' : ''}`}
+                onClick={() => setInputMode('address')}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                Par adresse
+              </button>
+              <button
+                className={`input-tab${inputMode === 'college' ? ' active' : ''}`}
+                onClick={() => setInputMode('college')}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
+                </svg>
+                Par collège
+              </button>
+            </div>
+
+            {inputMode === 'address' && (
+              <AddressInput onAddressSelect={handleAddressSelect} disabled={isLoading} />
+            )}
+            {inputMode === 'college' && (
+              <CollegeAutocomplete
+                onSelect={handleCollegeSelect}
+                placeholder="Nom de votre collège de secteur..."
+                disabled={isLoading}
+              />
+            )}
+          </>
         )}
 
         {isLoading && <LoadingState />}
 
         {error && !isLoading && !result && <ErrorMessage message={error} />}
 
-        {result && searchedAddress && (
+        {result && (
           <>
-            <CollegeCard result={result} address={searchedAddress} />
+            <CollegeCard result={result} address={searchedAddress ?? undefined} />
             <button className="new-search-button" onClick={handleNewSearch}>
               <svg
                 viewBox="0 0 24 24"

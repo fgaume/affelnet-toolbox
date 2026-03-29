@@ -5,3 +5,5 @@ export { LoadingState } from './LoadingState';
 export { ErrorMessage } from './ErrorMessage';
 export { ThemeToggle } from './ThemeToggle';
 export { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
+export { CollegeAutocomplete } from './CollegeAutocomplete';
+export { IpsGauge } from './IpsGauge';

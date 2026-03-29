@@ -75,3 +75,13 @@ export interface ApiAddressResponse {
   query: string;
   limit: number;
 }
+
+export interface College {
+  uai: string;
+  nom: string;
+}
+
+export interface IpsInfo {
+  ips: number;
+  bonus: number;
+}

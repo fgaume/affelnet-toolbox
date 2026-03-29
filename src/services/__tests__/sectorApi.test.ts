@@ -42,7 +42,7 @@ describe('findCollegeUAI', () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        features: [{ attributes: { UAI: '0752536Z', Nom: 'VOLTAIRE', X: 2.377, Y: 48.863, secteur: 'Tête' } }],
+        features: [{ attributes: { UAI: '0752536Z', Nom: 'VOLTAIRE', secteur: 'Tête' }, geometry: { x: 2.377, y: 48.863 } }],
       }),
     });
 
@@ -82,9 +82,9 @@ describe('findLyceesDeSecteur', () => {
       ok: true,
       json: async () => ({
         features: [
-          { attributes: { UAI: '0750676C', Nom: 'DORIAN', secteur: '1', X: 2.39, Y: 48.85 } },
-          { attributes: { UAI: '0750652B', Nom: 'CHARLEMAGNE', secteur: '1', X: 2.36, Y: 48.85 } },
-          { attributes: { UAI: '0750711R', Nom: 'BERGSON', secteur: '2', X: 2.37, Y: 48.88 } },
+          { attributes: { UAI: '0750676C', Nom: 'DORIAN', secteur: '1' }, geometry: { x: 2.39, y: 48.85 } },
+          { attributes: { UAI: '0750652B', Nom: 'CHARLEMAGNE', secteur: '1' }, geometry: { x: 2.36, y: 48.85 } },
+          { attributes: { UAI: '0750711R', Nom: 'BERGSON', secteur: '2' }, geometry: { x: 2.37, y: 48.88 } },
         ],
       }),
     });
@@ -97,7 +97,7 @@ describe('findLyceesDeSecteur', () => {
 
     const calledUrl = mockFetch.mock.calls[0][0] as string;
     expect(calledUrl).toContain('0752536Z');
-    expect(calledUrl).toContain("secteur%3C%3E'Tete'");
+    expect(calledUrl).toContain("secteur%3C%3E'T%C3%AAte'");
   });
 
   it('returns empty array when no lycees found', async () => {
