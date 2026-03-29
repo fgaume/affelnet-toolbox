@@ -1,26 +1,27 @@
 .grade-input-form {
-  background: var(--bg-card, #ffffff);
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--color-shadow-sm);
   margin-bottom: 2rem;
+  border: 1px solid var(--color-border);
 }
 
 .grade-form-header {
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border-color, #eee);
+  border-bottom: 1px solid var(--color-border);
   padding-bottom: 1rem;
 }
 
 .grade-form-header h3 {
   margin: 0 0 0.5rem 0;
-  color: var(--text-primary, #1a1a1a);
+  color: var(--color-text-primary);
 }
 
 .grade-form-header .subtitle {
   margin: 0;
   font-size: 0.9rem;
-  color: var(--text-secondary, #666);
+  color: var(--color-text-secondary);
 }
 
 .disciplinary-fields {
@@ -30,15 +31,16 @@
 }
 
 .field-section {
-  background: var(--bg-subtle, #f9f9f9);
+  background: var(--color-bg-subtle);
   padding: 1rem;
   border-radius: 8px;
+  border: 1px solid var(--color-border-subtle);
 }
 
 .field-section h4 {
   margin: 0 0 1rem 0;
   font-size: 1rem;
-  color: var(--primary-color, #2563eb);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -57,26 +59,28 @@
 .subject-input-group label {
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--text-primary, #333);
+  color: var(--color-text-primary);
 }
 
 .subject-input-group input {
   padding: 0.6rem;
-  border: 1px solid var(--border-color, #ccc);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 1rem;
   width: 100%;
-  transition: border-color 0.2s;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .subject-input-group input:focus {
   outline: none;
-  border-color: var(--primary-color, #2563eb);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
 }
 
 .subject-input-group input::placeholder {
-  color: #bbb;
+  color: var(--color-text-faint);
 }
 
 .form-actions {
@@ -87,8 +91,8 @@
 
 .btn-reset {
   background: none;
-  border: 1px solid #dc2626;
-  color: #dc2626;
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
@@ -97,7 +101,7 @@
 }
 
 .btn-reset:hover {
-  background: #fef2f2;
+  background: var(--color-error-bg);
 }
 
 /* Mobile adjustments */
