@@ -156,7 +156,7 @@ test.describe('Admission Chances Integration', () => {
     // If we want "Élevée", we need a high score.
     
     // Wait for the status label
-    const statusLabel = page.locator('.chance-status');
+    const statusLabel = page.locator('.chance-status').first();
     await expect(statusLabel).toBeVisible();
     
     // If the score is low (e.g. only one grade), it might be "Faible"
