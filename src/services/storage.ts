@@ -1,7 +1,13 @@
-import type { SectorResult, Address, SearchHistory } from '../types';
+import type { SectorResult, Address, SearchHistory, UserGrades, UserScore } from '../types';
 
 const STORAGE_KEY = 'college-secteur-history';
 const STORAGE_VERSION = 2;
+
+const GRADES_KEY = 'affelnet-user-grades';
+const GRADES_VERSION = 1;
+
+const SCORE_KEY = 'affelnet-user-score';
+const SCORE_VERSION = 1;
 
 function isValidHistory(data: unknown): data is SearchHistory[] {
   if (!Array.isArray(data)) return false;
@@ -70,4 +76,65 @@ export function removeFromHistory(id: string): void {
   const history = getSearchHistory();
   const filtered = history.filter((h) => h.id !== id);
   saveSearchHistory(filtered);
+}
+
+export function getUserGrades(): UserGrades | null {
+  try {
+    const stored = localStorage.getItem(GRADES_KEY);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+
+    if (parsed.version !== GRADES_VERSION) {
+      localStorage.removeItem(GRADES_KEY);
+      return null;
+    }
+
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+export function saveUserGrades(grades: UserGrades): void {
+  try {
+    localStorage.setItem(
+      GRADES_KEY,
+      JSON.stringify({ version: GRADES_VERSION, data: grades })
+    );
+  } catch (error) {
+    console.error('Erreur sauvegarde notes:', error);
+  }
+}
+
+export function getUserScore(): UserScore | null {
+  try {
+    const stored = localStorage.getItem(SCORE_KEY);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+
+    if (parsed.version !== SCORE_VERSION) {
+      localStorage.removeItem(SCORE_KEY);
+      return null;
+    }
+
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+export function saveUserScore(score: UserScore): void {
+  try {
+    localStorage.setItem(
+      SCORE_KEY,
+      JSON.stringify({ version: SCORE_VERSION, data: score })
+    );
+  } catch (error) {
+    console.error('Erreur sauvegarde score:', error);
+  }
+}
+
+export function clearScoreData(): void {
+  localStorage.removeItem(GRADES_KEY);
+  localStorage.removeItem(SCORE_KEY);
 }
