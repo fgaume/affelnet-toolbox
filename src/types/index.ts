@@ -129,8 +129,17 @@ export interface ScoreDetail {
 }
 
 export interface UserScore {
-  totalScore: number;
+  totalScore: number; // Academic score only (max 38400)
   details: Record<DisciplinaryField, ScoreDetail>;
+}
+
+export interface FinalScores {
+  academicScore: number;
+  ipsBonus: number;
+  boursierBonus: number;
+  secteur1: number;
+  secteur2: number;
+  secteur3: number;
 }
 
 export interface AcademicStatsResponse {

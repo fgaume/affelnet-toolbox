@@ -5,8 +5,15 @@ import type {
   UserScore,
   Subject,
   ScoreDetail,
+  FinalScores,
 } from '../types';
 import { DISCIPLINARY_FIELDS } from '../types';
+
+export const GEO_BONUS = {
+  SECTEUR_1: 32640,
+  SECTEUR_2: 17760,
+  SECTEUR_3: 16800,
+} as const;
 
 const FIELD_MAPPING: Record<DisciplinaryField, Subject[]> = {
   FRANCAIS: ['FRANCAIS'],
@@ -81,5 +88,20 @@ export function calculateAffelnetScore(
   return {
     totalScore: weightedSum * 2,
     details,
+  };
+}
+
+export function calculateFinalScores(
+  academicScore: number,
+  ipsBonus: number = 0,
+  boursierBonus: number = 0
+): FinalScores {
+  return {
+    academicScore,
+    ipsBonus,
+    boursierBonus,
+    secteur1: academicScore + ipsBonus + boursierBonus + GEO_BONUS.SECTEUR_1,
+    secteur2: academicScore + ipsBonus + boursierBonus + GEO_BONUS.SECTEUR_2,
+    secteur3: academicScore + ipsBonus + boursierBonus + GEO_BONUS.SECTEUR_3,
   };
 }

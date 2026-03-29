@@ -2,10 +2,8 @@ import { useReducer, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts';
-import type { UserScore } from '../types';
 import { fetchNiveauScolaire, fetchMedianTBByYear, type NiveauScolaireResult } from '../services/niveauScolaireApi';
 import { fetchIps, fetchMedianIpsByYear, type IpsResult } from '../services/ipsApi';
-import { fetchSeuils } from '../services/seuilsApi';
 import './LyceeDetail.css';
 
 interface LyceeInfo {
@@ -16,7 +14,6 @@ interface LyceeInfo {
 
 interface LyceesIndicateursProps {
   lycees: LyceeInfo[];
-  userScore?: UserScore | null;
 }
 
 interface LyceeData {
@@ -40,12 +37,11 @@ interface FetchState {
   data: Map<string, LyceeData>;
   medianTB: Map<string, number>;
   medianIPS: Map<string, number>;
-  seuils: Map<string, number>;
 }
 
 type FetchAction =
   | { type: 'FETCH_START' }
-  | { type: 'FETCH_SUCCESS'; data: Map<string, LyceeData>; medianTB: Map<string, number>; medianIPS: Map<string, number>; seuils: Map<string, number> };
+  | { type: 'FETCH_SUCCESS'; data: Map<string, LyceeData>; medianTB: Map<string, number>; medianIPS: Map<string, number> };
 
 function fetchReducer(state: FetchState, action: FetchAction): FetchState {
   switch (action.type) {
@@ -57,7 +53,6 @@ function fetchReducer(state: FetchState, action: FetchAction): FetchState {
         data: action.data,
         medianTB: action.medianTB,
         medianIPS: action.medianIPS,
-        seuils: action.seuils,
       };
   }
 }
@@ -67,10 +62,9 @@ const INITIAL_STATE: FetchState = {
   data: new Map(),
   medianTB: new Map(),
   medianIPS: new Map(),
-  seuils: new Map(),
 };
 
-export function LyceesIndicateurs({ lycees, userScore }: LyceesIndicateursProps) {
+export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   const [state, dispatch] = useReducer(fetchReducer, INITIAL_STATE);
 
   useEffect(() => {
@@ -92,11 +86,10 @@ export function LyceesIndicateurs({ lycees, userScore }: LyceesIndicateursProps)
           };
         }),
       ),
-      // Fetch medians and thresholds
+      // Fetch medians
       fetchMedianTBByYear(),
       fetchMedianIpsByYear(),
-      fetchSeuils(),
-    ]).then(([results, tbMedians, ipsMedians, seuils]) => {
+    ]).then(([results, tbMedians, ipsMedians]) => {
       if (cancelled) return;
       const map = new Map<string, LyceeData>();
       for (const r of results) {
@@ -109,14 +102,13 @@ export function LyceesIndicateurs({ lycees, userScore }: LyceesIndicateursProps)
         data: map,
         medianTB: tbMedians,
         medianIPS: ipsMedians,
-        seuils: seuils,
       });
     });
 
     return () => { cancelled = true; };
   }, [lycees]);
 
-  const { loading, data, medianTB, medianIPS, seuils } = state;
+  const { loading, data, medianTB, medianIPS } = state;
 
   if (loading) {
     return (
@@ -185,7 +177,7 @@ export function LyceesIndicateurs({ lycees, userScore }: LyceesIndicateursProps)
   const hasTB = tbChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.niveau);
   const hasIPS = ipsChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.ips);
 
-  if (!hasTB && !hasIPS && !userScore) return null;
+  if (!hasTB && !hasIPS) return null;
 
   const formatName = (key: string) => {
     if (key === MEDIAN_KEY) return 'Médiane Paris';
@@ -195,38 +187,6 @@ export function LyceesIndicateurs({ lycees, userScore }: LyceesIndicateursProps)
 
   return (
     <div className="lycee-detail">
-      {userScore && (
-        <div className="admission-chances">
-          <h5>Chances d'admission</h5>
-          <div className="chances-list">
-            {lycees.map((l) => {
-              const seuil = seuils.get(l.uai);
-              let statusLabel = 'Seuil inconnu';
-              let statusClass = 'unknown';
-
-              if (seuil) {
-                if (userScore.totalScore >= seuil) {
-                  statusLabel = 'Élevée';
-                  statusClass = 'high';
-                } else {
-                  statusLabel = 'Faible';
-                  statusClass = 'low';
-                }
-              }
-
-              return (
-                <div key={l.uai} className="chance-item">
-                  <span className="chance-lycee-name">{shortName(l.nom)}</span>
-                  <span className={`chance-status ${statusClass}`}>
-                    {statusLabel}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {hasTB && (
         <div className="lycee-detail-chart">
           <h5>Taux de mentions TB au Bac (%)</h5>

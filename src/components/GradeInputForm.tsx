@@ -101,7 +101,6 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
     <div className="grade-input-form">
       <div className="grade-form-header">
         <h3>Moyennes de 3ème</h3>
-        <p className="subtitle">Saisissez vos moyennes pour chaque matière.</p>
       </div>
 
       <div className="disciplinary-fields">

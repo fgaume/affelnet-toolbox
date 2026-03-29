@@ -122,9 +122,9 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
     const francaisInput = page.locator('label:has-text("Français") + input').first();
     await francaisInput.fill('16');
     
-    const totalScoreValue = page.locator('.total-score-value');
-    await expect(totalScoreValue).not.toContainText('--');
-    const initialScoreText = await totalScoreValue.innerText();
+    const sector1Score = page.locator('.secteur-1 .score-value');
+    await expect(sector1Score).toBeVisible();
+    const initialScoreText = await sector1Score.innerText();
 
     // 2. Switch to Search tab
     await page.click('button:has-text("Par adresse")');
@@ -132,45 +132,23 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
 
     // 3. Switch back to Score tab
     await page.click('button:has-text("Calculer son score")');
-    await expect(page.locator('.total-score-value')).toContainText(initialScoreText);
+    await expect(page.locator('.secteur-1 .score-value')).toContainText(initialScoreText);
   });
 
-  test('should show admission chances in search results after score is calculated', async ({ page }) => {
-    // 1. Calculate a high score
+  test('should show results summary after score is calculated', async ({ page }) => {
+    // 1. Calculate a score
     await page.click('button:has-text("Calculer son score")');
     
-    // Fill all subjects with 20 to get a very high score
-    const inputs = page.locator('input[type="number"]');
-    const count = await inputs.count();
-    for (let i = 0; i < count; i++) {
-      await inputs.nth(i).fill('20');
-    }
+    // Fill some subjects to get a high score
+    const francaisInput = page.locator('label:has-text("Français") + input').first();
+    await francaisInput.fill('20');
+    const mathInput = page.locator('label:has-text("Mathématiques") + input').first();
+    await mathInput.fill('20');
     
-    await expect(page.locator('.total-score-value')).not.toContainText('--');
-    const finalScore = await page.locator('.total-score-value').innerText();
+    await expect(page.locator('.secteur-1 .score-value')).toBeVisible();
 
-    // 2. Search for an address
-    await page.click('button:has-text("Par adresse")');
-    const addressInput = page.locator('input[placeholder="Saisissez votre adresse..."]');
-    await addressInput.fill('12 passage Saint-Ambroise');
-    await page.waitForTimeout(500);
-    const suggestion = page.locator('.suggestion-item').first();
-    await suggestion.click();
-
-    // 3. Verify CollegeCard and admission chances
-    await expect(page.locator('.college-card')).toBeVisible();
-    await expect(page.locator('.admission-chances')).toBeVisible();
-    
-    // 4. Check for a specific lycée in the list (ARAGO from our mock)
-    await expect(page.locator('.chance-item:has-text("ARAGO")')).toBeVisible();
-    
-    // 5. Verify the "Collèges en concurrence" section also has ARAGO
-    await expect(page.locator('.concurrence-lycee-btn:has-text("ARAGO")')).toBeVisible();
-    
-    // 6. Click on it to expand
-    await page.locator('.concurrence-lycee-btn:has-text("ARAGO")').click();
-    
-    // 7. Verify colleges list is shown (it will be empty because we didn't mock collegesConcurrenceApi but the button should stay expanded)
-    await expect(page.locator('.concurrence-lycee-btn:has-text("ARAGO")')).toHaveClass(/expanded/);
+    // 2. Verify summary breakdown exists
+    await expect(page.locator('.score-summary-breakdown')).toBeVisible();
+    await expect(page.locator('.summary-item:has-text("Score scolaire")')).toBeVisible();
   });
 });

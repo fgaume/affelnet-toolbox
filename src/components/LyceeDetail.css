@@ -57,62 +57,6 @@
   border-top: 1px solid var(--color-border);
 }
 
-.admission-chances {
-  margin: 16px 0;
-  padding: 12px;
-  background: var(--color-bg-subtle);
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-}
-
-.admission-chances h5 {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin: 0 0 10px 0;
-}
-
-.chances-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.chance-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-}
-
-.chance-lycee-name {
-  color: var(--color-text-primary);
-  font-weight: 500;
-}
-
-.chance-status {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.chance-status.high {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.chance-status.low {
-  background: var(--color-error-bg);
-  color: var(--color-error-text);
-}
-
-.chance-status.unknown {
-  background: var(--color-border);
-  color: var(--color-text-muted);
-}
-
 .lycee-detail-chart h5 {
   font-size: 13px;
   font-weight: 500;

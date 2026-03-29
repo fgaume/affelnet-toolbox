@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { SectorResult, LyceeSecteur, Address, UserScore } from '../types';
+import type { SectorResult, LyceeSecteur, Address } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
 import { SectorMap } from './SectorMap';
@@ -25,10 +25,9 @@ const DIFFICULTY_HARD: AdmissionDifficulty = {
 interface CollegeCardProps {
   result: SectorResult;
   address?: Address;
-  userScore?: UserScore | null;
 }
 
-export function CollegeCard({ result, address, userScore }: CollegeCardProps) {
+export function CollegeCard({ result, address }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
@@ -106,7 +105,6 @@ export function CollegeCard({ result, address, userScore }: CollegeCardProps) {
           effectifsLoading={effectifsLoading}
           requestedCount={requestedCount}
           difficulties={difficulties}
-          userScore={userScore}
           uaiCollegeUtilisateur={college.uai}
         />
       )}
