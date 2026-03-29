@@ -8,7 +8,7 @@
 
 ## Phase 2 : Interface Utilisateur
 **Plans:** 3 plans
-- [ ] 02-05-PLAN.md — GradeInputForm component
+- [x] 02-05-PLAN.md — GradeInputForm component
 - [ ] 02-06-PLAN.md — ScoreDisplay component
 - [ ] 02-07-PLAN.md — Integration in App.tsx
 
