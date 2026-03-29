@@ -2,6 +2,7 @@ import { useReducer, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts';
+import type { UserScore } from '../types';
 import { fetchNiveauScolaire, fetchMedianTBByYear, type NiveauScolaireResult } from '../services/niveauScolaireApi';
 import { fetchIps, fetchMedianIpsByYear, type IpsResult } from '../services/ipsApi';
 import './LyceeDetail.css';
@@ -14,6 +15,7 @@ interface LyceeInfo {
 
 interface LyceesIndicateursProps {
   lycees: LyceeInfo[];
+  userScore?: UserScore | null;
 }
 
 interface LyceeData {
@@ -54,7 +56,7 @@ function fetchReducer(_state: FetchState, action: FetchAction): FetchState {
 
 const INITIAL_STATE: FetchState = { loading: true, data: new Map(), medianTB: new Map(), medianIPS: new Map() };
 
-export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
+export function LyceesIndicateurs({ lycees, userScore }: LyceesIndicateursProps) {
   const [state, dispatch] = useReducer(fetchReducer, INITIAL_STATE);
 
   useEffect(() => {

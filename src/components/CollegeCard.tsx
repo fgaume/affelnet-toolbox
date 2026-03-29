@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { SectorResult, LyceeSecteur, Address, College, IpsInfo } from '../types';
+import type { SectorResult, LyceeSecteur, Address, College, IpsInfo, UserScore } from '../types';
 import { fetchCollegeIps } from '../services/collegeApi';
 import { CollegeAutocomplete } from './CollegeAutocomplete';
 import { IpsGauge } from './IpsGauge';
@@ -29,9 +29,10 @@ const DIFFICULTY_HARD: AdmissionDifficulty = {
 interface CollegeCardProps {
   result: SectorResult;
   address?: Address;
+  userScore?: UserScore | null;
 }
 
-export function CollegeCard({ result, address }: CollegeCardProps) {
+export function CollegeCard({ result, address, userScore }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [activeSector, setActiveSector] = useState(1);
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
@@ -281,6 +282,7 @@ export function CollegeCard({ result, address }: CollegeCardProps) {
           {activeSector === 1 && effectifs.length > 0 && (
             <LyceesIndicateurs
               lycees={lyceesIndicateursData}
+              userScore={userScore}
             />
           )}
           {activeSector !== 1 && (

@@ -164,7 +164,11 @@ function App() {
 
             {result && (
               <>
-                <CollegeCard result={result} address={searchedAddress ?? undefined} />
+                <CollegeCard
+                  result={result}
+                  address={searchedAddress ?? undefined}
+                  userScore={score}
+                />
                 <button className="new-search-button" onClick={handleNewSearch}>
                   <svg
                     viewBox="0 0 24 24"
