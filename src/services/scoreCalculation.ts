@@ -83,6 +83,3 @@ export function calculateAffelnetScore(
     details,
   };
 }
-
-// Export as calculateScore as well to match prompt requirement
-export const calculateScore = calculateAffelnetScore;

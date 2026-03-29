@@ -176,9 +176,9 @@ export function CollegesConcurrence({ uaiLycee, uaiCollegeUtilisateur }: College
           <Tooltip content={<CustomTooltip />} />
           {uniqueColleges.map((c) => (
             <Bar key={c.uai} dataKey={c.uai} stackId="stack" name={c.nom}>
-              {stackedData.map((_, index) => (
+              {stackedData.map((group) => (
                 <Cell
-                  key={index}
+                  key={group.bonusIps as number}
                   fill={BONUS_COLORS[c.bonusIps] ?? UNKNOWN_COLOR}
                   stroke={isUserCollege(c.uai) ? USER_STROKE : 'none'}
                   strokeWidth={isUserCollege(c.uai) ? USER_STROKE_WIDTH : 0}
