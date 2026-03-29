@@ -7,15 +7,9 @@
 }
 
 .sector-map {
-  height: 400px;
   width: 100%;
+  aspect-ratio: 1 / 1;
   z-index: 1;
-}
-
-@media (min-width: 1024px) {
-  .sector-map {
-    height: 500px;
-  }
 }
 
 .popup-itinerary {
@@ -63,6 +57,12 @@
 .legend-dot.lycee { background-color: #9333ea; }
 .legend-dot.tous { background-color: #ea580c; }
 
+/* Override Leaflet default divIcon styles (white bg + border) */
+.custom-marker-icon {
+  background: none !important;
+  border: none !important;
+}
+
 /* Only filter the map tiles in dark mode, not the whole container */
 [data-theme='dark'] .leaflet-tile-pane {
   filter: grayscale(1) invert(1) contrast(0.9) opacity(0.8);
@@ -74,10 +74,6 @@
 }
 
 @media (max-width: 640px) {
-  .sector-map {
-    height: 300px;
-  }
-  
   .map-legend {
     gap: 0.5rem;
     font-size: 0.75rem;

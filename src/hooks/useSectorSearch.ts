@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { Address, College, SectorResult } from '../types';
-import { findCollegeDeSecteur, findCollegeUAI, findLyceesDeSecteur } from '../services/sectorApi';
+import { findCollegeDeSecteur, findCollegeUAI, findLyceesDeSecteur, findCollegeCoordinates } from '../services/sectorApi';
 import { addToHistory } from '../services/storage';
 
 export function useSectorSearch() {
@@ -69,10 +69,14 @@ export function useSectorSearch() {
         lyceeError = e instanceof Error ? e.message : 'Lycées de secteur non disponibles';
       }
 
+      // Fetch college coordinates for the map
+      const coordinates = await findCollegeCoordinates(college.uai);
+
       const sectorResult: SectorResult = {
         college: {
           nom: college.nom,
           uai: college.uai,
+          coordinates,
         },
         lycees,
         lyceeError,

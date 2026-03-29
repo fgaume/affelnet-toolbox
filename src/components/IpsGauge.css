@@ -46,13 +46,6 @@
   margin: 0 auto;
 }
 
-.ips-gauge-value {
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--color-text-primary);
-  margin-top: 2px;
-}
-
 .ips-gauge-threshold {
   position: absolute;
   font-size: 10px;

@@ -56,10 +56,9 @@ export function IpsGauge({ ips }: IpsGaugeProps) {
 
       {/* Labels below the gauge */}
       <div className="ips-gauge-labels">
-        {/* College IPS marker: triangle + value */}
+        {/* College IPS marker: triangle only */}
         <div className="ips-gauge-college-label" style={{ left: `${markerPercent}%` }}>
           <div className="ips-gauge-triangle" />
-          <div className="ips-gauge-value">{ips.toFixed(1).replace('.', ',')}</div>
         </div>
 
         {/* Threshold values */}

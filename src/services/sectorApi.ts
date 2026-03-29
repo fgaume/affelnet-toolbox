@@ -48,8 +48,9 @@ export async function findCollegeUAI(nomCollege: string): Promise<{ uai: string;
   const normalizedName = normalizeCollegeName(nomCollege);
 
   const params = new URLSearchParams({
-    outFields: 'UAI,Nom,X,Y,secteur',
-    returnGeometry: 'false',
+    outFields: 'UAI,Nom,secteur',
+    returnGeometry: 'true',
+    outSR: '4326',
     f: 'pjson',
     where: `Nom like '%${normalizedName}' and secteur='Tête'`,
   });
@@ -62,33 +63,53 @@ export async function findCollegeUAI(nomCollege: string): Promise<{ uai: string;
   if (!data.features?.length) {
     // Fallback search without secteur='Tête' if not found
     const fallbackParams = new URLSearchParams({
-      outFields: 'Réseau,Nom_Tete,X,Y',
-      returnGeometry: 'false',
+      outFields: 'Réseau,Nom_Tete',
+      returnGeometry: 'true',
+      outSR: '4326',
       f: 'pjson',
       returnDistinctValues: 'true',
       where: `Nom_Tete like '%${normalizedName}'`,
     });
     const fallbackResponse = await fetch(`${ARCGIS_BASE}?${fallbackParams}`);
     const fallbackData = await fallbackResponse.json();
-    
+
     if (!fallbackData.features?.length) {
       throw new Error('Collège non référencé dans l\'annuaire Affelnet');
     }
-    
-    const attr = fallbackData.features[0].attributes;
-    return { 
-      uai: attr.Réseau as string,
-      coordinates: attr.X && attr.Y ? [attr.X, attr.Y] : undefined 
+
+    const feat = fallbackData.features[0];
+    const geom = feat.geometry;
+    return {
+      uai: feat.attributes.Réseau as string,
+      coordinates: geom?.x != null && geom?.y != null ? [geom.x, geom.y] : undefined
     };
   }
 
-  const attributes = data.features[0].attributes;
-  const uai = attributes.UAI as string;
-  const coordinates: [number, number] | undefined = attributes.X && attributes.Y 
-    ? [attributes.X, attributes.Y] 
+  const feat = data.features[0];
+  const uai = feat.attributes.UAI as string;
+  const geom = feat.geometry;
+  const coordinates: [number, number] | undefined = geom?.x != null && geom?.y != null
+    ? [geom.x, geom.y]
     : undefined;
 
   return { uai, coordinates };
+}
+
+/** Look up college coordinates by UAI from ArcGIS */
+export async function findCollegeCoordinates(uai: string): Promise<[number, number] | undefined> {
+  const params = new URLSearchParams({
+    outFields: 'UAI',
+    returnGeometry: 'true',
+    outSR: '4326',
+    f: 'pjson',
+    where: `UAI='${uai}' and secteur='Tête'`,
+  });
+  const response = await fetch(`${ARCGIS_BASE}?${params}`);
+  if (!response.ok) return undefined;
+  const data = await response.json();
+  if (!data.features?.length) return undefined;
+  const geom = data.features[0].geometry;
+  return geom?.x != null && geom?.y != null ? [geom.x, geom.y] : undefined;
 }
 
 // ----- TEMPORARY: Rabelais closure workaround (remove when Rectorat API is updated) -----
@@ -131,8 +152,9 @@ function applyRabelaisClosure(lycees: LyceeSecteur[], uaiCollege: string): Lycee
 
 export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSecteur[]> {
   const params = new URLSearchParams({
-    outFields: 'UAI,Nom,secteur,X,Y',
-    returnGeometry: 'false',
+    outFields: 'UAI,Nom,secteur',
+    returnGeometry: 'true',
+    outSR: '4326',
     f: 'pjson',
     orderByFields: 'secteur',
   });
@@ -146,11 +168,11 @@ export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSect
   const data = await response.json();
 
   const lycees = (data.features || []).map(
-    (f: { attributes: { UAI: string; Nom: string; secteur: string; X?: number; Y?: number } }) => ({
+    (f: { attributes: { UAI: string; Nom: string; secteur: string }; geometry?: { x: number; y: number } }) => ({
       uai: f.attributes.UAI,
       nom: f.attributes.Nom,
       secteur: parseInt(f.attributes.secteur, 10),
-      coordinates: f.attributes.X && f.attributes.Y ? [f.attributes.X, f.attributes.Y] as [number, number] : undefined,
+      coordinates: f.geometry?.x != null && f.geometry?.y != null ? [f.geometry.x, f.geometry.y] as [number, number] : undefined,
     })
   );
 
