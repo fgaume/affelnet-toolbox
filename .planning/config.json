@@ -1,0 +1,14 @@
+{
+  "workflow": "gsd",
+  "preferences": {
+    "tdd": true,
+    "styling": "vanilla-css",
+    "documentation": "markdown",
+    "subagents": true
+  },
+  "project": {
+    "id": "affelnet-score-scolaire",
+    "name": "Affelnet Score Scolaire",
+    "root": "/Users/fred/Code/college/affelnet-no-socle"
+  }
+}
