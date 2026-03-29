@@ -31,7 +31,7 @@ const homeIcon = L.divIcon({
 });
 
 const collegeIcon = L.divIcon({
-  html: `<svg viewBox="0 0 24 24" fill="#16a34a" width="30" height="30" stroke="white" stroke-width="1.5"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>`,
+  html: `<svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#16a34a" stroke="white" stroke-width="1.5"/><circle cx="12" cy="9" r="3.5" fill="white"/></svg>`,
   className: 'custom-marker-icon',
   iconSize: [30, 30],
   iconAnchor: [15, 30],
@@ -72,6 +72,9 @@ function getItineraryUrl(from: [number, number], to: [number, number]) {
 }
 
 export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecteurs }: SectorMapProps) {
+  // Itinerary origin: home if available, otherwise college
+  const itineraryOrigin: [number, number] | undefined = homeCoords ?? college.coordinates;
+  const itineraryLabel = homeCoords ? 'depuis le domicile' : `depuis le collège ${college.nom}`;
   const allCoords: [number, number][] = [
     ...(homeCoords ? [homeCoords] : []),
     ...(college.coordinates ? [college.coordinates] : []),
@@ -109,7 +112,7 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
               {homeCoords && (
                 <div className="popup-itinerary">
                   <a href={getItineraryUrl(homeCoords, college.coordinates)} target="_blank" rel="noopener noreferrer">
-                    Voir l'itinéraire
+                    Itinéraire {itineraryLabel}
                   </a>
                 </div>
               )}
@@ -126,10 +129,15 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
             <Popup>
               <strong>Lycée de secteur 1</strong><br />
               {lycee.nom}
-              {homeCoords && (
+              <div className="popup-itinerary">
+                <a href={`https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=${lycee.uai}`} target="_blank" rel="noopener noreferrer">
+                  Voir la fiche officielle
+                </a>
+              </div>
+              {itineraryOrigin && (
                 <div className="popup-itinerary">
-                  <a href={getItineraryUrl(homeCoords, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
-                    Voir l'itinéraire
+                  <a href={getItineraryUrl(itineraryOrigin, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
+                    Itinéraire {itineraryLabel}
                   </a>
                 </div>
               )}
@@ -146,10 +154,15 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
             <Popup>
               <strong>Lycée tous secteurs</strong><br />
               {lycee.nom}
-              {homeCoords && (
+              <div className="popup-itinerary">
+                <a href={`https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=${lycee.uai}`} target="_blank" rel="noopener noreferrer">
+                  Voir la fiche officielle
+                </a>
+              </div>
+              {itineraryOrigin && (
                 <div className="popup-itinerary">
-                  <a href={getItineraryUrl(homeCoords, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
-                    Voir l'itinéraire
+                  <a href={getItineraryUrl(itineraryOrigin, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
+                    Itinéraire {itineraryLabel}
                   </a>
                 </div>
               )}

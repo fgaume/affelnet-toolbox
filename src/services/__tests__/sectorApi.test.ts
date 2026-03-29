@@ -97,7 +97,7 @@ describe('findLyceesDeSecteur', () => {
 
     const calledUrl = mockFetch.mock.calls[0][0] as string;
     expect(calledUrl).toContain('0752536Z');
-    expect(calledUrl).toContain("secteur%3C%3E'Tete'");
+    expect(calledUrl).toContain("secteur%3C%3E'T%C3%AAte'");
   });
 
   it('returns empty array when no lycees found', async () => {

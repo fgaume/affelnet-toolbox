@@ -35,8 +35,8 @@ export function useSectorSearch() {
       }
 
       const sectorResult: SectorResult = {
-        college: { 
-          nom: collegeName, 
+        college: {
+          nom: collegeName,
           uai: collegeUAI,
           coordinates: collegeCoordinates
         },

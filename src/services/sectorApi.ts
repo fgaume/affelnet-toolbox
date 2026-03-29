@@ -159,7 +159,7 @@ export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSect
     orderByFields: 'secteur',
   });
   // Manually append 'where' to preserve single quotes unencoded (URLSearchParams encodes ' as %27)
-  const whereClause = `secteur<>'Tete' and Réseau='${uaiCollege}'`;
+  const whereClause = `secteur<>'Tête' and Réseau='${uaiCollege}'`;
   const url = `${ARCGIS_BASE}?${params}&where=${encodeURIComponent(whereClause).replace(/%27/g, "'")}`;
 
   const response = await fetch(url);
