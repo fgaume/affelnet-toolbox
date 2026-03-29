@@ -24,7 +24,7 @@ const TEST_CASES = [
     address: '8 avenue de Suffren',
     college: 'GUILLAUME APOLLINAIRE',
     uai: '0752190Y',
-    lyceesSecteur1: ['J. DE SAILLY', 'J. DE LA FONTAINE', 'J.B. SAY', 'BUFFON', 'V. DURUY'],
+    lyceesSecteur1: ['J. DE SAILLY', 'J. DE LA FONTAINE', 'J. SAY', 'BUFFON', 'V. DURUY'],
   },
   {
     address: '120 boulevard de Menilmontant',

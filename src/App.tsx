@@ -23,7 +23,10 @@ import {
   GradeInputForm,
   ScoreDisplay,
 } from './components';
-import { fetchAcademicStats } from './services/scoreApi';
+import {
+  fetchAcademicStats,
+} from './services/scoreApi';
+import { fetchCollegeIps } from './services/collegeApi';
 import { calculateAffelnetScore } from './services/scoreCalculation';
 import './App.css';
 
@@ -39,6 +42,7 @@ function App() {
   const [stats, setStats] = useState<Record<DisciplinaryField, AcademicStats> | null>(null);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState<string | null>(null);
+  const [ipsBonus, setIpsBonus] = useState(0);
 
   // Fetch academic stats when the score tab is activated
   useEffect(() => {
@@ -50,6 +54,21 @@ function App() {
         .finally(() => setIsStatsLoading(false));
     }
   }, [inputMode, stats, isStatsLoading]);
+
+  // Fetch IPS bonus when result changes
+  useEffect(() => {
+    if (result?.college.uai) {
+      fetchCollegeIps(result.college.uai).then(info => {
+        setIpsBonus(info?.bonus ?? 0);
+      }).catch(() => {
+        setIpsBonus(0);
+      });
+    } else {
+      // If we are in college mode and have a selected college but no search result yet
+      // This is a placeholder if we wanted to fetch IPS even before sector results
+      setIpsBonus(0);
+    }
+  }, [result]);
 
   const handleAddressSelect = useCallback(
     (address: Address) => {
@@ -167,7 +186,6 @@ function App() {
                 <CollegeCard
                   result={result}
                   address={searchedAddress ?? undefined}
-                  userScore={score}
                 />
                 <button className="new-search-button" onClick={handleNewSearch}>
                   <svg
@@ -202,7 +220,7 @@ function App() {
             {stats && (
               <div className="score-grid">
                 <GradeInputForm onGradesChange={handleGradesChange} />
-                <ScoreDisplay score={score} />
+                <ScoreDisplay score={score} ipsBonus={ipsBonus} />
               </div>
             )}
           </div>

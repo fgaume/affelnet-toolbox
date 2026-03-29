@@ -1,11 +1,13 @@
 import React from 'react';
 import type { UserScore, DisciplinaryField } from '../types';
 import { DISCIPLINARY_FIELDS } from '../types';
+import { calculateFinalScores, GEO_BONUS } from '../services/scoreCalculation';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import './ScoreDisplay.css';
 
 interface ScoreDisplayProps {
   score: UserScore | null;
+  ipsBonus: number;
 }
 
 const FIELD_NAMES: Record<DisciplinaryField, string> = {
@@ -18,7 +20,7 @@ const FIELD_NAMES: Record<DisciplinaryField, string> = {
   EPS: 'EPS',
 };
 
-const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => {
+const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus }) => {
   if (!score) {
     return (
       <div className="score-display">
@@ -29,6 +31,8 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => {
     );
   }
 
+  const finalScores = calculateFinalScores(score.totalScore, ipsBonus);
+
   const breakdownData = DISCIPLINARY_FIELDS.map(field => ({
     name: FIELD_NAMES[field],
     value: score.details[field].contribution * 2,
@@ -37,12 +41,38 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => {
   return (
     <div className="score-display">
       <h2>Votre Score Affelnet</h2>
-      <div className="total-score-container">
-        <div className="total-score-value">
-          {Math.round(score.totalScore).toLocaleString()}
+      
+      <div className="final-scores-grid">
+        <div className="final-score-card secteur-1">
+          <div className="score-label">Secteur 1</div>
+          <div className="score-value">{Math.round(finalScores.secteur1).toLocaleString()}</div>
         </div>
-        <div className="total-score-max">
-          sur 38 400 points
+        <div className="final-score-card secteur-2">
+          <div className="score-label">Secteur 2</div>
+          <div className="score-value">{Math.round(finalScores.secteur2).toLocaleString()}</div>
+        </div>
+        <div className="final-score-card secteur-3">
+          <div className="score-label">Secteur 3</div>
+          <div className="score-value">{Math.round(finalScores.secteur3).toLocaleString()}</div>
+        </div>
+      </div>
+
+      <div className="score-summary-breakdown">
+        <div className="summary-item">
+          <span>Score scolaire</span>
+          <span className="summary-value">{Math.round(score.totalScore).toLocaleString()}</span>
+        </div>
+        <div className="summary-item">
+          <span>Bonus IPS (collège de scolarisation)</span>
+          <span className="summary-value">{ipsBonus}</span>
+        </div>
+        <div className="summary-item">
+          <span>Bonus géographique</span>
+          <div className="geo-bonuses">
+            <div>Secteur 1: {GEO_BONUS.SECTEUR_1}</div>
+            <div>Secteur 2: {GEO_BONUS.SECTEUR_2}</div>
+            <div>Secteur 3: {GEO_BONUS.SECTEUR_3}</div>
+          </div>
         </div>
       </div>
 
@@ -62,25 +92,20 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => {
           <thead>
             <tr>
               <th scope="col">Champ</th>
-              <th scope="col" className="numeric">Moyenne</th>
-              <th scope="col" className="numeric">Points</th>
-              <th scope="col" className="numeric">Contrib.</th>
+              <th scope="col" className="numeric">Brut</th>
+              <th scope="col" className="numeric">Harmonisé</th>
             </tr>
           </thead>
           <tbody>
             {DISCIPLINARY_FIELDS.map((field) => {
               const detail = score.details[field];
-              const points = detail.contribution * 2;
-              const contributionPct = (points / score.totalScore) * 100;
+              const harmonizedValue = detail.harmonizedNote;
 
               return (
                 <tr key={field}>
                   <td>{FIELD_NAMES[field]}</td>
                   <td className="numeric">{detail.rawAverage.toFixed(2)}</td>
-                  <td className="numeric">{Math.round(points).toLocaleString()}</td>
-                  <td className="numeric">
-                    {isNaN(contributionPct) ? '0%' : `${contributionPct.toFixed(1)}%`}
-                  </td>
+                  <td className="numeric">{harmonizedValue.toFixed(3)}</td>
                 </tr>
               );
             })}
@@ -90,9 +115,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => {
 
       <div className="score-info">
         <strong>Information sur le calcul :</strong><br />
-        Le score académique est calculé en harmonisant vos moyennes par champ disciplinaire. 
-        Cette harmonisation prend en compte la moyenne et l'écart-type de l'académie de Paris pour l'année précédente.
-        Chaque champ a un coefficient (5 pour le Français et les Mathématiques, 4 pour les autres) et le résultat final est multiplié par 2.
+        Le score total est composé de trois éléments : le score scolaire harmonisé, le bonus IPS de votre collège de scolarisation, et le bonus lié au secteur géographique du lycée demandé.
       </div>
     </div>
   );

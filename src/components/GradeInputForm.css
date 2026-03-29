@@ -27,50 +27,53 @@
 .disciplinary-fields {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .field-section {
   background: var(--color-bg-subtle);
-  padding: 1rem;
+  padding: 0.75rem;
   border-radius: 8px;
   border: 1px solid var(--color-border-subtle);
 }
 
 .field-section h4 {
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
   color: var(--color-primary);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .subjects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
+  grid-template-columns: auto 70px;
+  align-items: center;
+  gap: 0.5rem 1rem;
 }
 
 .subject-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  display: contents;
 }
 
 .subject-input-group label {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--color-text-primary);
+  line-height: 1.2;
 }
 
 .subject-input-group input {
-  padding: 0.6rem;
+  padding: 0.4rem 0.6rem;
   border: 1px solid var(--color-border);
   border-radius: 6px;
-  font-size: 1rem;
-  width: 100%;
+  font-size: 0.95rem;
+  width: 70px;
   background-color: var(--color-bg-input);
   color: var(--color-text-primary);
   transition: border-color 0.2s, box-shadow 0.2s;
+  text-align: right;
 }
 
 .subject-input-group input:focus {

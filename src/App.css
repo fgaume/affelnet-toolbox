@@ -159,14 +159,24 @@
 
 .score-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto auto;
   gap: 24px;
   align-items: start;
+  justify-content: center;
+  width: 100%;
+}
+
+.score-display {
+  position: sticky;
+  top: 20px;
 }
 
 @media (max-width: 900px) {
   .score-grid {
     grid-template-columns: 1fr;
+  }
+  .score-display {
+    position: static;
   }
 }
 

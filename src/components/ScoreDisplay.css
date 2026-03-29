@@ -1,34 +1,99 @@
 .score-display {
   background-color: var(--color-bg-card);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.25rem;
   box-shadow: var(--color-shadow-md);
   margin-top: 2rem;
   border: 1px solid var(--color-border);
   transition: background-color 0.3s ease;
+  max-width: 600px;
 }
 
 .score-display h2 {
   margin-top: 0;
-  margin-bottom: 1.5rem;
-  font-size: 1.25rem;
+  margin-bottom: 1.25rem;
+  font-size: 1.1rem;
   color: var(--color-text-primary);
   text-align: center;
 }
 
 .total-score-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2rem;
+  display: none;
 }
 
-.total-score-value {
-  font-size: 3.5rem;
-  font-weight: 800;
+.final-scores-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.final-score-card {
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.final-score-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--color-shadow-sm);
+}
+
+.final-score-card.secteur-1 {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light, rgba(var(--color-primary-rgb), 0.05));
+}
+
+.final-score-card.secteur-1 .score-value {
   color: var(--color-primary);
-  line-height: 1;
+}
+
+.final-score-card .score-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.final-score-card .score-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.score-summary-breakdown {
+  background-color: var(--color-bg-subtle);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.summary-value {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.geo-bonuses {
+  text-align: right;
+  font-size: 0.75rem;
+  line-height: 1.2;
 }
 
 .total-score-max {
@@ -50,6 +115,9 @@
 @media (max-width: 640px) {
   .total-score-value {
     font-size: 2.5rem;
+  }
+  .final-scores-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -87,9 +155,13 @@
   border-bottom: none;
 }
 
-.score-table td.numeric {
+.score-table td.numeric,
+.score-table th.numeric {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+.score-table td.numeric {
   color: var(--color-text-primary);
 }
 

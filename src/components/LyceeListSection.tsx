@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { LyceeSecteur, UserScore, EffectifLycee } from '../types';
+import type { LyceeSecteur, EffectifLycee } from '../types';
 import type { AdmissionDifficulty } from '../services/seuilsApi';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
 import { LyceesIndicateurs } from './LyceeDetail';
@@ -20,7 +20,6 @@ interface LyceeListSectionProps {
   effectifsLoading: boolean;
   requestedCount?: number;
   difficulties: Map<string, AdmissionDifficulty>;
-  userScore?: UserScore | null;
   uaiCollegeUtilisateur: string;
 }
 
@@ -30,7 +29,6 @@ export function LyceeListSection({
   effectifsLoading,
   requestedCount,
   difficulties,
-  userScore,
   uaiCollegeUtilisateur,
 }: LyceeListSectionProps) {
   const [activeSector, setActiveSector] = useState(1);
@@ -106,7 +104,7 @@ export function LyceeListSection({
       )}
 
       {activeSector === 1 && effectifs.length > 0 && (
-        <LyceesIndicateurs lycees={lyceesIndicateursData} userScore={userScore} />
+        <LyceesIndicateurs lycees={lyceesIndicateursData} />
       )}
 
       {activeSector !== 1 && (

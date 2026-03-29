@@ -37,7 +37,7 @@
   height: 8px;
   border-radius: 50%;
   border: 2.5px solid;
-  background: var(--color-bg);
+  background: var(--color-bg-card);
 }
 
 .decile-legend {
