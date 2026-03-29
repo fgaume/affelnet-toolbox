@@ -149,6 +149,27 @@
   height: 16px;
 }
 
+.score-calculation-container {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .score-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Responsive adjustments for iPhone 14 and similar devices */
 @media (max-width: 480px) {
   .app-header {
