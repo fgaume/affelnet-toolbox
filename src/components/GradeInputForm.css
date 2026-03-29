@@ -1,0 +1,114 @@
+.grade-input-form {
+  background: var(--bg-card, #ffffff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.grade-form-header {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color, #eee);
+  padding-bottom: 1rem;
+}
+
+.grade-form-header h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.grade-form-header .subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #666);
+}
+
+.disciplinary-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.field-section {
+  background: var(--bg-subtle, #f9f9f9);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.field-section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: var(--primary-color, #2563eb);
+  font-weight: 600;
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.subject-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.subject-input-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+.subject-input-group input {
+  padding: 0.6rem;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.subject-input-group input:focus {
+  outline: none;
+  border-color: var(--primary-color, #2563eb);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.subject-input-group input::placeholder {
+  color: #bbb;
+}
+
+.form-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-reset {
+  background: none;
+  border: 1px solid #dc2626;
+  color: #dc2626;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-reset:hover {
+  background: #fef2f2;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .subjects-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 400px) {
+  .subjects-grid {
+    grid-template-columns: 1fr;
+  }
+}
