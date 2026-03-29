@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Subject, DisciplinaryField, UserGrades, DISCIPLINARY_FIELDS } from '../types';
+import type { Subject, DisciplinaryField, UserGrades } from '../types';
+import { DISCIPLINARY_FIELDS } from '../types';
 import { getUserGrades, saveUserGrades, clearScoreData } from '../services/storage';
 import './GradeInputForm.css';
 
@@ -53,15 +54,22 @@ const INITIAL_GRADES: UserGrades = {
   EPS: null,
 };
 
-const GradeInputForm: React.FC = () => {
+interface GradeInputFormProps {
+  onGradesChange?: (grades: UserGrades) => void;
+}
+
+const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
   const [grades, setGrades] = useState<UserGrades>(INITIAL_GRADES);
 
   useEffect(() => {
     const savedGrades = getUserGrades();
     if (savedGrades) {
       setGrades(savedGrades);
+      if (onGradesChange) {
+        onGradesChange(savedGrades);
+      }
     }
-  }, []);
+  }, [onGradesChange]);
 
   const handleGradeChange = (subject: Subject, value: string) => {
     const numValue = value === '' ? null : parseFloat(value);
@@ -74,12 +82,18 @@ const GradeInputForm: React.FC = () => {
     const newGrades = { ...grades, [subject]: numValue };
     setGrades(newGrades);
     saveUserGrades(newGrades);
+    if (onGradesChange) {
+      onGradesChange(newGrades);
+    }
   };
 
   const handleReset = () => {
     if (window.confirm('Voulez-vous vraiment réinitialiser toutes les notes ?')) {
       setGrades(INITIAL_GRADES);
       clearScoreData();
+      if (onGradesChange) {
+        onGradesChange(INITIAL_GRADES);
+      }
     }
   };
 
@@ -108,6 +122,7 @@ const GradeInputForm: React.FC = () => {
                     value={grades[subject] ?? ''}
                     onChange={(e) => handleGradeChange(subject, e.target.value)}
                     placeholder="--"
+                    aria-label={`Moyenne annuelle de ${SUBJECT_LABELS[subject]}`}
                   />
                 </div>
               ))}

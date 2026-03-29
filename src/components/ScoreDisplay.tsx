@@ -1,6 +1,7 @@
 import React from 'react';
-import { UserScore, DISCIPLINARY_FIELDS, DisciplinaryField } from '../types';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
+import type { UserScore, DisciplinaryField } from '../types';
+import { DISCIPLINARY_FIELDS } from '../types';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import './ScoreDisplay.css';
 
 interface ScoreDisplayProps {
@@ -45,12 +46,12 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => {
         </div>
       </div>
 
-      <div className="score-chart-container">
+      <div className="score-chart-container" role="img" aria-label="Graphique des points par champ disciplinaire">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={breakdownData} layout="vertical" margin={{ left: 20, right: 30, top: 10, bottom: 10 }}>
             <XAxis type="number" hide domain={[0, 'dataMax']} />
             <YAxis dataKey="name" type="category" width={150} fontSize={12} tick={{ fill: 'currentColor' }} />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="#2563eb" barSize={20} />
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="var(--color-primary)" barSize={20} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -60,10 +61,10 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => {
         <table className="score-table">
           <thead>
             <tr>
-              <th>Champ</th>
-              <th className="numeric">Moyenne</th>
-              <th className="numeric">Points</th>
-              <th className="numeric">Contrib.</th>
+              <th scope="col">Champ</th>
+              <th scope="col" className="numeric">Moyenne</th>
+              <th scope="col" className="numeric">Points</th>
+              <th scope="col" className="numeric">Contrib.</th>
             </tr>
           </thead>
           <tbody>
