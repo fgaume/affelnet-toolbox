@@ -9,8 +9,8 @@
 ## Phase 2 : Interface Utilisateur
 **Plans:** 3 plans
 - [x] 02-05-PLAN.md — GradeInputForm component
-- [ ] 02-06-PLAN.md — ScoreDisplay component
-- [ ] 02-07-PLAN.md — Integration in App.tsx
+- [x] 02-06-PLAN.md — ScoreDisplay component
+- [x] 02-07-PLAN.md — Integration in App.tsx
 
 ## Phase 3 : Intégration & Finitions
 - [ ] **Tâche 8** : Mise à jour de `LyceeDetail.tsx` pour afficher les chances d'admission si un score est calculé.
