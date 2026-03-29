@@ -13,9 +13,10 @@
 - [x] 02-07-PLAN.md — Integration in App.tsx
 
 ## Phase 3 : Intégration & Finitions
-- [ ] **Tâche 8** : Mise à jour de `LyceeDetail.tsx` pour afficher les chances d'admission si un score est calculé.
-- [ ] **Tâche 9** : Polissage visuel et accessibilité (Formulaires, Tableaux).
-- [ ] **Tâche 10** : Vérification finale avec `react-doctor` et tests de bout en bout (Playwright).
+**Plans:** 3 plans
+- [ ] 03-08-PLAN.md — LyceeDetail integration with score comparison
+- [ ] 03-09-PLAN.md — UI/UX polish and CSS variables harmonization
+- [ ] 03-10-PLAN.md — Final verification and Playwright test coverage expansion
 
 ---
 ## Critères de succès
@@ -24,3 +25,4 @@
 - [ ] Les données sont conservées après rechargement de la page.
 - [ ] Tous les tests unitaires pour le calcul passent.
 - [ ] L'application respecte les bonnes pratiques React (zéro erreur lint).
+- [ ] Les chances d'admission sont affichées dans les détails des lycées.
