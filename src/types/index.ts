@@ -85,3 +85,64 @@ export interface IpsInfo {
   ips: number;
   bonus: number;
 }
+
+export const SUBJECTS = [
+  'FRANCAIS',
+  'MATHEMATIQUES',
+  'HISTOIRE_GEO',
+  'LV1',
+  'LV2',
+  'EPS',
+  'ARTS_PLASTIQUES',
+  'EDUCATION_MUSICALE',
+  'SVT',
+  'TECHNOLOGIE',
+  'PHYSIQUE_CHIMIE',
+  'EMC',
+] as const;
+
+export type Subject = (typeof SUBJECTS)[number];
+
+export const DISCIPLINARY_FIELDS = [
+  'FRANCAIS',
+  'MATHEMATIQUES',
+  'HISTOIRE_GEO',
+  'LANGUES_VIVANTES',
+  'SCIENCES_TECHNO_DP',
+  'ARTS',
+  'EPS',
+] as const;
+
+export type DisciplinaryField = (typeof DISCIPLINARY_FIELDS)[number];
+
+export type UserGrades = Record<Subject, number | null>;
+
+export interface AcademicStats {
+  moyenne: number;
+  ecartType: number;
+}
+
+export interface ScoreDetail {
+  rawAverage: number;
+  harmonizedNote: number;
+  contribution: number;
+}
+
+export interface UserScore {
+  totalScore: number;
+  details: Record<DisciplinaryField, ScoreDetail>;
+}
+
+export interface AcademicStatsResponse {
+  rows: Array<{
+    row: {
+      annee: number;
+      champ: string;
+      moyenne: number;
+      'ecart-type': number;
+    };
+  }>;
+  num_rows_total: number;
+}
+
+export type InputMode = 'address' | 'college' | 'score';
