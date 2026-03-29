@@ -1,20 +1,20 @@
 # Project State : Affelnet Score Scolaire
 
 ## Current Phase
-**Phase 02** : UI Implementation (In Progress)
+**Phase 03** : Integration & Polish (Planned)
 
 ## Progress
 - [x] Phase 01 : Logic & Services
-- [/] Phase 02 : UI Implementation (2/3 plans completed)
+- [x] Phase 02 : UI Implementation
 - [ ] Phase 03 : Integration & Polish
 
 ## Phase 02 Plans
 - [x] 05 : GradeInputForm component (Completed)
 - [x] 06 : ScoreDisplay component (Completed)
-- [ ] 07 : Integration in App.tsx (Planned)
+- [x] 07 : Integration in App.tsx (Completed)
 
 ## Next Step
-Execute Plan 07: Integration in App.tsx.
+Execute `/gsd:plan-phase 03` to start Phase 03.
 
 ## Decisions
 - [02-ui] Subject grouping: Used FIELD_MAPPING based on scoreCalculation.ts logic (7 fields).
