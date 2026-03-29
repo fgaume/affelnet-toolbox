@@ -7,9 +7,10 @@
 - [ ] 01-logic-03-PLAN.md — Persistence - Storage Extension
 
 ## Phase 2 : Interface Utilisateur
-- [ ] **Tâche 5** : Composant `GradeInputForm.tsx` (Formulaire de saisie des 12 notes).
-- [ ] **Tâche 6** : Composant `ScoreDisplay.tsx` (Score total + Tableau détaillé).
-- [ ] **Tâche 7** : Intégration de l'onglet "Score" dans `App.tsx` (Navigation et état).
+**Plans:** 3 plans
+- [ ] 02-05-PLAN.md — GradeInputForm component
+- [ ] 02-06-PLAN.md — ScoreDisplay component
+- [ ] 02-07-PLAN.md — Integration in App.tsx
 
 ## Phase 3 : Intégration & Finitions
 - [ ] **Tâche 8** : Mise à jour de `LyceeDetail.tsx` pour afficher les chances d'admission si un score est calculé.
