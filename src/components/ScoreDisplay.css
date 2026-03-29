@@ -1,0 +1,52 @@
+.score-display {
+  background-color: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  transition: background-color 0.3s ease;
+}
+
+.score-display h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  color: var(--text-primary, #333);
+  text-align: center;
+}
+
+.total-score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.total-score-value {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #2563eb;
+  line-height: 1;
+}
+
+.total-score-max {
+  font-size: 1.25rem;
+  color: var(--text-secondary, #666);
+  margin-top: 0.5rem;
+}
+
+.score-placeholder {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary, #666);
+  font-style: italic;
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .total-score-value {
+    font-size: 2.5rem;
+  }
+}
