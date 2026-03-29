@@ -1,10 +1,10 @@
 # Roadmap : Calculateur de Score Affelnet
 
 ## Phase 1 : Logique de Calcul & Services
-- [ ] **Tâche 1** : Définition des types TypeScript (Matières, Champs Disciplinaires, Scores).
-- [ ] **Tâche 2** : Service `scoreApi.ts` pour récupérer mu/sigma de Hugging Face.
-- [ ] **Tâche 3** : Service `scoreCalculation.ts` implémentant l'algorithme d'harmonisation (TDD).
-- [ ] **Tâche 4** : Extension de `storage.ts` pour gérer les notes et les scores persistés.
+**Plans:** 3 plans
+- [ ] 01-logic-01-PLAN.md — Foundation - Types & API Service
+- [ ] 01-logic-02-PLAN.md — Algorithm - Calculation Logic (TDD)
+- [ ] 01-logic-03-PLAN.md — Persistence - Storage Extension
 
 ## Phase 2 : Interface Utilisateur
 - [ ] **Tâche 5** : Composant `GradeInputForm.tsx` (Formulaire de saisie des 12 notes).
