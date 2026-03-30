@@ -48,7 +48,7 @@
 
 .subjects-grid {
   display: grid;
-  grid-template-columns: auto 70px;
+  grid-template-columns: auto auto;
   align-items: center;
   gap: 0.5rem 1rem;
 }
@@ -90,6 +90,69 @@
   margin-top: 2rem;
   display: flex;
   justify-content: flex-end;
+}
+
+.subject-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-fill-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: #f59e0b;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.btn-fill-all:hover {
+  color: #d97706;
+  background: var(--color-bg-subtle);
+  border-color: #f59e0b;
+}
+
+.btn-fill-all svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-eps-dispense {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.btn-eps-dispense:hover {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.btn-eps-dispense.active {
+  color: #fff;
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.btn-eps-dispense svg {
+  width: 16px;
+  height: 16px;
 }
 
 .btn-reset {

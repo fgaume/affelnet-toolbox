@@ -88,6 +88,51 @@
 .summary-value {
   font-weight: 600;
   color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+.multiplier-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.multiplier-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.multiplier-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.multiplier-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-bg-subtle);
+}
+
+.multiplier-value {
+  min-width: 28px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-primary);
 }
 
 .geo-bonuses {
@@ -100,6 +145,51 @@
   font-size: 1.25rem;
   color: var(--color-text-secondary);
   margin-top: 0.5rem;
+}
+
+.stats-year-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-subtle);
+  border-radius: 8px;
+  border: 1px solid var(--color-border-subtle);
+}
+
+.stats-year-label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.stats-year-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.stats-year-btn {
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.stats-year-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.stats-year-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
 }
 
 .score-placeholder {
@@ -162,6 +252,13 @@
 }
 
 .score-table td.numeric {
+  color: var(--color-text-primary);
+}
+
+.score-total-row td {
+  border-top: 2px solid var(--color-text-primary);
+  border-bottom: none !important;
+  font-weight: 700;
   color: var(--color-text-primary);
 }
 

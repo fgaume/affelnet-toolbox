@@ -2,12 +2,19 @@ import React from 'react';
 import type { UserScore, DisciplinaryField } from '../types';
 import { DISCIPLINARY_FIELDS } from '../types';
 import { calculateFinalScores, GEO_BONUS } from '../services/scoreCalculation';
+import { ALT_MODEL_KEY, ALT_MODEL_LABEL } from '../services/scoreApi';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import './ScoreDisplay.css';
 
 interface ScoreDisplayProps {
   score: UserScore | null;
   ipsBonus: number;
+  collegeName?: string;
+  multiplier: number;
+  onMultiplierChange: (delta: number) => void;
+  statsYear: number | null;
+  availableStatsYears: number[];
+  onStatsYearChange: (year: number) => void;
 }
 
 const FIELD_NAMES: Record<DisciplinaryField, string> = {
@@ -20,7 +27,7 @@ const FIELD_NAMES: Record<DisciplinaryField, string> = {
   EPS: 'EPS',
 };
 
-const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus }) => {
+const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus, collegeName, multiplier, onMultiplierChange, statsYear, availableStatsYears, onStatsYearChange }) => {
   if (!score) {
     return (
       <div className="score-display">
@@ -59,20 +66,35 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus }) => {
 
       <div className="score-summary-breakdown">
         <div className="summary-item">
-          <span>Score scolaire</span>
+          <span>Total champs disciplinaires</span>
+          <span className="summary-value">{Math.round(score.weightedSum).toLocaleString()}</span>
+        </div>
+        <div className="summary-item">
+          <span className="multiplier-label">
+            Coefficient de pondération
+            <span className="multiplier-controls">
+              <button className="multiplier-btn" onClick={() => onMultiplierChange(-0.1)} aria-label="Diminuer">−</button>
+              <span className="multiplier-value">×{multiplier.toFixed(1)}</span>
+              <button className="multiplier-btn" onClick={() => onMultiplierChange(0.1)} aria-label="Augmenter">+</button>
+            </span>
+          </span>
           <span className="summary-value">{Math.round(score.totalScore).toLocaleString()}</span>
         </div>
         <div className="summary-item">
-          <span>Bonus IPS (collège de scolarisation)</span>
+          <span>Bonus IPS {collegeName ? collegeName : '(collège de scolarisation)'}</span>
           <span className="summary-value">{ipsBonus}</span>
         </div>
         <div className="summary-item">
-          <span>Bonus géographique</span>
-          <div className="geo-bonuses">
-            <div>Secteur 1: {GEO_BONUS.SECTEUR_1}</div>
-            <div>Secteur 2: {GEO_BONUS.SECTEUR_2}</div>
-            <div>Secteur 3: {GEO_BONUS.SECTEUR_3}</div>
-          </div>
+          <span>Bonus géographique Secteur 1</span>
+          <span className="summary-value">{GEO_BONUS.SECTEUR_1.toLocaleString()}</span>
+        </div>
+        <div className="summary-item">
+          <span>Bonus géographique Secteur 2</span>
+          <span className="summary-value">{GEO_BONUS.SECTEUR_2.toLocaleString()}</span>
+        </div>
+        <div className="summary-item">
+          <span>Bonus géographique Secteur 3</span>
+          <span className="summary-value">{GEO_BONUS.SECTEUR_3.toLocaleString()}</span>
         </div>
       </div>
 
@@ -110,8 +132,32 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus }) => {
               );
             })}
           </tbody>
+          <tfoot>
+            <tr className="score-total-row">
+              <td>Total</td>
+              <td className="numeric"></td>
+              <td className="numeric">{Math.round(score.weightedSum).toLocaleString()}</td>
+            </tr>
+          </tfoot>
         </table>
       </div>
+
+      {availableStatsYears.length > 1 && statsYear && (
+        <div className="stats-year-selector">
+          <span className="stats-year-label">Statistiques d'harmonisation :</span>
+          <div className="stats-year-buttons">
+            {availableStatsYears.map((year) => (
+              <button
+                key={year}
+                className={`stats-year-btn${statsYear === year ? ' active' : ''}`}
+                onClick={() => onStatsYearChange(year)}
+              >
+                {year === ALT_MODEL_KEY ? ALT_MODEL_LABEL : year}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="score-info">
         <strong>Information sur le calcul :</strong><br />

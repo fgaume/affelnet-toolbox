@@ -9,3 +9,4 @@ export { CollegeAutocomplete } from './CollegeAutocomplete';
 export { IpsGauge } from './IpsGauge';
 export { default as GradeInputForm } from './GradeInputForm';
 export { default as ScoreDisplay } from './ScoreDisplay';
+export { DataSourcesPanel } from './DataSourcesPanel';

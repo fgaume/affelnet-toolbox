@@ -60,6 +60,7 @@ describe('storage service', () => {
 
   it('should save and retrieve user score', () => {
     const mockScore: UserScore = {
+      weightedSum: 2500,
       totalScore: 5000,
       details: {
         FRANCAIS: { rawAverage: 15, harmonizedNote: 100, contribution: 600 },

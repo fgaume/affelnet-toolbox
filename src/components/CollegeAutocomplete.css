@@ -1,6 +1,7 @@
 .college-autocomplete-container {
   position: relative;
   width: 100%;
+  max-width: 500px;
 }
 
 .college-autocomplete-container .input-wrapper {
@@ -14,7 +15,7 @@
   left: 16px;
   width: 20px;
   height: 20px;
-  color: var(--color-text-muted);
+  color: var(--color-primary);
   pointer-events: none;
 }
 

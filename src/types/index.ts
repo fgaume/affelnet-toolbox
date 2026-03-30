@@ -129,7 +129,8 @@ export interface ScoreDetail {
 }
 
 export interface UserScore {
-  totalScore: number; // Academic score only (max 38400)
+  weightedSum: number; // Sum of weighted harmonized scores (before multiplier)
+  totalScore: number; // Academic score = weightedSum * multiplier
   details: Record<DisciplinaryField, ScoreDetail>;
 }
 
@@ -154,4 +155,5 @@ export interface AcademicStatsResponse {
   num_rows_total: number;
 }
 
-export type InputMode = 'address' | 'college' | 'score';
+export type TopTab = 'search' | 'score';
+export type SearchMode = 'address' | 'college';

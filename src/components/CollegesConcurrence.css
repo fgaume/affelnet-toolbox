@@ -106,7 +106,7 @@
 .concurrence-legend-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   font-size: 11px;
   color: var(--color-text-secondary);
 }
