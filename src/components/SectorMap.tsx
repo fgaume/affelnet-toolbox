@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { CollegeSecteur, LyceeSecteur } from '../types';
 import 'leaflet/dist/leaflet.css';
 import './SectorMap.css';
@@ -54,6 +54,14 @@ const tousSecteursIcon = L.divIcon({
   popupAnchor: [0, -24],
 });
 
+function MapInvalidator({ expanded }: { expanded: boolean }) {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => map.invalidateSize(), 200);
+  }, [expanded, map]);
+  return null;
+}
+
 function MapResizer({ coords }: { coords: [number, number][] }) {
   const map = useMap();
   
@@ -72,6 +80,8 @@ function getItineraryUrl(from: [number, number], to: [number, number]) {
 }
 
 export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecteurs }: SectorMapProps) {
+  const [expanded, setExpanded] = useState(false);
+
   // Itinerary origin: home if available, otherwise college
   const itineraryOrigin: [number, number] | undefined = homeCoords ?? college.coordinates;
   const itineraryLabel = homeCoords ? 'depuis le domicile' : `depuis le collège ${college.nom}`;
@@ -82,11 +92,37 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
     ...lyceesTousSecteurs.map(l => l.coordinates).filter((c): c is [number, number] => !!c)
   ];
 
+  // Close on Escape
+  useEffect(() => {
+    if (!expanded) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setExpanded(false);
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [expanded]);
+
   // Center on home if available, otherwise on college, otherwise Paris default
   const centerCoords: [number, number] = homeCoords ?? college.coordinates ?? [2.3488, 48.8534];
 
   return (
-    <div className="sector-map-container">
+    <div className={`sector-map-container${expanded ? ' expanded' : ''}`}>
+      <button
+        className="map-expand-btn"
+        onClick={() => setExpanded(!expanded)}
+        aria-label={expanded ? 'Réduire la carte' : 'Agrandir la carte'}
+        title={expanded ? 'Réduire' : 'Agrandir'}
+      >
+        {expanded ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+          </svg>
+        )}
+      </button>
       <MapContainer
         center={[centerCoords[1], centerCoords[0]]}
         zoom={14}
@@ -171,6 +207,7 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
         ))}
 
         <MapResizer coords={allCoords} />
+        <MapInvalidator expanded={expanded} />
       </MapContainer>
       
       <div className="map-legend">

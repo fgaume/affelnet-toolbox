@@ -48,8 +48,9 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled }: College
   return (
     <div className="college-autocomplete-container" ref={containerRef}>
       <div className="input-wrapper">
-        <svg className="school-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
+        <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
+          <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
         </svg>
         <input
           type="text"
@@ -91,8 +92,9 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled }: College
                 onClick={() => handleCollegeClick(college)}
                 type="button"
               >
-                <svg className="school-icon" viewBox="0 0 24 24" fill="currentColor" style={{ position: 'static', color: 'var(--color-primary)' }}>
-                  <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" width="20" height="20" style={{ flexShrink: 0 }}>
+                  <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
+                  <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
                 </svg>
                 <span>{college.nom}</span>
               </button>

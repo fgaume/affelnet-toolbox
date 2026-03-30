@@ -149,6 +149,50 @@
   height: 16px;
 }
 
+.search-mode-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 500px;
+  background: var(--color-bg-card);
+  border-radius: 8px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+}
+
+.search-mode-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.search-mode-tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.search-mode-tab.active {
+  color: var(--color-primary);
+  background: var(--color-bg-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-mode-tab svg {
+  width: 14px;
+  height: 14px;
+}
+
 .score-calculation-container {
   width: 100%;
   max-width: 1000px;

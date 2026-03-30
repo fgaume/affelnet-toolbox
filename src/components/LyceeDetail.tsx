@@ -187,26 +187,26 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
 
   return (
     <div className="lycee-detail">
-      {hasTB && (
+      {hasIPS && (
         <div className="lycee-detail-chart">
-          <h5>Taux de mentions TB au Bac (%)</h5>
+          <h5>Indice de Position Sociale (IPS)</h5>
           <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={tbChartData}>
+            <LineChart data={ipsChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} unit="%" />
+              <YAxis tick={{ fontSize: 11 }} domain={['auto', 'auto']} />
               <Tooltip
                 formatter={(v: unknown, name: unknown) => [
-                  `${Number(v).toFixed(1)}%`,
+                  Number(v).toFixed(1),
                   formatName(String(name ?? '')),
                 ]}
-                itemSorter={(item) => tbRank.get(String(item.dataKey ?? '')) ?? 9999}
+                itemSorter={(item) => ipsRank.get(String(item.dataKey ?? '')) ?? 9999}
               />
               <Legend
                 formatter={(key: string) => formatName(key)}
                 wrapperStyle={{ fontSize: 11 }}
               />
-              {[...lycees].sort((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l) => (
+              {[...lycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"
@@ -232,26 +232,26 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
         </div>
       )}
 
-      {hasIPS && (
+      {hasTB && (
         <div className="lycee-detail-chart">
-          <h5>Indice de Position Sociale (IPS)</h5>
+          <h5>Taux de mentions TB au Bac (%)</h5>
           <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={ipsChartData}>
+            <LineChart data={tbChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} domain={['auto', 'auto']} />
+              <YAxis tick={{ fontSize: 11 }} unit="%" />
               <Tooltip
                 formatter={(v: unknown, name: unknown) => [
-                  Number(v).toFixed(1),
+                  `${Number(v).toFixed(1)}%`,
                   formatName(String(name ?? '')),
                 ]}
-                itemSorter={(item) => ipsRank.get(String(item.dataKey ?? '')) ?? 9999}
+                itemSorter={(item) => tbRank.get(String(item.dataKey ?? '')) ?? 9999}
               />
               <Legend
                 formatter={(key: string) => formatName(key)}
                 wrapperStyle={{ fontSize: 11 }}
               />
-              {[...lycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
+              {[...lycees].sort((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"

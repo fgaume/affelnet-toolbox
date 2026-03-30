@@ -31,7 +31,7 @@ export function SearchHistory({
   return (
     <div className="search-history">
       <div className="history-header">
-        <h3>Recherches recentes</h3>
+        <h3>Recherches récentes</h3>
         <button className="clear-history-btn" onClick={onClearHistory}>
           Effacer tout
         </button>

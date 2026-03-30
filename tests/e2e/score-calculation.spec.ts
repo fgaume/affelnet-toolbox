@@ -127,7 +127,7 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
     const initialScoreText = await sector1Score.innerText();
 
     // 2. Switch to Search tab
-    await page.click('button:has-text("Par adresse")');
+    await page.click('button:has-text("Lycées de secteur")');
     await expect(page.locator('input[placeholder="Saisissez votre adresse..."]')).toBeVisible();
 
     // 3. Switch back to Score tab
