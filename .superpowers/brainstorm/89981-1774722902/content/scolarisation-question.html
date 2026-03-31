@@ -1,0 +1,124 @@
+<h2>Section 2 : Question de scolarisation dans CollegeCard</h2>
+<p class="subtitle">Demander à l'élève s'il est scolarisé dans son collège de secteur</p>
+
+<div class="mockup">
+  <div class="mockup-header">CollegeCard — après le nom du collège de secteur</div>
+  <div class="mockup-body" style="padding: 24px; font-family: system-ui;">
+
+    <!-- Existing college header -->
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+      <div style="width:48px; height:48px; background:#3b82f6; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">🏫</div>
+      <div>
+        <h3 style="margin:0; font-size:20px;">Collège Condorcet</h3>
+        <a href="#" style="color:#3b82f6; font-size:13px;">Voir la fiche établissement ↗</a>
+      </div>
+    </div>
+
+    <!-- NEW: Scolarisation question -->
+    <div style="background:#f0f9ff; border:1px solid #bfdbfe; border-radius:12px; padding:16px; margin-bottom:20px;">
+      <p style="margin:0 0 12px 0; font-weight:600; color:#1e40af;">Êtes-vous scolarisé(e) dans ce collège ?</p>
+      <div style="display:flex; gap:10px;">
+        <button style="padding:8px 24px; border-radius:8px; border:2px solid #3b82f6; background:#3b82f6; color:white; font-weight:600; cursor:pointer;">Oui</button>
+        <button style="padding:8px 24px; border-radius:8px; border:2px solid #e5e7eb; background:white; color:#374151; font-weight:600; cursor:pointer;">Non</button>
+      </div>
+    </div>
+
+    <!-- Placeholder for lycees -->
+    <div style="background:#f9fafb; border-radius:8px; padding:16px; color:#6b7280; text-align:center;">
+      Lycées de secteur, carte, scores d'admission...
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top:32px;">Après réponse "Oui"</h3>
+
+<div class="mockup">
+  <div class="mockup-header">Le collège de secteur = collège de scolarisation → affichage IPS</div>
+  <div class="mockup-body" style="padding: 24px; font-family: system-ui;">
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <div style="width:48px; height:48px; background:#3b82f6; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">🏫</div>
+      <div>
+        <h3 style="margin:0; font-size:20px;">Collège Condorcet</h3>
+        <span style="background:#dbeafe; color:#1e40af; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600;">Secteur · Scolarisation</span>
+      </div>
+    </div>
+
+    <!-- IPS Block -->
+    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:16px; margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <p style="margin:0; font-size:13px; color:#166534; font-weight:600;">IPS du collège</p>
+          <p style="margin:4px 0 0; font-size:28px; font-weight:700; color:#15803d;">126,3</p>
+        </div>
+        <div style="text-align:right;">
+          <p style="margin:0; font-size:13px; color:#166534; font-weight:600;">Bonus IPS Affelnet</p>
+          <p style="margin:4px 0 0; font-size:28px; font-weight:700; color:#15803d;">+800 pts</p>
+        </div>
+      </div>
+      <div style="border-top:1px solid #bbf7d0; padding-top:12px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; color:#166534;">
+          <span>⬇ Seuil bonus 1200 : IPS &lt; 106,7 <span style="color:#6b7280;">(−19,6 pts)</span></span>
+          <span>⬆ Seuil bonus 400 : IPS ≥ 129,8 <span style="color:#6b7280;">(+3,5 pts)</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f9fafb; border-radius:8px; padding:16px; color:#6b7280; text-align:center;">
+      Lycées de secteur, carte, scores d'admission...
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top:32px;">Après réponse "Non" → saisie du collège de scolarisation</h3>
+
+<div class="mockup">
+  <div class="mockup-header">Autocomplete collège de scolarisation + affichage IPS</div>
+  <div class="mockup-body" style="padding: 24px; font-family: system-ui;">
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <div style="width:48px; height:48px; background:#3b82f6; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">🏫</div>
+      <div>
+        <h3 style="margin:0; font-size:20px;">Collège Condorcet</h3>
+        <span style="background:#dbeafe; color:#1e40af; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600;">Secteur</span>
+      </div>
+    </div>
+
+    <!-- Scolarisation input -->
+    <div style="background:#fefce8; border:1px solid #fde68a; border-radius:12px; padding:16px; margin-bottom:16px;">
+      <p style="margin:0 0 8px 0; font-weight:600; color:#92400e;">Collège de scolarisation</p>
+      <input class="mock-input" value="Berlioz" style="width:100%; padding:10px 14px; font-size:15px; margin-bottom:4px;">
+      <div style="border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        <div style="padding:10px 16px; border-bottom:1px solid #f3f4f6; cursor:pointer; background:#fefce8;">
+          <strong>Berlioz</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- IPS Block for scolarisation college -->
+    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:16px; margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <p style="margin:0; font-size:13px; color:#166534; font-weight:600;">IPS du collège Berlioz</p>
+          <p style="margin:4px 0 0; font-size:28px; font-weight:700; color:#15803d;">98,2</p>
+        </div>
+        <div style="text-align:right;">
+          <p style="margin:0; font-size:13px; color:#166534; font-weight:600;">Bonus IPS Affelnet</p>
+          <p style="margin:4px 0 0; font-size:28px; font-weight:700; color:#15803d;">+1200 pts</p>
+        </div>
+      </div>
+      <div style="border-top:1px solid #bbf7d0; padding-top:12px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; color:#166534;">
+          <span>⬇ Aucun seuil inférieur</span>
+          <span>⬆ Seuil bonus 800 : IPS ≥ 106,7 <span style="color:#6b7280;">(+8,5 pts)</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f9fafb; border-radius:8px; padding:16px; color:#6b7280; text-align:center;">
+      Lycées de secteur, carte, scores d'admission...
+    </div>
+  </div>
+</div>
+
+<p class="subtitle">3 états : question initiale → réponse Oui (IPS secteur) → réponse Non (saisie + IPS scolarisation). Ça te va ?</p>

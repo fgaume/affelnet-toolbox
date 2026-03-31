@@ -1,0 +1,113 @@
+<h2>Visualisation de la proximité aux seuils IPS</h2>
+<p class="subtitle">Quel type de graphique Recharts pour montrer la position de l'élève par rapport aux seuils ?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Jauge horizontale (custom BarChart)</h3>
+      <div class="mockup" style="margin:12px 0;">
+        <div class="mockup-body" style="padding:20px; font-family:system-ui;">
+          <p style="margin:0 0 8px; font-size:13px; color:#6b7280;">Position IPS de votre collège par rapport aux seuils de bonus</p>
+          <!-- Gauge bar -->
+          <div style="position:relative; height:40px; background:linear-gradient(to right, #166534 0%, #166534 25%, #22c55e 25%, #22c55e 50%, #facc15 50%, #facc15 75%, #ef4444 75%, #ef4444 100%); border-radius:8px; overflow:hidden;">
+            <!-- Seuil labels inside -->
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:#6b7280; margin-top:4px;">
+            <span>0</span>
+            <span>106,7</span>
+            <span>117,1</span>
+            <span>129,8</span>
+            <span>160</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600; margin-top:2px;">
+            <span style="color:#166534; flex:1; text-align:center;">+1200</span>
+            <span style="color:#22c55e; flex:1; text-align:center;">+800</span>
+            <span style="color:#a16207; flex:1; text-align:center;">+400</span>
+            <span style="color:#ef4444; flex:1; text-align:center;">0</span>
+          </div>
+          <!-- Marker -->
+          <div style="position:relative; margin-top:-52px; height:40px;">
+            <div style="position:absolute; left:58%; transform:translateX(-50%);">
+              <div style="width:4px; height:40px; background:#1e293b; border-radius:2px;"></div>
+            </div>
+          </div>
+          <div style="position:relative; margin-top:24px;">
+            <div style="position:absolute; left:58%; transform:translateX(-50%); text-align:center;">
+              <div style="font-weight:700; font-size:14px;">▲ 126,3</div>
+              <div style="font-size:11px; color:#6b7280;">Votre collège</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p>Barre horizontale segmentée par palier de bonus. Un marqueur vertical indique la position exacte de l'IPS. Lecture immédiate de la zone et de la distance aux seuils voisins.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Lecture très intuitive</li><li>Montre les 4 zones d'un coup</li><li>Le marqueur rend la proximité évidente</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Recharts n'a pas de composant jauge natif — à construire avec un BarChart horizontal customisé ou des ReferenceLine</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Bullet Chart (BarChart horizontal + ReferenceLine)</h3>
+      <div class="mockup" style="margin:12px 0;">
+        <div class="mockup-body" style="padding:20px; font-family:system-ui;">
+          <p style="margin:0 0 8px; font-size:13px; color:#6b7280;">Bonus IPS : +800 pts</p>
+          <!-- Bullet style -->
+          <div style="position:relative; height:32px; background:#e5e7eb; border-radius:4px; overflow:hidden;">
+            <div style="position:absolute; left:0; top:0; height:100%; width:78%; background:linear-gradient(to right, #bbf7d0, #86efac); border-radius:4px 0 0 4px;"></div>
+            <!-- Reference lines -->
+            <div style="position:absolute; left:66%; top:0; height:100%; width:2px; background:#f59e0b; z-index:2;"></div>
+            <div style="position:absolute; left:73%; top:0; height:100%; width:2px; background:#ef4444; z-index:2;"></div>
+            <div style="position:absolute; left:81%; top:0; height:100%; width:2px; background:#6b7280; z-index:2;"></div>
+            <!-- Marker -->
+            <div style="position:absolute; left:78%; top:2px; width:12px; height:28px; background:#1e293b; border-radius:3px; transform:translateX(-50%); z-index:3;"></div>
+          </div>
+          <div style="display:flex; font-size:11px; color:#6b7280; margin-top:6px; gap:4px;">
+            <span style="position:relative; left:64%;">106,7</span>
+            <span style="position:relative; left:64%;">117,1</span>
+            <span style="position:relative; left:64%;">129,8</span>
+          </div>
+        </div>
+      </div>
+      <p>Style "bullet chart" : la barre colorée représente l'IPS du collège, les lignes verticales marquent les seuils. Plus compact.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Compact, s'intègre bien dans un petit espace</li><li>Recharts BarChart + ReferenceLine natif</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Moins lisible que la jauge segmentée</li><li>Les zones de bonus sont moins évidentes</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Gauge semi-circulaire (PieChart custom)</h3>
+      <div class="mockup" style="margin:12px 0;">
+        <div class="mockup-body" style="padding:20px; font-family:system-ui; text-align:center;">
+          <div style="position:relative; width:200px; height:110px; margin:0 auto; overflow:hidden;">
+            <!-- Semi circle segments -->
+            <div style="width:200px; height:200px; border-radius:50%; background: conic-gradient(#166534 0deg 45deg, #22c55e 45deg 90deg, #facc15 90deg 135deg, #ef4444 135deg 180deg, transparent 180deg 360deg); position:absolute; top:0;"></div>
+            <div style="width:140px; height:140px; border-radius:50%; background:white; position:absolute; top:30px; left:30px;"></div>
+            <!-- Needle would go here -->
+            <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); text-align:center;">
+              <div style="font-size:24px; font-weight:700;">126,3</div>
+              <div style="font-size:11px; color:#6b7280;">+800 pts</div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-around; font-size:10px; color:#6b7280; margin-top:8px; max-width:200px; margin-left:auto; margin-right:auto;">
+            <span>1200</span><span>800</span><span>400</span><span>0</span>
+          </div>
+        </div>
+      </div>
+      <p>Demi-cercle coloré par zone avec aiguille pointant la valeur IPS. Visuellement attractif, style "tableau de bord".</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Visuellement engageant, effet "dashboard"</li><li>Faisable avec PieChart Recharts (startAngle/endAngle)</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Prend plus de place verticalement</li><li>L'aiguille nécessite un customized label ou SVG</li><li>Moins précis pour lire la distance aux seuils</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle">Clique sur ton choix préféré, ou réponds dans le terminal.</p>

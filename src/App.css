@@ -121,10 +121,10 @@
 
 .input-tabs {
   display: flex;
+  justify-content: center;
   gap: 4px;
   margin-bottom: 12px;
   width: 100%;
-  max-width: 1000px;
 }
 
 .input-tab {
