@@ -1,0 +1,164 @@
+.admission-history {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.admission-history h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.admission-history-subtitle {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.admission-history-filter {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.admission-history-filter::placeholder {
+  color: var(--color-text-muted);
+}
+
+.admission-history-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+}
+
+.admission-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admission-history-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.admission-history-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  background: var(--color-bg-card);
+  border-bottom: 2px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.admission-history-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.admission-history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admission-history-table .col-name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  min-width: 160px;
+  position: sticky;
+  left: 0;
+  background: var(--color-bg-card);
+  z-index: 1;
+}
+
+.admission-history-table th.col-name {
+  z-index: 2;
+}
+
+.admission-history-table .col-year {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 70px;
+}
+
+.admission-history-table .col-year-empty {
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.admission-history-table .col-graph {
+  text-align: center;
+  min-width: 50px;
+}
+
+.sparkline-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-card);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sparkline-toggle:hover {
+  border-color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, #3b82f6);
+}
+
+.sparkline-toggle.active {
+  border-color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, #3b82f6);
+  background: color-mix(in srgb, var(--color-primary, #3b82f6) 10%, transparent);
+}
+
+.sparkline-container {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.admission-history-empty {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .admission-history-table .col-name {
+    min-width: 120px;
+    font-size: 13px;
+  }
+
+  .admission-history-table .col-year {
+    min-width: 60px;
+    font-size: 13px;
+  }
+
+  .admission-history h2 {
+    font-size: 18px;
+  }
+}

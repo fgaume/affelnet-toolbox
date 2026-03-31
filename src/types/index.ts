@@ -155,5 +155,11 @@ export interface AcademicStatsResponse {
   num_rows_total: number;
 }
 
-export type TopTab = 'search' | 'score';
+export interface LyceeAdmissionHistory {
+  readonly code: string;
+  readonly nom: string;
+  readonly seuils: readonly number[];
+}
+
+export type TopTab = 'search' | 'score' | 'history';
 export type SearchMode = 'address' | 'college';

@@ -71,3 +71,43 @@ describe('fetchSeuils', () => {
     expect(seuils.size).toBe(2);
   });
 });
+
+describe('fetchAllSeuils', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
+  it('returns full history sorted by name', async () => {
+    const mockData = {
+      rows: [
+        { row: { code: '0750693W', nom: 'BUFFON', seuils: [40582, 40439, 40559, 40668, 40691] } },
+        { row: { code: '0750680G', nom: 'ARAGO', seuils: [40386, 40467, 40536, 40590, 40531] } },
+      ],
+    };
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockData),
+    }));
+
+    const { fetchAllSeuils } = await import('../seuilsApi');
+    const history = await fetchAllSeuils();
+
+    expect(history).toHaveLength(2);
+    expect(history[0].nom).toBe('ARAGO');
+    expect(history[0].code).toBe('0750680G');
+    expect(history[0].seuils).toEqual([40386, 40467, 40536, 40590, 40531]);
+    expect(history[1].nom).toBe('BUFFON');
+  });
+
+  it('throws on fetch error', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+    }));
+
+    const { fetchAllSeuils } = await import('../seuilsApi');
+    await expect(fetchAllSeuils()).rejects.toThrow('Erreur chargement seuils: 500');
+  });
+});

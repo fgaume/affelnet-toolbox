@@ -268,6 +268,7 @@ function App() {
                 <ScoreDisplay
                   score={score}
                   ipsBonus={ipsBonus}
+                  collegeUai={result?.college.uai}
                   collegeName={result?.college.nom}
                   multiplier={multiplier}
                   onMultiplierChange={handleMultiplierChange}

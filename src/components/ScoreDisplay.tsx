@@ -3,12 +3,13 @@ import type { UserScore, DisciplinaryField } from '../types';
 import { DISCIPLINARY_FIELDS } from '../types';
 import { calculateFinalScores, GEO_BONUS } from '../services/scoreCalculation';
 import { ALT_MODEL_KEY, ALT_MODEL_LABEL } from '../services/scoreApi';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { AdmissionGauge } from './';
 import './ScoreDisplay.css';
 
 interface ScoreDisplayProps {
   score: UserScore | null;
   ipsBonus: number;
+  collegeUai?: string;
   collegeName?: string;
   multiplier: number;
   onMultiplierChange: (delta: number) => void;
@@ -27,7 +28,7 @@ const FIELD_NAMES: Record<DisciplinaryField, string> = {
   EPS: 'EPS',
 };
 
-const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus, collegeName, multiplier, onMultiplierChange, statsYear, availableStatsYears, onStatsYearChange }) => {
+const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus, collegeUai, collegeName, multiplier, onMultiplierChange, statsYear, availableStatsYears, onStatsYearChange }) => {
   if (!score) {
     return (
       <div className="score-display">
@@ -39,11 +40,6 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus, collegeNam
   }
 
   const finalScores = calculateFinalScores(score.totalScore, ipsBonus);
-
-  const breakdownData = DISCIPLINARY_FIELDS.map(field => ({
-    name: FIELD_NAMES[field],
-    value: score.details[field].contribution * 2,
-  })).sort((a, b) => b.value - a.value);
 
   return (
     <div className="score-display">
@@ -88,25 +84,9 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, ipsBonus, collegeNam
           <span>Bonus géographique Secteur 1</span>
           <span className="summary-value">{GEO_BONUS.SECTEUR_1.toLocaleString()}</span>
         </div>
-        <div className="summary-item">
-          <span>Bonus géographique Secteur 2</span>
-          <span className="summary-value">{GEO_BONUS.SECTEUR_2.toLocaleString()}</span>
-        </div>
-        <div className="summary-item">
-          <span>Bonus géographique Secteur 3</span>
-          <span className="summary-value">{GEO_BONUS.SECTEUR_3.toLocaleString()}</span>
-        </div>
       </div>
 
-      <div className="score-chart-container" role="img" aria-label="Graphique des points par champ disciplinaire">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={breakdownData} layout="vertical" margin={{ left: 20, right: 30, top: 10, bottom: 10 }}>
-            <XAxis type="number" hide domain={[0, 'dataMax']} />
-            <YAxis dataKey="name" type="category" width={150} fontSize={12} tick={{ fill: 'currentColor' }} />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="var(--color-primary)" barSize={20} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <AdmissionGauge userScore={finalScores.secteur1} collegeUai={collegeUai} />
 
       <div className="score-breakdown">
         <h3>Détails par champ disciplinaire</h3>
