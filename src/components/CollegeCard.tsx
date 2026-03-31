@@ -20,6 +20,7 @@ const DIFFICULTY_HARD: AdmissionDifficulty = {
   color: '#dc2626',
   label: 'Difficilement accessible',
   seuil: 0,
+  level: 'hard',
 };
 
 interface CollegeCardProps {

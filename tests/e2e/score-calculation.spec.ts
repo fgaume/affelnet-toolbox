@@ -111,15 +111,15 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
   });
 
   test('should navigate to Score tab and display components', async ({ page }) => {
-    await page.click('button:has-text("Calculer son score")');
+    await page.click('button:has-text("Simuler son barème")');
     await expect(page.locator('.grade-input-form')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('.score-display')).toBeVisible({ timeout: 15000 });
   });
 
   test('should calculate score and persist it when switching tabs', async ({ page }) => {
     // 1. Calculate score
-    await page.click('button:has-text("Calculer son score")');
-    const francaisInput = page.locator('label:has-text("Français") + input').first();
+    await page.click('button:has-text("Simuler son barème")');
+    const francaisInput = page.getByLabel('Moyenne annuelle de Français').first();
     await francaisInput.fill('16');
     
     const sector1Score = page.locator('.secteur-1 .score-value');
@@ -131,24 +131,24 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
     await expect(page.locator('input[placeholder="Saisissez votre adresse..."]')).toBeVisible();
 
     // 3. Switch back to Score tab
-    await page.click('button:has-text("Calculer son score")');
+    await page.click('button:has-text("Simuler son barème")');
     await expect(page.locator('.secteur-1 .score-value')).toContainText(initialScoreText);
   });
 
   test('should show results summary after score is calculated', async ({ page }) => {
     // 1. Calculate a score
-    await page.click('button:has-text("Calculer son score")');
+    await page.click('button:has-text("Simuler son barème")');
     
     // Fill some subjects to get a high score
-    const francaisInput = page.locator('label:has-text("Français") + input').first();
+    const francaisInput = page.getByLabel('Moyenne annuelle de Français').first();
     await francaisInput.fill('20');
-    const mathInput = page.locator('label:has-text("Mathématiques") + input').first();
+    const mathInput = page.getByLabel('Moyenne annuelle de Mathématiques').first();
     await mathInput.fill('20');
     
     await expect(page.locator('.secteur-1 .score-value')).toBeVisible();
 
     // 2. Verify summary breakdown exists
     await expect(page.locator('.score-summary-breakdown')).toBeVisible();
-    await expect(page.locator('.summary-item:has-text("Score scolaire")')).toBeVisible();
+    await expect(page.locator('.summary-item:has-text("Total champs disciplinaires")')).toBeVisible();
   });
 });

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import type { LyceeAdmissionHistory } from "../types";
 import { SEUIL_YEARS, getAdmissionDifficulty } from "../services/seuilsApi";
 import AdmissionSparkline from "./AdmissionSparkline";
+import { hasValidSparklineData } from "./sparklineUtils";
 import "./AdmissionHistoryTable.css";
 
 interface AdmissionHistoryTableProps {
@@ -95,6 +96,9 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
           <tbody>
             {filteredData.map((lycee) => {
               const isExpanded = expandedRows.has(lycee.code);
+              // On vérifie si la ligne contient de vraies données pour tracer un graphique
+              const hasGraphData = hasValidSparklineData(lycee.seuils);
+
               return (
                 <tr key={lycee.code} className={isExpanded ? "expanded" : ""}>
                   <td className="col-name">{lycee.nom}</td>
@@ -121,35 +125,40 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
                     );
                   })}
                   <td className="col-graph">
-                    <button
-                      className={`sparkline-toggle${isExpanded ? " active" : ""}`}
-                      onClick={() => toggleRow(lycee.code)}
-                      title={
-                        isExpanded
-                          ? "Masquer le graphique"
-                          : "Afficher le graphique"
-                      }
-                      aria-label={
-                        isExpanded
-                          ? "Masquer le graphique"
-                          : "Afficher le graphique"
-                      }
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        width="20"
-                        height="20"
-                      >
-                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
-                      </svg>
-                    </button>
-                    {isExpanded && (
-                      <div className="sparkline-container">
-                        <AdmissionSparkline seuils={lycee.seuils} />
-                      </div>
+                    {/* On n'affiche le bouton et le conteneur que s'il y a des données valides */}
+                    {hasGraphData && (
+                      <>
+                        <button
+                          className={`sparkline-toggle${isExpanded ? " active" : ""}`}
+                          onClick={() => toggleRow(lycee.code)}
+                          title={
+                            isExpanded
+                              ? "Masquer le graphique"
+                              : "Afficher le graphique"
+                          }
+                          aria-label={
+                            isExpanded
+                              ? "Masquer le graphique"
+                              : "Afficher le graphique"
+                          }
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            width="20"
+                            height="20"
+                          >
+                            <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
+                          </svg>
+                        </button>
+                        {isExpanded && (
+                          <div className="sparkline-container">
+                            <AdmissionSparkline seuils={lycee.seuils} />
+                          </div>
+                        )}
+                      </>
                     )}
                   </td>
                 </tr>
