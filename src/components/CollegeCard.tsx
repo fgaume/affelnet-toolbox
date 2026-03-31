@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { SectorResult, LyceeSecteur, Address } from '../types';
+import type { SectorResult, LyceeSecteur, Address, College } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
 import { SectorMap } from './SectorMap';
-import { ScolarisationSection } from './ScolarisationSection';
+import { ScolarisationSection, type ScolarisationStatus } from './ScolarisationSection';
 import { LyceeListSection } from './LyceeListSection';
 import './CollegeCard.css';
 
@@ -32,11 +32,16 @@ export function CollegeCard({ result, address, onClose }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
+  const [activeSector, setActiveSector] = useState(1);
+  const [scolarisation, setScolarisation] = useState<ScolarisationStatus>('pending');
+  const [collegeScolarisation, setCollegeScolarisation] = useState<College | null>(null);
 
-  // Filter lycees of sector 1 for the map
-  const lyceesSecteur1 = useMemo(
-    () => lycees?.filter(l => l.secteur === 1) ?? [],
-    [lycees]
+  // Filter lycees for the map based on active sector
+  const lyceesForMap = useMemo(
+    () => activeSector === 0
+      ? TOUS_SECTEURS_LYCEES
+      : lycees?.filter(l => l.secteur === activeSector) ?? [],
+    [lycees, activeSector]
   );
 
   // Fetch seuils once and compute difficulties for displayed lycées + tous secteurs
@@ -103,7 +108,13 @@ export function CollegeCard({ result, address, onClose }: CollegeCardProps) {
         </div>
       )}
 
-      <ScolarisationSection collegeUai={college.uai} />
+      <ScolarisationSection
+        collegeUai={college.uai}
+        scolarisation={scolarisation}
+        onScolarisationChange={setScolarisation}
+        collegeScolarisation={collegeScolarisation}
+        onCollegeScolarisationChange={setCollegeScolarisation}
+      />
 
       {lycees && (
         <LyceeListSection
@@ -113,14 +124,16 @@ export function CollegeCard({ result, address, onClose }: CollegeCardProps) {
           requestedCount={requestedCount}
           difficulties={difficulties}
           uaiCollegeUtilisateur={college.uai}
+          onSectorChange={setActiveSector}
         />
       )}
 
       <SectorMap
         homeCoords={address?.coordinates}
         college={college}
-        lyceesSecteur1={lyceesSecteur1}
-        lyceesTousSecteurs={TOUS_SECTEURS_LYCEES}
+        lyceesActifs={lyceesForMap}
+        lyceesTousSecteurs={activeSector === 0 || activeSector === 1 ? TOUS_SECTEURS_LYCEES : []}
+        activeSector={activeSector}
       />
 
       {lyceeError && (

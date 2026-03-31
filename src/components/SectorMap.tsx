@@ -1,6 +1,6 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip as LeafletTooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CollegeSecteur, LyceeSecteur } from '../types';
 import 'leaflet/dist/leaflet.css';
 import './SectorMap.css';
@@ -17,8 +17,9 @@ L.Icon.Default.mergeOptions({
 interface SectorMapProps {
   homeCoords?: [number, number];
   college: CollegeSecteur;
-  lyceesSecteur1: LyceeSecteur[];
+  lyceesActifs: LyceeSecteur[];
   lyceesTousSecteurs: LyceeSecteur[];
+  activeSector: number;
 }
 
 // Custom icons with white stroke for visibility
@@ -54,17 +55,61 @@ const tousSecteursIcon = L.divIcon({
   popupAnchor: [0, -24],
 });
 
-function MapInvalidator({ expanded }: { expanded: boolean }) {
+function LyceeMarker({ lycee, icon, children }: {
+  lycee: { nom: string; coordinates?: [number, number] };
+  icon: L.DivIcon;
+  children: React.ReactNode;
+}) {
+  const markerRef = useRef<L.Marker>(null);
+
+  const handleTooltipClick = useCallback(() => {
+    markerRef.current?.openPopup();
+  }, []);
+
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return;
+    const tooltip = marker.getTooltip();
+    if (!tooltip) return;
+    const el = tooltip.getElement();
+    if (!el) return;
+    el.addEventListener('click', handleTooltipClick);
+    return () => el.removeEventListener('click', handleTooltipClick);
+  }, [handleTooltipClick]);
+
+  if (!lycee.coordinates) return null;
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={[lycee.coordinates[1], lycee.coordinates[0]]}
+      icon={icon}
+    >
+      <LeafletTooltip permanent direction="right" offset={[8, -12]} className="lycee-label" interactive>
+        {lycee.nom}
+      </LeafletTooltip>
+      {children}
+    </Marker>
+  );
+}
+
+function MapInvalidator({ expanded, coords }: { expanded: boolean; coords: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
-    setTimeout(() => map.invalidateSize(), 200);
-  }, [expanded, map]);
+    setTimeout(() => {
+      map.invalidateSize();
+      if (coords.length > 0) {
+        const bounds = L.latLngBounds(coords.map(c => [c[1], c[0]]));
+        map.fitBounds(bounds, { padding: expanded ? [80, 80] : [50, 50] });
+      }
+    }, 200);
+  }, [expanded, map, coords]);
   return null;
 }
 
 function MapResizer({ coords }: { coords: [number, number][] }) {
   const map = useMap();
-  
+
   useEffect(() => {
     if (coords.length > 0) {
       const bounds = L.latLngBounds(coords.map(c => [c[1], c[0]]));
@@ -79,7 +124,7 @@ function getItineraryUrl(from: [number, number], to: [number, number]) {
   return `https://www.google.com/maps/dir/?api=1&origin=${from[1]},${from[0]}&destination=${to[1]},${to[0]}&travelmode=transit`;
 }
 
-export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecteurs }: SectorMapProps) {
+export function SectorMap({ homeCoords, college, lyceesActifs, lyceesTousSecteurs, activeSector }: SectorMapProps) {
   const [expanded, setExpanded] = useState(false);
 
   // Itinerary origin: home if available, otherwise college
@@ -88,7 +133,7 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
   const allCoords: [number, number][] = [
     ...(homeCoords ? [homeCoords] : []),
     ...(college.coordinates ? [college.coordinates] : []),
-    ...lyceesSecteur1.map(l => l.coordinates).filter((c): c is [number, number] => !!c),
+    ...lyceesActifs.map(l => l.coordinates).filter((c): c is [number, number] => !!c),
     ...lyceesTousSecteurs.map(l => l.coordinates).filter((c): c is [number, number] => !!c)
   ];
 
@@ -156,21 +201,17 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
           </Marker>
         )}
 
-        {lyceesSecteur1.map(lycee => lycee.coordinates && (
-          <Marker
-            key={lycee.uai}
-            position={[lycee.coordinates[1], lycee.coordinates[0]]}
-            icon={lyceeIcon}
-          >
+        {lyceesActifs.map(lycee => (
+          <LyceeMarker key={lycee.uai} lycee={lycee} icon={lyceeIcon}>
             <Popup>
-              <strong>Lycée de secteur 1</strong><br />
+              <strong>Lycée {activeSector === 0 ? 'tous secteurs' : `secteur ${activeSector}`}</strong><br />
               {lycee.nom}
               <div className="popup-itinerary">
                 <a href={`https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=${lycee.uai}`} target="_blank" rel="noopener noreferrer">
                   Voir la fiche officielle
                 </a>
               </div>
-              {itineraryOrigin && (
+              {itineraryOrigin && lycee.coordinates && (
                 <div className="popup-itinerary">
                   <a href={getItineraryUrl(itineraryOrigin, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
                     Itinéraire {itineraryLabel}
@@ -178,15 +219,11 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
                 </div>
               )}
             </Popup>
-          </Marker>
+          </LyceeMarker>
         ))}
 
-        {lyceesTousSecteurs.map(lycee => lycee.coordinates && (
-          <Marker
-            key={lycee.uai}
-            position={[lycee.coordinates[1], lycee.coordinates[0]]}
-            icon={tousSecteursIcon}
-          >
+        {lyceesTousSecteurs.map(lycee => (
+          <LyceeMarker key={lycee.uai} lycee={lycee} icon={tousSecteursIcon}>
             <Popup>
               <strong>Lycée tous secteurs</strong><br />
               {lycee.nom}
@@ -195,7 +232,7 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
                   Voir la fiche officielle
                 </a>
               </div>
-              {itineraryOrigin && (
+              {itineraryOrigin && lycee.coordinates && (
                 <div className="popup-itinerary">
                   <a href={getItineraryUrl(itineraryOrigin, lycee.coordinates)} target="_blank" rel="noopener noreferrer">
                     Itinéraire {itineraryLabel}
@@ -203,18 +240,18 @@ export function SectorMap({ homeCoords, college, lyceesSecteur1, lyceesTousSecte
                 </div>
               )}
             </Popup>
-          </Marker>
+          </LyceeMarker>
         ))}
 
         <MapResizer coords={allCoords} />
-        <MapInvalidator expanded={expanded} />
+        <MapInvalidator expanded={expanded} coords={allCoords} />
       </MapContainer>
       
       <div className="map-legend">
         {homeCoords && <div className="legend-item"><span className="legend-dot home"></span> Domicile</div>}
         <div className="legend-item"><span className="legend-dot college"></span> Collège</div>
-        <div className="legend-item"><span className="legend-dot lycee"></span> Lycée Secteur 1</div>
-        <div className="legend-item"><span className="legend-dot tous"></span> Tous secteurs</div>
+        <div className="legend-item"><span className="legend-dot lycee"></span> Lycée {activeSector === 0 ? 'tous secteurs' : `Secteur ${activeSector}`}</div>
+        {lyceesTousSecteurs.length > 0 && <div className="legend-item"><span className="legend-dot tous"></span> Tous secteurs</div>}
       </div>
     </div>
   );

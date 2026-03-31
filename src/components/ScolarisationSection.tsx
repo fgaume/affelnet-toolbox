@@ -4,13 +4,23 @@ import { IpsGauge } from './IpsGauge';
 import { fetchCollegeIps } from '../services/collegeApi';
 import type { College, IpsInfo } from '../types';
 
+export type ScolarisationStatus = 'pending' | 'same' | 'other';
+
 interface ScolarisationSectionProps {
   collegeUai: string;
+  scolarisation: ScolarisationStatus;
+  onScolarisationChange: (status: ScolarisationStatus) => void;
+  collegeScolarisation: College | null;
+  onCollegeScolarisationChange: (college: College | null) => void;
 }
 
-export function ScolarisationSection({ collegeUai }: ScolarisationSectionProps) {
-  const [scolarisation, setScolarisation] = useState<'pending' | 'same' | 'other'>('pending');
-  const [collegeScolarisation, setCollegeScolarisation] = useState<College | null>(null);
+export function ScolarisationSection({
+  collegeUai,
+  scolarisation,
+  onScolarisationChange,
+  collegeScolarisation,
+  onCollegeScolarisationChange,
+}: ScolarisationSectionProps) {
   const [ipsInfo, setIpsInfo] = useState<IpsInfo | null>(null);
   const [ipsLoading, setIpsLoading] = useState(false);
   const [ipsError, setIpsError] = useState<string | null>(null);
@@ -38,12 +48,12 @@ export function ScolarisationSection({ collegeUai }: ScolarisationSectionProps) 
   }, [scolarisation, collegeScolarisation, collegeUai]);
 
   const handleScolarisationSame = () => {
-    setScolarisation('same');
-    setCollegeScolarisation(null);
+    onScolarisationChange('same');
+    onCollegeScolarisationChange(null);
   };
 
   const handleScolarisationOther = () => {
-    setScolarisation('other');
+    onScolarisationChange('other');
     setIpsInfo(null);
   };
 
@@ -66,7 +76,7 @@ export function ScolarisationSection({ collegeUai }: ScolarisationSectionProps) 
       {scolarisation === 'same' && (
         <div className="scolarisation-result">
           <span className="scolarisation-badge">Secteur · Scolarisation</span>
-          <button className="scolarisation-change" onClick={() => setScolarisation('pending')}>
+          <button className="scolarisation-change" onClick={() => onScolarisationChange('pending')}>
             Modifier
           </button>
         </div>
@@ -76,13 +86,13 @@ export function ScolarisationSection({ collegeUai }: ScolarisationSectionProps) 
         <div className="scolarisation-other">
           <p className="scolarisation-other-label">Collège de scolarisation</p>
           <CollegeAutocomplete
-            onSelect={setCollegeScolarisation}
+            onSelect={onCollegeScolarisationChange}
             placeholder="Nom de votre collège de scolarisation..."
           />
           {collegeScolarisation && (
             <div className="scolarisation-result" style={{ marginTop: 8 }}>
               <span className="scolarisation-badge scolarisation-badge-other">{collegeScolarisation.nom}</span>
-              <button className="scolarisation-change" onClick={() => setScolarisation('pending')}>
+              <button className="scolarisation-change" onClick={() => onScolarisationChange('pending')}>
                 Modifier
               </button>
             </div>

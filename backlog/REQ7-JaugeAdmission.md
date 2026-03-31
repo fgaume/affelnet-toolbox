@@ -1,0 +1,2 @@
+A la place du diagramme à barres horizontales des matières du composant "Votre Score Afflelnet" dans le menu "Calculer son score" (qu'il faut supprimer) construis un autre diagramme qui représentent les 5 lycées de secteur sur une sorte d'axe ou de jauge (un peu comme celle des bonus IPS) avec un "pointeur" vers le score d'admission courant de secteur 1 afin d'illustrer les lycées où l'on serait admis.
+Tu prendras les scores d'admissions les plus récents, que tu as déjà récupéré lors du tableau "Historique scores".

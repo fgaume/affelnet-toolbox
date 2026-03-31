@@ -24,10 +24,12 @@ import {
   GradeInputForm,
   ScoreDisplay,
   DataSourcesPanel,
+  AdmissionHistoryTable,
 } from './components';
 import {
   fetchAllAcademicStats,
 } from './services/scoreApi';
+import { useAdmissionHistory } from './hooks/useAdmissionHistory';
 import { fetchCollegeIps } from './services/collegeApi';
 import { calculateAffelnetScore, DEFAULT_MULTIPLIER } from './services/scoreCalculation';
 import './App.css';
@@ -51,6 +53,7 @@ function App() {
   const [ipsBonus, setIpsBonus] = useState(0);
   const [multiplier, setMultiplier] = useState(DEFAULT_MULTIPLIER);
   const [lastGrades, setLastGrades] = useState<UserGrades | null>(null);
+  const { data: admissionHistory, isLoading: isHistoryLoading, error: historyError } = useAdmissionHistory(topTab === 'history');
 
   // Fetch all academic stats when the score tab is activated
   useEffect(() => {
@@ -182,83 +185,90 @@ function App() {
             </svg>
             Calculer son score
           </button>
+          <button
+            className={`input-tab${topTab === 'history' ? ' active' : ''}`}
+            onClick={() => handleTopTabChange('history')}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
+            </svg>
+            Historique scores
+          </button>
         </div>
 
-        {topTab === 'search' && (
-          <>
-            {!result && !isLoading && (
-              <>
-                <div className="search-mode-tabs">
-                  <button
-                    className={`search-mode-tab${searchMode === 'address' ? ' active' : ''}`}
-                    onClick={() => setSearchMode('address')}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                    </svg>
-                    Par adresse
-                  </button>
-                  <button
-                    className={`search-mode-tab${searchMode === 'college' ? ' active' : ''}`}
-                    onClick={() => setSearchMode('college')}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
-                      <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
-                    </svg>
-                    Par collège
-                  </button>
-                </div>
-                {searchMode === 'address' && (
-                  <AddressInput onAddressSelect={handleAddressSelect} disabled={isLoading} />
-                )}
-                {searchMode === 'college' && (
-                  <CollegeAutocomplete
-                    onSelect={handleCollegeSelect}
-                    placeholder="Nom de votre collège de secteur..."
-                    disabled={isLoading}
-                  />
-                )}
-              </>
-            )}
-
-            {isLoading && <LoadingState />}
-
-            {error && !isLoading && !result && <ErrorMessage message={error} />}
-
-            {result && (
-              <>
-                <CollegeCard
-                  result={result}
-                  address={searchedAddress ?? undefined}
-                  onClose={handleNewSearch}
-                />
-                <button className="new-search-button" onClick={handleNewSearch}>
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
+        <div className="tab-panel" style={{ display: topTab === 'search' ? undefined : 'none' }}>
+          {!result && !isLoading && (
+            <>
+              <div className="search-mode-tabs">
+                <button
+                  className={`search-mode-tab${searchMode === 'address' ? ' active' : ''}`}
+                  onClick={() => setSearchMode('address')}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                   </svg>
-                  Nouvelle recherche
+                  Par adresse de votre domicile
                 </button>
-              </>
-            )}
+                <button
+                  className={`search-mode-tab${searchMode === 'college' ? ' active' : ''}`}
+                  onClick={() => setSearchMode('college')}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
+                  </svg>
+                  Par collège de secteur
+                </button>
+              </div>
+              {searchMode === 'address' && (
+                <AddressInput onAddressSelect={handleAddressSelect} disabled={isLoading} />
+              )}
+              {searchMode === 'college' && (
+                <CollegeAutocomplete
+                  onSelect={handleCollegeSelect}
+                  placeholder="Nom de votre collège de secteur..."
+                  disabled={isLoading}
+                />
+              )}
+            </>
+          )}
 
-            {!result && !isLoading && history.length > 0 && (
-              <SearchHistory
-                history={history}
-                onSelectEntry={handleHistorySelect}
-                onRemoveEntry={removeEntry}
-                onClearHistory={clearHistory}
+          {isLoading && <LoadingState />}
+
+          {error && !isLoading && !result && <ErrorMessage message={error} />}
+
+          {result && (
+            <>
+              <CollegeCard
+                result={result}
+                address={searchedAddress ?? undefined}
+                onClose={handleNewSearch}
               />
-            )}
-          </>
-        )}
+              <button className="new-search-button" onClick={handleNewSearch}>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+                Nouvelle recherche
+              </button>
+            </>
+          )}
 
-        {topTab === 'score' && (
+          {!result && !isLoading && history.length > 0 && (
+            <SearchHistory
+              history={history}
+              onSelectEntry={handleHistorySelect}
+              onRemoveEntry={removeEntry}
+              onClearHistory={clearHistory}
+            />
+          )}
+        </div>
+
+        <div className="tab-panel" style={{ display: topTab === 'score' ? undefined : 'none' }}>
           <div className="score-calculation-container">
             {isStatsLoading && <LoadingState />}
             {statsError && <ErrorMessage message={`Erreur lors du chargement des statistiques : ${statsError}`} />}
@@ -278,7 +288,17 @@ function App() {
               </div>
             )}
           </div>
-        )}
+        </div>
+
+        <div className="tab-panel" style={{ display: topTab === 'history' ? undefined : 'none' }}>
+          <div className="admission-history-container">
+            {isHistoryLoading && <LoadingState />}
+            {historyError && <ErrorMessage message={`Erreur lors du chargement des seuils : ${historyError}`} />}
+            {!isHistoryLoading && !historyError && admissionHistory.length > 0 && (
+              <AdmissionHistoryTable data={admissionHistory} />
+            )}
+          </div>
+        </div>
       </main>
 
       <footer className="app-footer">
