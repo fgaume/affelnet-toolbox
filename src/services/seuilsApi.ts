@@ -9,6 +9,7 @@ export interface AdmissionDifficulty {
   color: string;
   label: string;
   seuil: number;
+  level: 'extreme' | 'hard' | 'medium' | 'easy' | 'very-easy';
 }
 
 interface DatasetRow {
@@ -83,16 +84,16 @@ export async function fetchAllSeuils(): Promise<readonly LyceeAdmissionHistory[]
  */
 export function getAdmissionDifficulty(seuil: number): AdmissionDifficulty {
   if (seuil > 40731) {
-    return { color: '#1a1a1a', label: 'Inaccessible sans bonus', seuil };
+    return { color: '#1a1a1a', label: 'Inaccessible sans bonus', seuil, level: 'extreme' };
   }
   if (seuil > 40600) {
-    return { color: '#dc2626', label: 'Difficilement accessible', seuil };
+    return { color: '#dc2626', label: 'Difficilement accessible', seuil, level: 'hard' };
   }
   if (seuil > 40250) {
-    return { color: '#f97316', label: 'Moyennement accessible', seuil };
+    return { color: '#f97316', label: 'Moyennement accessible', seuil, level: 'medium' };
   }
   if (seuil > 38000) {
-    return { color: '#2563eb', label: 'Facilement accessible (secteur 1)', seuil };
+    return { color: '#2563eb', label: 'Facilement accessible (secteur 1)', seuil, level: 'easy' };
   }
-  return { color: '#16a34a', label: 'Très facilement accessible', seuil };
+  return { color: '#16a34a', label: 'Très facilement accessible', seuil, level: 'very-easy' };
 }
