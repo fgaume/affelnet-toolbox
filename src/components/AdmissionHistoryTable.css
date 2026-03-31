@@ -66,6 +66,40 @@
   white-space: nowrap;
 }
 
+.admission-history-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.admission-history-table th.sortable:hover {
+  color: var(--color-text-primary);
+}
+
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sort-icon {
+  flex-shrink: 0;
+  opacity: 0.3;
+  transition: opacity 0.15s;
+}
+
+.sort-icon.active {
+  opacity: 1;
+}
+
+.sort-arrow {
+  opacity: 0.25;
+}
+
+.sort-arrow-active {
+  opacity: 1;
+}
+
 .admission-history-table td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--color-border);
@@ -158,6 +192,64 @@
 [data-theme="dark"] .admission-history-table .difficulty-medium { color: #fb923c; }
 [data-theme="dark"] .admission-history-table .difficulty-easy { color: #60a5fa; }
 [data-theme="dark"] .admission-history-table .difficulty-very-easy { color: #4ade80; }
+
+/* Legend */
+.admission-history-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.legend-label {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-right: 4px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.legend-item::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-item.difficulty-very-easy { color: #16a34a; }
+.legend-item.difficulty-very-easy::before { background: #16a34a; }
+.legend-item.difficulty-easy { color: #2563eb; }
+.legend-item.difficulty-easy::before { background: #2563eb; }
+.legend-item.difficulty-medium { color: #ea580c; }
+.legend-item.difficulty-medium::before { background: #ea580c; }
+.legend-item.difficulty-hard { color: #dc2626; }
+.legend-item.difficulty-hard::before { background: #dc2626; }
+.legend-item.difficulty-extreme { color: #1a1a1a; }
+.legend-item.difficulty-extreme::before { background: #1a1a1a; }
+
+[data-theme="dark"] .legend-item.difficulty-very-easy { color: #4ade80; }
+[data-theme="dark"] .legend-item.difficulty-very-easy::before { background: #4ade80; }
+[data-theme="dark"] .legend-item.difficulty-easy { color: #60a5fa; }
+[data-theme="dark"] .legend-item.difficulty-easy::before { background: #60a5fa; }
+[data-theme="dark"] .legend-item.difficulty-medium { color: #fb923c; }
+[data-theme="dark"] .legend-item.difficulty-medium::before { background: #fb923c; }
+[data-theme="dark"] .legend-item.difficulty-hard { color: #f87171; }
+[data-theme="dark"] .legend-item.difficulty-hard::before { background: #f87171; }
+[data-theme="dark"] .legend-item.difficulty-extreme { color: #d8b4fe; }
+[data-theme="dark"] .legend-item.difficulty-extreme::before { background: #d8b4fe; }
 
 @media (max-width: 768px) {
   .admission-history-table .col-name {
