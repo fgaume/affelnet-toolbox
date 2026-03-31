@@ -3,17 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/school.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="description" content="Trouvez votre collège de secteur en fonction de votre adresse" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="Trouvez votre collège de secteur en fonction de votre adresse"
+    />
     <meta name="theme-color" content="#1e40af" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <title>Mon Collège de Secteur</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <title>Affelnet Paris</title>
     <script>
-      (function() {
-        var mode = localStorage.getItem('theme-mode') || 'system';
-        var dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-        document.querySelector('meta[name="theme-color"]').content = dark ? '#0f172a' : '#1e40af';
+      (function () {
+        var mode = localStorage.getItem("theme-mode") || "system";
+        var dark =
+          mode === "dark" ||
+          (mode === "system" &&
+            matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        document.querySelector('meta[name="theme-color"]').content = dark
+          ? "#0f172a"
+          : "#1e40af";
       })();
     </script>
   </head>

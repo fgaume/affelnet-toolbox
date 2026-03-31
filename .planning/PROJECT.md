@@ -1,7 +1,7 @@
 # Projet : Affelnet Score Scolaire
 
 ## Contexte
-L'application "Mon Collège de Secteur" permet actuellement de trouver son collège de secteur à Paris et de visualiser les lycées associés (Secteur 1, 2, 3) avec leurs indicateurs (IPS, taux de réussite, etc.).
+L'application "Affelnet Paris" permet actuellement de trouver son collège de secteur à Paris et de visualiser les lycées associés (Secteur 1, 2, 3) avec leurs indicateurs (IPS, taux de réussite, etc.).
 
 Cette nouvelle phase vise à intégrer un calculateur de score scolaire Affelnet directement dans l'application. Ce score est crucial pour l'affectation en lycée à Paris et se calcule à partir des moyennes annuelles des matières suivies en classe de 3ème.
 
