@@ -57,7 +57,7 @@ export function AddressInput({ onAddressSelect, disabled }: AddressInputProps) {
         <input
           type="text"
           className="address-input"
-          placeholder="Saisissez votre adresse..."
+          placeholder="Saisissez l'adresse de votre domicile"
           value={inputValue}
           onChange={handleInputChange}
           onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-"Mon Collège de Secteur" — a React SPA that finds a student's sector middle school (collège) based on their home address, targeting the French education system. Uses public French government APIs for geocoding and school data.
+"Affelnet Paris" — a React SPA that finds a student's sector middle school (collège) based on their home address, targeting the French education system. Uses public French government APIs for geocoding and school data.
 
 ## Commands
 
