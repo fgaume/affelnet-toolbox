@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type {
   Address,
   College,
@@ -49,7 +49,6 @@ function App() {
   const [availableStatsYears, setAvailableStatsYears] = useState<number[]>([]);
   const [statsYear, setStatsYear] = useState<number | null>(null);
   const stats = statsYear && allStatsByYear ? allStatsByYear.get(statsYear) ?? null : null;
-  const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [ipsBonus, setIpsBonus] = useState(0);
   const [multiplier, setMultiplier] = useState(DEFAULT_MULTIPLIER);
@@ -57,9 +56,10 @@ function App() {
   const { data: admissionHistory, isLoading: isHistoryLoading, error: historyError } = useAdmissionHistory(topTab === 'history');
 
   // Fetch all academic stats when the score tab is activated
+  const statsFetchingRef = useRef(false);
   useEffect(() => {
-    if (topTab === 'score' && !allStatsByYear && !isStatsLoading) {
-      setIsStatsLoading(true);
+    if (topTab === 'score' && !allStatsByYear && !statsFetchingRef.current) {
+      statsFetchingRef.current = true;
       fetchAllAcademicStats()
         .then(({ availableYears, statsByYear }) => {
           setAllStatsByYear(statsByYear);
@@ -67,9 +67,11 @@ function App() {
           setStatsYear(Math.max(...availableYears));
         })
         .catch(err => setStatsError(err instanceof Error ? err.message : String(err)))
-        .finally(() => setIsStatsLoading(false));
+        .finally(() => {
+          statsFetchingRef.current = false;
+        });
     }
-  }, [topTab, allStatsByYear, isStatsLoading]);
+  }, [topTab, allStatsByYear]);
 
   // Fetch IPS bonus when result changes
   useEffect(() => {
@@ -79,10 +81,6 @@ function App() {
       }).catch(() => {
         setIpsBonus(0);
       });
-    } else {
-      // If we are in college mode and have a selected college but no search result yet
-      // This is a placeholder if we wanted to fetch IPS even before sector results
-      setIpsBonus(0);
     }
   }, [result]);
 
@@ -135,17 +133,15 @@ function App() {
     });
   }, [lastGrades, stats]);
 
-  // Recalculate score when stats year changes
-  useEffect(() => {
-    if (lastGrades && stats) {
-      const newScore = calculateAffelnetScore(lastGrades, stats, multiplier);
-      setScore(newScore);
-    }
-  }, [statsYear]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const handleStatsYearChange = useCallback((year: number) => {
     setStatsYear(year);
-  }, []);
+    if (lastGrades && allStatsByYear) {
+      const yearStats = allStatsByYear.get(year);
+      if (yearStats) {
+        setScore(calculateAffelnetScore(lastGrades, yearStats, multiplier));
+      }
+    }
+  }, [lastGrades, allStatsByYear, multiplier]);
 
   const handleTopTabChange = (tab: TopTab) => {
     setTopTab(tab);
@@ -272,14 +268,14 @@ function App() {
 
         <div className="tab-panel" style={{ display: topTab === 'score' ? undefined : 'none' }}>
           <div className="score-calculation-container">
-            {isStatsLoading && <LoadingState />}
+            {topTab === 'score' && !allStatsByYear && !statsError && <LoadingState />}
             {statsError && <ErrorMessage message={`Erreur lors du chargement des statistiques : ${statsError}`} />}
             {stats && (
               <div className="score-grid">
                 <GradeInputForm onGradesChange={handleGradesChange} />
                 <ScoreDisplay
                   score={score}
-                  ipsBonus={ipsBonus}
+                  ipsBonus={result?.college.uai ? ipsBonus : 0}
                   collegeName={result?.college.nom}
                   multiplier={multiplier}
                   onMultiplierChange={handleMultiplierChange}

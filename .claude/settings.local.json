@@ -43,7 +43,8 @@
       "Bash(/Users/fred/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/skills/brainstorming/scripts/start-server.sh --project-dir /Users/fred/Code/college/affelnet-no-socle)",
       "Bash(/Users/fred/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/skills/brainstorming/scripts/stop-server.sh /Users/fred/Code/college/affelnet-no-socle/.superpowers/brainstorm/18858-1774563010)",
       "Bash(python3 -m json.tool)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(git pull:*)"
     ]
   }
 }
