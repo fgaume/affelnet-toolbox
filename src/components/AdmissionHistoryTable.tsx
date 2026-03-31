@@ -29,11 +29,25 @@ function useIsMobile(): boolean {
   return isMobile;
 }
 
+type SortKey = 'name' | number; // number = index in SEUIL_YEARS
+type SortDir = 'asc' | 'desc';
+
+function SortIcon({ active, direction }: { readonly active: boolean; readonly direction: SortDir }) {
+  return (
+    <svg className={`sort-icon${active ? ' active' : ''}`} viewBox="0 0 10 14" width="10" height="14" fill="currentColor">
+      <path className={active && direction === 'asc' ? 'sort-arrow-active' : 'sort-arrow'} d="M5 0L9.5 5.5H0.5Z" />
+      <path className={active && direction === 'desc' ? 'sort-arrow-active' : 'sort-arrow'} d="M5 14L0.5 8.5H9.5Z" />
+    </svg>
+  );
+}
+
 function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
   const [expandedRows, setExpandedRows] = useState<ReadonlySet<string>>(
     new Set(),
   );
   const [filter, setFilter] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
   const isMobile = useIsMobile();
 
   const visibleYears = useMemo(
@@ -46,11 +60,31 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
     [visibleYears],
   );
 
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir(key === 'name' ? 'asc' : 'desc');
+    }
+  };
+
   const filteredData = useMemo(() => {
-    if (!filter.trim()) return data;
-    const lower = filter.toLowerCase();
-    return data.filter((l) => l.nom.toLowerCase().includes(lower));
-  }, [data, filter]);
+    const filtered = filter.trim()
+      ? data.filter((l) => l.nom.toLowerCase().includes(filter.toLowerCase()))
+      : [...data];
+
+    const sorted = filtered.slice().sort((a, b) => {
+      if (sortKey === 'name') {
+        return a.nom.localeCompare(b.nom, 'fr');
+      }
+      const seuilA = a.seuils[sortKey] ?? 0;
+      const seuilB = b.seuils[sortKey] ?? 0;
+      return seuilA - seuilB;
+    });
+
+    return sortDir === 'desc' ? sorted.reverse() : sorted;
+  }, [data, filter, sortKey, sortDir]);
 
   const toggleRow = (code: string) => {
     setExpandedRows((prev) => {
@@ -84,12 +118,17 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
         <table className="admission-history-table">
           <thead>
             <tr>
-              <th className="col-name">Lycée</th>
-              {visibleYears.map((year) => (
-                <th key={year} className="col-year">
-                  {year}
-                </th>
-              ))}
+              <th className="col-name sortable" onClick={() => handleSort('name')}>
+                <span className="th-content">Lycée <SortIcon active={sortKey === 'name'} direction={sortDir} /></span>
+              </th>
+              {visibleYears.map((year) => {
+                const idx = SEUIL_YEARS.indexOf(year);
+                return (
+                  <th key={year} className="col-year sortable" onClick={() => handleSort(idx)}>
+                    <span className="th-content">{year} <SortIcon active={sortKey === idx} direction={sortDir} /></span>
+                  </th>
+                );
+              })}
               <th className="col-graph">Évolution</th>
             </tr>
           </thead>
@@ -171,6 +210,15 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
       {filteredData.length === 0 && (
         <p className="admission-history-empty">Aucun lycée trouvé</p>
       )}
+
+      <div className="admission-history-legend">
+        <span className="legend-label">Légende :</span>
+        <span className="legend-item difficulty-very-easy">Très facilement accessible</span>
+        <span className="legend-item difficulty-easy">Facilement accessible</span>
+        <span className="legend-item difficulty-medium">Moyennement accessible</span>
+        <span className="legend-item difficulty-hard">Difficilement accessible</span>
+        <span className="legend-item difficulty-extreme">Inaccessible sans bonus</span>
+      </div>
     </div>
   );
 }

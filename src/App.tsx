@@ -25,6 +25,7 @@ import {
   ScoreDisplay,
   DataSourcesPanel,
   AdmissionHistoryTable,
+  DisclaimerModal,
 } from './components';
 import {
   fetchAllAcademicStats,
@@ -152,6 +153,7 @@ function App() {
 
   return (
     <div className="app">
+      <DisclaimerModal />
       <header className="app-header">
         <ThemeToggle mode={mode} onToggle={setMode} />
         <div className="logo">
