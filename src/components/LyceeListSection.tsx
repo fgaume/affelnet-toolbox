@@ -21,6 +21,7 @@ interface LyceeListSectionProps {
   requestedCount?: number;
   difficulties: Map<string, AdmissionDifficulty>;
   uaiCollegeUtilisateur: string;
+  onSectorChange?: (sector: number) => void;
 }
 
 export function LyceeListSection({
@@ -30,8 +31,14 @@ export function LyceeListSection({
   requestedCount,
   difficulties,
   uaiCollegeUtilisateur,
+  onSectorChange,
 }: LyceeListSectionProps) {
   const [activeSector, setActiveSector] = useState(1);
+
+  const handleSectorChange = (sector: number) => {
+    setActiveSector(sector);
+    onSectorChange?.(sector);
+  };
   const [expandedLycee, setExpandedLycee] = useState<string | null>(null);
 
   const lyceesBySector = useMemo(() => {
@@ -66,7 +73,7 @@ export function LyceeListSection({
           <button
             key={secteur}
             className={`sector-tab${activeSector === secteur ? ' active' : ''}`}
-            onClick={() => setActiveSector(secteur)}
+            onClick={() => handleSectorChange(secteur)}
           >
             {sectorLabel(secteur)}
           </button>

@@ -201,6 +201,8 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                   formatName(String(name ?? '')),
                 ]}
                 itemSorter={(item) => ipsRank.get(String(item.dataKey ?? '')) ?? 9999}
+                contentStyle={{ background: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border, #ddd)', borderRadius: 6, fontSize: 11, padding: '4px 8px' }}
+                wrapperStyle={{ zIndex: 10 }}
               />
               <Legend
                 formatter={(key: string) => formatName(key)}
@@ -246,6 +248,8 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                   formatName(String(name ?? '')),
                 ]}
                 itemSorter={(item) => tbRank.get(String(item.dataKey ?? '')) ?? 9999}
+                contentStyle={{ background: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border, #ddd)', borderRadius: 6, fontSize: 11, padding: '4px 8px' }}
+                wrapperStyle={{ zIndex: 10 }}
               />
               <Legend
                 formatter={(key: string) => formatName(key)}

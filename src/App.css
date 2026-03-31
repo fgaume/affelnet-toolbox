@@ -60,6 +60,13 @@
   box-sizing: border-box;
 }
 
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .new-search-button {
   display: flex;
   align-items: center;

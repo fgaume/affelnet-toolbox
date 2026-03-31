@@ -3,6 +3,8 @@ const DATASET_URL =
 
 const SEUIL_2025_INDEX = 4;
 
+export const SEUIL_YEARS = [2021, 2022, 2023, 2024, 2025] as const;
+
 export interface AdmissionDifficulty {
   color: string;
   label: string;
@@ -17,7 +19,10 @@ interface DatasetRow {
   };
 }
 
+import type { LyceeAdmissionHistory } from '../types';
+
 let cache: Map<string, number> | null = null;
+let historyCache: readonly LyceeAdmissionHistory[] | null = null;
 
 /**
  * Fetch all lycée admission thresholds from HuggingFace dataset.
@@ -44,6 +49,33 @@ export async function fetchSeuils(): Promise<Map<string, number>> {
   }
 
   return cache;
+}
+
+/**
+ * Fetch full historical admission thresholds for all lycées.
+ * Returns the complete seuils array per lycée.
+ * Cached after first call.
+ */
+export async function fetchAllSeuils(): Promise<readonly LyceeAdmissionHistory[]> {
+  if (historyCache) return historyCache;
+
+  const response = await fetch(DATASET_URL);
+  if (!response.ok) {
+    throw new Error(`Erreur chargement seuils: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const rows: DatasetRow[] = data.rows;
+
+  historyCache = rows
+    .map(({ row }) => ({
+      code: row.code,
+      nom: row.nom,
+      seuils: row.seuils,
+    }))
+    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+  return historyCache;
 }
 
 /**
