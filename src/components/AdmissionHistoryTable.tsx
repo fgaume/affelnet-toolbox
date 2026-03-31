@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
-import type { LyceeAdmissionHistory } from '../types';
-import { SEUIL_YEARS, getAdmissionDifficulty } from '../services/seuilsApi';
-import AdmissionSparkline from './AdmissionSparkline';
-import './AdmissionHistoryTable.css';
+import { useState, useEffect, useMemo } from "react";
+import type { LyceeAdmissionHistory } from "../types";
+import { SEUIL_YEARS, getAdmissionDifficulty } from "../services/seuilsApi";
+import AdmissionSparkline from "./AdmissionSparkline";
+import "./AdmissionHistoryTable.css";
 
 interface AdmissionHistoryTableProps {
   readonly data: readonly LyceeAdmissionHistory[];
@@ -11,46 +11,48 @@ interface AdmissionHistoryTableProps {
 const MOBILE_BREAKPOINT = 768;
 
 // These lycées never have admission scores (selection on dossier only)
-const NO_SCORE_LYCEES = new Set(['0750654D', '0750655E']); // HENRI IV, LOUIS LE GRAND
+const NO_SCORE_LYCEES = new Set(["0750654D", "0750655E"]); // HENRI IV, LOUIS LE GRAND
 
 function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(
-    () => window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches
+    () => window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches,
   );
 
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
   return isMobile;
 }
 
 function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
-  const [expandedRows, setExpandedRows] = useState<ReadonlySet<string>>(new Set());
-  const [filter, setFilter] = useState('');
+  const [expandedRows, setExpandedRows] = useState<ReadonlySet<string>>(
+    new Set(),
+  );
+  const [filter, setFilter] = useState("");
   const isMobile = useIsMobile();
 
   const visibleYears = useMemo(
     () => (isMobile ? SEUIL_YEARS.slice(-2) : SEUIL_YEARS),
-    [isMobile]
+    [isMobile],
   );
 
   const visibleYearIndices = useMemo(
-    () => visibleYears.map(y => SEUIL_YEARS.indexOf(y)),
-    [visibleYears]
+    () => visibleYears.map((y) => SEUIL_YEARS.indexOf(y)),
+    [visibleYears],
   );
 
   const filteredData = useMemo(() => {
     if (!filter.trim()) return data;
     const lower = filter.toLowerCase();
-    return data.filter(l => l.nom.toLowerCase().includes(lower));
+    return data.filter((l) => l.nom.toLowerCase().includes(lower));
   }, [data, filter]);
 
   const toggleRow = (code: string) => {
-    setExpandedRows(prev => {
+    setExpandedRows((prev) => {
       const next = new Set(prev);
       if (next.has(code)) {
         next.delete(code);
@@ -63,9 +65,10 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
 
   return (
     <div className="admission-history">
-      <h2>Historique des scores d'admission</h2>
+      <h2>Historique des seuils d'admission</h2>
       <p className="admission-history-subtitle">
-        Seuils d'admission par lycée sur les {SEUIL_YEARS.length} dernières années
+        Seuils d'admission par lycée sur les {SEUIL_YEARS.length} dernières
+        années
       </p>
 
       <input
@@ -73,7 +76,7 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
         className="admission-history-filter"
         placeholder="Filtrer par nom de lycée…"
         value={filter}
-        onChange={e => setFilter(e.target.value)}
+        onChange={(e) => setFilter(e.target.value)}
       />
 
       <div className="admission-history-table-wrapper">
@@ -81,31 +84,36 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
           <thead>
             <tr>
               <th className="col-name">Lycée</th>
-              {visibleYears.map(year => (
-                <th key={year} className="col-year">{year}</th>
+              {visibleYears.map((year) => (
+                <th key={year} className="col-year">
+                  {year}
+                </th>
               ))}
               <th className="col-graph">Évolution</th>
             </tr>
           </thead>
           <tbody>
-            {filteredData.map(lycee => {
+            {filteredData.map((lycee) => {
               const isExpanded = expandedRows.has(lycee.code);
               return (
-                <tr key={lycee.code} className={isExpanded ? 'expanded' : ''}>
+                <tr key={lycee.code} className={isExpanded ? "expanded" : ""}>
                   <td className="col-name">{lycee.nom}</td>
-                  {visibleYearIndices.map(idx => {
+                  {visibleYearIndices.map((idx) => {
                     const seuil = lycee.seuils[idx];
                     const isNoScore = NO_SCORE_LYCEES.has(lycee.code);
                     const hasValue = seuil != null && seuil > 0;
-                    const difficulty = hasValue ? getAdmissionDifficulty(seuil) : null;
+                    const difficulty = hasValue
+                      ? getAdmissionDifficulty(seuil)
+                      : null;
                     const displayValue = hasValue
-                      ? seuil.toLocaleString('fr-FR')
-                      : isNoScore ? 'N/A' : '–';
+                      ? seuil.toLocaleString("fr-FR")
+                      : isNoScore
+                        ? "N/A"
+                        : "–";
                     return (
                       <td
                         key={idx}
-                        className={`col-year${!hasValue ? ' col-year-empty' : ''}`}
-                        style={difficulty ? { color: difficulty.color } : undefined}
+                        className={`col-year${!hasValue ? " col-year-empty" : ""}${difficulty ? ` difficulty-${difficulty.level}` : ""}`}
                         title={difficulty?.label}
                       >
                         {displayValue}
@@ -114,12 +122,27 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
                   })}
                   <td className="col-graph">
                     <button
-                      className={`sparkline-toggle${isExpanded ? ' active' : ''}`}
+                      className={`sparkline-toggle${isExpanded ? " active" : ""}`}
                       onClick={() => toggleRow(lycee.code)}
-                      title={isExpanded ? 'Masquer le graphique' : 'Afficher le graphique'}
-                      aria-label={isExpanded ? 'Masquer le graphique' : 'Afficher le graphique'}
+                      title={
+                        isExpanded
+                          ? "Masquer le graphique"
+                          : "Afficher le graphique"
+                      }
+                      aria-label={
+                        isExpanded
+                          ? "Masquer le graphique"
+                          : "Afficher le graphique"
+                      }
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        width="20"
+                        height="20"
+                      >
                         <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
                       </svg>
                     </button>

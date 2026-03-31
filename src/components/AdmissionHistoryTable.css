@@ -147,6 +147,18 @@
   font-style: italic;
 }
 
+.admission-history-table .difficulty-extreme { color: #1a1a1a; }
+.admission-history-table .difficulty-hard { color: #dc2626; }
+.admission-history-table .difficulty-medium { color: #ea580c; }
+.admission-history-table .difficulty-easy { color: #2563eb; }
+.admission-history-table .difficulty-very-easy { color: #16a34a; }
+
+[data-theme="dark"] .admission-history-table .difficulty-extreme { color: #d8b4fe; } /* Purple for contrast */
+[data-theme="dark"] .admission-history-table .difficulty-hard { color: #f87171; }
+[data-theme="dark"] .admission-history-table .difficulty-medium { color: #fb923c; }
+[data-theme="dark"] .admission-history-table .difficulty-easy { color: #60a5fa; }
+[data-theme="dark"] .admission-history-table .difficulty-very-easy { color: #4ade80; }
+
 @media (max-width: 768px) {
   .admission-history-table .col-name {
     min-width: 120px;
