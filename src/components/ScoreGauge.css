@@ -1,0 +1,212 @@
+.score-gauge {
+    width: 100%;
+    margin: 1rem 0 2rem;
+}
+
+.score-gauge-title {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+/* Inner wrapper with left/right margin to prevent label overflow */
+.score-gauge-inner {
+    margin: 0 28px;
+}
+
+/* Labels containers */
+.score-gauge-labels {
+    position: relative;
+    height: 52px;
+}
+
+.score-gauge-labels--above {
+    margin-bottom: 0;
+}
+
+.score-gauge-labels--below {
+    margin-top: 0;
+}
+
+/* Individual label */
+.score-gauge-label {
+    position: absolute;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    pointer-events: none;
+}
+
+.score-gauge-label-name {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.score-gauge-label-value {
+    font-size: 10px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.score-gauge-label-line {
+    width: 2px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+/* Icons */
+.score-gauge-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+/* Gauge bar */
+.score-gauge-bar-container {
+    position: relative;
+    height: 14px;
+}
+
+.score-gauge-bar {
+    width: 100%;
+    height: 14px;
+    border-radius: 7px;
+    opacity: 0.85;
+}
+
+/* User score marker */
+.score-gauge-user-marker {
+    position: absolute;
+    top: -10px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+
+.score-gauge-user-triangle {
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 9px solid var(--color-primary);
+}
+
+.score-gauge-user-line {
+    width: 3px;
+    height: 24px;
+    background: var(--color-primary);
+    border-radius: 1px;
+}
+
+.score-gauge-user-value {
+    margin-top: 2px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-primary);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Axis labels */
+.score-gauge-axis-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Easy lycees list */
+.score-gauge-easy-list {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: var(--color-bg-subtle);
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.score-gauge-easy-title {
+    margin: 0 0 4px;
+    font-size: 11px;
+    color: var(--color-text-muted);
+}
+
+.score-gauge-easy-list ul {
+    margin: 0;
+    padding-left: 16px;
+    list-style: disc;
+}
+
+.score-gauge-easy-list li {
+    font-weight: 600;
+    line-height: 1.6;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.score-gauge-seuil-value {
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+/* All very-easy message */
+.score-gauge-easy-only {
+    text-align: center;
+    padding: 1rem;
+    font-size: 14px;
+    font-weight: 600;
+    color: #16a34a;
+    background: var(--color-bg-subtle);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .score-gauge-inner {
+        margin: 0 20px;
+    }
+
+    .score-gauge-labels {
+        height: 46px;
+    }
+
+    .score-gauge-label-name {
+        font-size: 9px;
+        max-width: 80px;
+    }
+
+    .score-gauge-label-value {
+        font-size: 9px;
+    }
+
+    .score-gauge-label-line {
+        height: 12px;
+    }
+
+    .score-gauge-user-value {
+        font-size: 10px;
+    }
+
+    .score-gauge-icon {
+        width: 12px;
+        height: 12px;
+    }
+}

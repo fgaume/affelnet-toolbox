@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import type {
   Address,
   College,
@@ -32,6 +32,7 @@ import {
 } from './services/scoreApi';
 import { useAdmissionHistory } from './hooks/useAdmissionHistory';
 import { fetchCollegeIps } from './services/collegeApi';
+import { fetchSeuils, getAdmissionDifficulty } from './services/seuilsApi';
 import { calculateAffelnetScore, DEFAULT_MULTIPLIER } from './services/scoreCalculation';
 import './App.css';
 
@@ -54,6 +55,38 @@ function App() {
   const [multiplier, setMultiplier] = useState(DEFAULT_MULTIPLIER);
   const [lastGrades, setLastGrades] = useState<UserGrades | null>(null);
   const { data: admissionHistory, isLoading: isHistoryLoading, error: historyError } = useAdmissionHistory(topTab === 'history');
+  const [seuils, setSeuils] = useState<Map<string, number> | null>(null);
+
+  // Fetch seuils when score tab is activated
+  useEffect(() => {
+    if (topTab === 'score' && !seuils) {
+      fetchSeuils().then(setSeuils).catch(() => {});
+    }
+  }, [topTab, seuils]);
+
+  // Compute sector 1 lycees with seuils for the score gauge
+  const sector1LyceesWithSeuils = useMemo(() => {
+    if (!result?.lycees || !seuils) return undefined;
+    return result.lycees
+      .filter(l => l.secteur === 1)
+      .map(l => {
+        const seuil = seuils.get(l.uai);
+        if (seuil == null) return null;
+        return { uai: l.uai, nom: l.nom, seuil, difficulty: getAdmissionDifficulty(seuil) };
+      })
+      .filter((l): l is NonNullable<typeof l> => l != null);
+  }, [result, seuils]);
+
+  const allSeuilsRange = useMemo(() => {
+    if (!seuils) return undefined;
+    const allValues = [...seuils.values()].filter(s => s > 0);
+    if (allValues.length === 0) return undefined;
+    const easyAndAbove = allValues.filter(s => s > 38000);
+    return {
+      min: easyAndAbove.length > 0 ? Math.min(...easyAndAbove) : Math.min(...allValues),
+      max: Math.max(...allValues),
+    };
+  }, [seuils]);
 
   // Fetch all academic stats when the score tab is activated
   const statsFetchingRef = useRef(false);
@@ -282,6 +315,8 @@ function App() {
                   statsYear={statsYear}
                   availableStatsYears={availableStatsYears}
                   onStatsYearChange={handleStatsYearChange}
+                  sector1Lycees={sector1LyceesWithSeuils}
+                  allSeuilsRange={allSeuilsRange}
                 />
               </div>
             )}
