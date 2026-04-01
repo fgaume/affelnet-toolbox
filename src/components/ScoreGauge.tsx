@@ -39,6 +39,11 @@ function buildGradient(min: number, max: number): string {
   return `linear-gradient(to right, ${stops.join(', ')})`;
 }
 
+/** For labels: use a theme-aware color for 'extreme' level (black invisible in dark mode) */
+function labelColor(difficulty: AdmissionDifficulty): string {
+  return difficulty.level === 'extreme' ? 'var(--color-text-primary)' : difficulty.color;
+}
+
 function AdmissionIcon({ admitted }: { admitted: boolean }) {
   if (admitted) {
     return (
@@ -75,7 +80,7 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
         <div className="score-gauge-easy-list">
           <ul>
             {veryEasy.map(l => (
-              <li key={l.uai} style={{ color: l.difficulty.color }}>
+              <li key={l.uai} style={{ color: labelColor(l.difficulty) }}>
                 {sector1Score != null && <AdmissionIcon admitted={sector1Score >= l.seuil} />}
                 {l.nom} <span className="score-gauge-seuil-value">(seuil : {l.seuil.toLocaleString()})</span>
               </li>
@@ -93,7 +98,7 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
 
   return (
     <div className="score-gauge">
-      <p className="score-gauge-title">Position du score de secteur 1 par rapport aux seuils d'admission</p>
+      <p className="score-gauge-title">Positionnement de votre score secteur 1 vs seuils d'admission</p>
 
       <div className="score-gauge-inner">
         {/* Labels above the bar */}
@@ -107,14 +112,14 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
                 className="score-gauge-label"
                 style={{ left: `${pct}%` }}
               >
-                <span className="score-gauge-label-name" style={{ color: l.difficulty.color }}>
+                <span className="score-gauge-label-name" style={{ color: labelColor(l.difficulty) }}>
                   {sector1Score != null && <AdmissionIcon admitted={admitted} />}
                   {l.nom}
                 </span>
-                <span className="score-gauge-label-value" style={{ color: l.difficulty.color }}>
+                <span className="score-gauge-label-value" style={{ color: labelColor(l.difficulty) }}>
                   {l.seuil.toLocaleString()}
                 </span>
-                <span className="score-gauge-label-line" style={{ backgroundColor: l.difficulty.color }} />
+                <span className="score-gauge-label-line" style={{ backgroundColor: labelColor(l.difficulty) }} />
               </div>
             );
           })}
@@ -147,11 +152,11 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
                 className="score-gauge-label"
                 style={{ left: `${pct}%` }}
               >
-                <span className="score-gauge-label-line" style={{ backgroundColor: l.difficulty.color }} />
-                <span className="score-gauge-label-value" style={{ color: l.difficulty.color }}>
+                <span className="score-gauge-label-line" style={{ backgroundColor: labelColor(l.difficulty) }} />
+                <span className="score-gauge-label-value" style={{ color: labelColor(l.difficulty) }}>
                   {l.seuil.toLocaleString()}
                 </span>
-                <span className="score-gauge-label-name" style={{ color: l.difficulty.color }}>
+                <span className="score-gauge-label-name" style={{ color: labelColor(l.difficulty) }}>
                   {sector1Score != null && <AdmissionIcon admitted={admitted} />}
                   {l.nom}
                 </span>
@@ -173,7 +178,7 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
           <p className="score-gauge-easy-title">Lycées très facilement accessibles (hors échelle) :</p>
           <ul>
             {veryEasy.map(l => (
-              <li key={l.uai} style={{ color: l.difficulty.color }}>
+              <li key={l.uai} style={{ color: labelColor(l.difficulty) }}>
                 {sector1Score != null && <AdmissionIcon admitted={sector1Score >= l.seuil} />}
                 {l.nom} <span className="score-gauge-seuil-value">(seuil : {l.seuil.toLocaleString()})</span>
               </li>
