@@ -3,7 +3,8 @@ import type { UserScore, DisciplinaryField } from "../types";
 import { DISCIPLINARY_FIELDS } from "../types";
 import { calculateFinalScores, GEO_BONUS } from "../services/scoreCalculation";
 import { ALT_MODEL_KEY, ALT_MODEL_LABEL } from "../services/scoreApi";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { ScoreGauge } from "./ScoreGauge";
+import type { LyceeSeuil } from "./ScoreGauge";
 import "./ScoreDisplay.css";
 
 interface ScoreDisplayProps {
@@ -15,6 +16,8 @@ interface ScoreDisplayProps {
   statsYear: number | null;
   availableStatsYears: number[];
   onStatsYearChange: (year: number) => void;
+  sector1Lycees?: LyceeSeuil[];
+  allSeuilsRange?: { min: number; max: number };
 }
 
 const FIELD_NAMES: Record<DisciplinaryField, string> = {
@@ -36,6 +39,8 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   statsYear,
   availableStatsYears,
   onStatsYearChange,
+  sector1Lycees,
+  allSeuilsRange,
 }) => {
   if (!score) {
     return (
@@ -48,11 +53,6 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   }
 
   const finalScores = calculateFinalScores(score.totalScore, ipsBonus);
-
-  const breakdownData = DISCIPLINARY_FIELDS.map((field) => ({
-    name: FIELD_NAMES[field],
-    value: score.details[field].contribution * 2,
-  })).sort((a, b) => b.value - a.value);
 
   return (
     <div className="score-display">
@@ -137,34 +137,14 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
         </div>
       </div>
 
-      <div
-        className="score-chart-container"
-        role="img"
-        aria-label="Graphique des points par champ disciplinaire"
-      >
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={breakdownData}
-            layout="vertical"
-            margin={{ left: 20, right: 30, top: 10, bottom: 10 }}
-          >
-            <XAxis type="number" hide domain={[0, "dataMax"]} />
-            <YAxis
-              dataKey="name"
-              type="category"
-              width={150}
-              fontSize={12}
-              tick={{ fill: "currentColor" }}
-            />
-            <Bar
-              dataKey="value"
-              radius={[0, 4, 4, 0]}
-              fill="var(--color-primary)"
-              barSize={20}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {sector1Lycees && sector1Lycees.length > 0 && allSeuilsRange && (
+        <ScoreGauge
+          sector1Score={Math.round(finalScores.secteur1)}
+          lycees={sector1Lycees}
+          axisMin={allSeuilsRange.min}
+          axisMax={allSeuilsRange.max}
+        />
+      )}
 
       <div className="score-breakdown">
         <h3>Détails par champ disciplinaire</h3>

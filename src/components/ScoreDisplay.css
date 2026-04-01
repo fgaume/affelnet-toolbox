@@ -206,6 +206,7 @@
   .total-score-value {
     font-size: 2.5rem;
   }
+
   .final-scores-grid {
     grid-template-columns: 1fr;
   }
@@ -271,13 +272,4 @@
   font-size: 0.85rem;
   color: var(--color-info-text);
   line-height: 1.5;
-}
-
-.score-chart-container {
-  width: 100%;
-  height: 300px;
-  margin: 1rem 0 2rem 0;
-  display: flex;
-  justify-content: center;
-  color: var(--color-text-secondary);
 }
