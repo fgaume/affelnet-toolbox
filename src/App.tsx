@@ -10,6 +10,7 @@ import type {
   AcademicStats,
   DisciplinaryField
 } from './types';
+import type { ScolarisationStatus } from './components/ScolarisationSection';
 import { useSectorSearch } from './hooks/useSectorSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
 import { useTheme } from './hooks/useTheme';
@@ -56,6 +57,8 @@ function App() {
   const [lastGrades, setLastGrades] = useState<UserGrades | null>(null);
   const { data: admissionHistory, isLoading: isHistoryLoading, error: historyError } = useAdmissionHistory(topTab === 'history');
   const [seuils, setSeuils] = useState<Map<string, number> | null>(null);
+  const [scolarisation, setScolarisation] = useState<ScolarisationStatus>('pending');
+  const [collegeScolarisation, setCollegeScolarisation] = useState<College | null>(null);
 
   // Fetch seuils when score tab is activated
   useEffect(() => {
@@ -106,16 +109,22 @@ function App() {
     }
   }, [topTab, allStatsByYear]);
 
-  // Fetch IPS bonus when result changes
+  // Derive the UAI to use for IPS bonus (scolarisation college, not sector)
+  const ipsTargetUai = useMemo(() => {
+    if (scolarisation === 'same') return result?.college.uai ?? null;
+    if (scolarisation === 'other' && collegeScolarisation) return collegeScolarisation.uai;
+    return null;
+  }, [scolarisation, result, collegeScolarisation]);
+
+  // Fetch IPS bonus when target college changes
   useEffect(() => {
-    if (result?.college.uai) {
-      fetchCollegeIps(result.college.uai).then(info => {
-        setIpsBonus(info?.bonus ?? 0);
-      }).catch(() => {
-        setIpsBonus(0);
-      });
-    }
-  }, [result]);
+    if (!ipsTargetUai) return;
+    fetchCollegeIps(ipsTargetUai).then(info => {
+      setIpsBonus(info?.bonus ?? 0);
+    }).catch(() => {
+      setIpsBonus(0);
+    });
+  }, [ipsTargetUai]);
 
   const handleAddressSelect = useCallback(
     (address: Address) => {
@@ -144,6 +153,9 @@ function App() {
   const handleNewSearch = useCallback(() => {
     reset();
     refresh();
+    setScolarisation('pending');
+    setCollegeScolarisation(null);
+    setIpsBonus(0);
   }, [reset, refresh]);
 
   const handleGradesChange = useCallback((grades: UserGrades) => {
@@ -273,6 +285,10 @@ function App() {
                 result={result}
                 address={searchedAddress ?? undefined}
                 onClose={handleNewSearch}
+                scolarisation={scolarisation}
+                onScolarisationChange={setScolarisation}
+                collegeScolarisation={collegeScolarisation}
+                onCollegeScolarisationChange={setCollegeScolarisation}
               />
               <button className="new-search-button" onClick={handleNewSearch}>
                 <svg
@@ -308,8 +324,8 @@ function App() {
                 <GradeInputForm onGradesChange={handleGradesChange} />
                 <ScoreDisplay
                   score={score}
-                  ipsBonus={result?.college.uai ? ipsBonus : 0}
-                  collegeName={result?.college.nom}
+                  ipsBonus={ipsBonus}
+                  collegeName={scolarisation === 'other' && collegeScolarisation ? collegeScolarisation.nom : result?.college.nom}
                   multiplier={multiplier}
                   onMultiplierChange={handleMultiplierChange}
                   statsYear={statsYear}

@@ -27,15 +27,17 @@ interface CollegeCardProps {
   result: SectorResult;
   address?: Address;
   onClose?: () => void;
+  scolarisation: ScolarisationStatus;
+  onScolarisationChange: (status: ScolarisationStatus) => void;
+  collegeScolarisation: College | null;
+  onCollegeScolarisationChange: (college: College | null) => void;
 }
 
-export function CollegeCard({ result, address, onClose }: CollegeCardProps) {
+export function CollegeCard({ result, address, onClose, scolarisation, onScolarisationChange, collegeScolarisation, onCollegeScolarisationChange }: CollegeCardProps) {
   const { college, lycees, lyceeError } = result;
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
   const [activeSector, setActiveSector] = useState(1);
-  const [scolarisation, setScolarisation] = useState<ScolarisationStatus>('pending');
-  const [collegeScolarisation, setCollegeScolarisation] = useState<College | null>(null);
 
   // Filter lycees for the map based on active sector
   const lyceesForMap = useMemo(
@@ -112,9 +114,9 @@ export function CollegeCard({ result, address, onClose }: CollegeCardProps) {
       <ScolarisationSection
         collegeUai={college.uai}
         scolarisation={scolarisation}
-        onScolarisationChange={setScolarisation}
+        onScolarisationChange={onScolarisationChange}
         collegeScolarisation={collegeScolarisation}
-        onCollegeScolarisationChange={setCollegeScolarisation}
+        onCollegeScolarisationChange={onCollegeScolarisationChange}
       />
 
       {lycees && (
