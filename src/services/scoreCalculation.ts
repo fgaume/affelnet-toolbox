@@ -45,7 +45,7 @@ const FIELD_WEIGHTS: Record<DisciplinaryField, number> = {
  * 4. Weighting: Apply coefficients (5 for FR/Maths, 4 for others).
  * 5. Final Score: (Sum of weighted harmonized scores) * 2.
  */
-export const DEFAULT_MULTIPLIER = 2;
+export const DEFAULT_MULTIPLIER = 2.3;
 
 export function calculateAffelnetScore(
   grades: UserGrades,
