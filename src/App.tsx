@@ -30,6 +30,7 @@ import {
 } from './components';
 import {
   fetchAllAcademicStats,
+  ALT_MODEL_KEY,
 } from './services/scoreApi';
 import { useAdmissionHistory } from './hooks/useAdmissionHistory';
 import { fetchCollegeIps } from './services/collegeApi';
@@ -100,7 +101,7 @@ function App() {
         .then(({ availableYears, statsByYear }) => {
           setAllStatsByYear(statsByYear);
           setAvailableStatsYears(availableYears);
-          setStatsYear(Math.max(...availableYears));
+          setStatsYear(availableYears.includes(ALT_MODEL_KEY) ? ALT_MODEL_KEY : Math.max(...availableYears));
         })
         .catch(err => setStatsError(err instanceof Error ? err.message : String(err)))
         .finally(() => {
