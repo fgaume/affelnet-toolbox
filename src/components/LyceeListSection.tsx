@@ -188,7 +188,7 @@ export function LyceeListSection({
                     </svg>
                   </button>
                   {expandedLycee === e.uai && (
-                    <CollegesConcurrence uaiLycee={e.uai} uaiCollegeUtilisateur={uaiCollegeUtilisateur} />
+                    <CollegesConcurrence uaiLycee={e.uai} nomLycee={e.nom} uaiCollegeUtilisateur={uaiCollegeUtilisateur} />
                   )}
                 </li>
               );

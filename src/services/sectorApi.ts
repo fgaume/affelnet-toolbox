@@ -3,12 +3,20 @@ import { wgs84ToWebMercator } from './geo';
 
 const CAPGEO_BASE = 'https://capgeo2.paris.fr/public/rest/services/DASCO/DASCO_Carte_scolaire/MapServer/0/query';
 const ARCGIS_BASE = 'https://services9.arcgis.com/ekT8MJFiVh8nvlV5/arcgis/rest/services/Affectation_Lyc%C3%A9es/FeatureServer/0/query';
-const ANNEE_SCOLAIRE = '2025-2026';
 
-export async function findCollegeDeSecteur(lat: number, lon: number): Promise<string> {
+function getAnneeScolaireCandidates(): [string, string] {
+  const year = new Date().getFullYear();
+  return [`${year}-${year + 1}`, `${year - 1}-${year}`];
+}
+
+async function queryCarteScolaire(
+  lat: number,
+  lon: number,
+  anneeScolaire: string,
+): Promise<string | null> {
   const { x, y } = wgs84ToWebMercator(lat, lon);
   const geometry = JSON.stringify({ x, y });
-  const where = `annee_scol='${ANNEE_SCOLAIRE}' AND type_etabl='COL'`;
+  const where = `annee_scol='${anneeScolaire}' AND type_etabl='COL'`;
 
   const params = new URLSearchParams({
     f: 'json',
@@ -23,18 +31,26 @@ export async function findCollegeDeSecteur(lat: number, lon: number): Promise<st
   });
 
   const response = await fetch(`${CAPGEO_BASE}?${params}`);
-  if (!response.ok) throw new Error('Erreur de connexion à la carte scolaire');
+  if (!response.ok) return null;
 
   const data = await response.json();
   const feature = data.features?.find(
-    (f: { attributes: { type_etabl: string } }) => f.attributes.type_etabl === 'COL'
+    (f: { attributes: { type_etabl: string } }) => f.attributes.type_etabl === 'COL',
   );
 
-  if (!feature) {
-    throw new Error('Aucun collège de secteur trouvé pour cette adresse');
-  }
+  return feature ? (feature.attributes.libelle as string) : null;
+}
 
-  return feature.attributes.libelle as string;
+export async function findCollegeDeSecteur(lat: number, lon: number): Promise<string> {
+  const [current, previous] = getAnneeScolaireCandidates();
+
+  const result = await queryCarteScolaire(lat, lon, current);
+  if (result) return result;
+
+  const fallback = await queryCarteScolaire(lat, lon, previous);
+  if (fallback) return fallback;
+
+  throw new Error('Aucun collège de secteur trouvé pour cette adresse');
 }
 
 function normalizeCollegeName(libelle: string): string {

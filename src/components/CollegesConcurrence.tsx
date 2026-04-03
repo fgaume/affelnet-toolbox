@@ -12,12 +12,14 @@ import {
 import {
   fetchCollegesConcurrents,
   type CollegeConcurrent,
+  type ConcurrenceResult,
 } from "../services/collegesConcurrenceApi";
 import "./CollegesConcurrence.css";
 import { CustomTooltip, type BarDataPoint } from "./CustomTooltip";
 
 interface CollegesConcurrenceProps {
   uaiLycee: string;
+  nomLycee: string;
   uaiCollegeUtilisateur: string;
 }
 
@@ -61,11 +63,11 @@ function buildChartData(colleges: CollegeConcurrent[]): BarDataPoint[] {
 type State =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "success"; colleges: CollegeConcurrent[] };
+  | { status: "success"; colleges: CollegeConcurrent[]; dnbSession: number | null };
 
 type Action =
   | { type: "FETCH_START" }
-  | { type: "FETCH_SUCCESS"; colleges: CollegeConcurrent[] }
+  | { type: "FETCH_SUCCESS"; result: ConcurrenceResult }
   | { type: "FETCH_ERROR"; message: string };
 
 function reducer(_state: State, action: Action): State {
@@ -73,7 +75,7 @@ function reducer(_state: State, action: Action): State {
     case "FETCH_START":
       return { status: "loading" };
     case "FETCH_SUCCESS":
-      return { status: "success", colleges: action.colleges };
+      return { status: "success", colleges: action.result.colleges, dnbSession: action.result.dnbSession };
     case "FETCH_ERROR":
       return { status: "error", message: action.message };
   }
@@ -82,7 +84,7 @@ function reducer(_state: State, action: Action): State {
 function doFetch(uaiLycee: string, dispatch: Dispatch<Action>) {
   dispatch({ type: "FETCH_START" });
   fetchCollegesConcurrents(uaiLycee)
-    .then((result) => dispatch({ type: "FETCH_SUCCESS", colleges: result }))
+    .then((result) => dispatch({ type: "FETCH_SUCCESS", result }))
     .catch((err) =>
       dispatch({
         type: "FETCH_ERROR",
@@ -93,6 +95,7 @@ function doFetch(uaiLycee: string, dispatch: Dispatch<Action>) {
 
 export function CollegesConcurrence({
   uaiLycee,
+  nomLycee,
   uaiCollegeUtilisateur,
 }: CollegesConcurrenceProps) {
   const [state, dispatch] = useReducer(reducer, { status: "loading" });
@@ -124,11 +127,12 @@ export function CollegesConcurrence({
     );
   }
 
-  const colleges = state.colleges;
+  const { colleges, dnbSession } = state;
 
   if (colleges.length === 0) return null;
 
   const chartData = buildChartData(colleges);
+  const xAxisLabel = dnbSession ? `Admis DNB ${dnbSession}` : 'Admis DNB';
 
   // Transform data for stacked bars: each dataKey is a college UAI
   const stackedData = chartData.map((group) => {
@@ -161,6 +165,11 @@ export function CollegesConcurrence({
 
   return (
     <div className="concurrence-panel">
+      <p className="concurrence-subtitle">
+        Poids des collèges ayant {nomLycee} en secteur 1
+        <br />
+        <span className="concurrence-subtitle-detail">(effectif estimé via nombre d'admis au DNB{dnbSession ? ` ${dnbSession}` : ''})</span>
+      </p>
       <ResponsiveContainer
         width="100%"
         height={Math.max(120, chartData.length * 32 + 50)}
@@ -181,7 +190,7 @@ export function CollegesConcurrence({
             type="number"
             tick={{ fontSize: 11 }}
             label={{
-              value: "Admis DNB",
+              value: xAxisLabel,
               position: "insideBottom",
               offset: -5,
               fontSize: 11,

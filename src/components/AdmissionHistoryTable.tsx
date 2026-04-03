@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import type { LyceeAdmissionHistory } from "../types";
-import { SEUIL_YEARS, getAdmissionDifficulty } from "../services/seuilsApi";
+import { getSeuilYears, getAdmissionDifficulty } from "../services/seuilsApi";
 import AdmissionSparkline from "./AdmissionSparkline";
 import { hasValidSparklineData } from "./sparklineUtils";
 import "./AdmissionHistoryTable.css";
@@ -29,7 +29,7 @@ function useIsMobile(): boolean {
   return isMobile;
 }
 
-type SortKey = 'name' | number; // number = index in SEUIL_YEARS
+type SortKey = 'name' | number; // number = index in seuilYears
 type SortDir = 'asc' | 'desc';
 
 function SortIcon({ active, direction }: { readonly active: boolean; readonly direction: SortDir }) {
@@ -50,14 +50,16 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const isMobile = useIsMobile();
 
+  const seuilYears = getSeuilYears();
+
   const visibleYears = useMemo(
-    () => (isMobile ? SEUIL_YEARS.slice(-2) : SEUIL_YEARS),
-    [isMobile],
+    () => (isMobile ? seuilYears.slice(-2) : [...seuilYears]),
+    [isMobile, seuilYears],
   );
 
   const visibleYearIndices = useMemo(
-    () => visibleYears.map((y) => SEUIL_YEARS.indexOf(y)),
-    [visibleYears],
+    () => visibleYears.map((y) => seuilYears.indexOf(y)),
+    [visibleYears, seuilYears],
   );
 
   const handleSort = (key: SortKey) => {
@@ -102,7 +104,7 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
     <div className="admission-history">
       <h2>Historique des seuils d'admission</h2>
       <p className="admission-history-subtitle">
-        Seuils d'admission par lycée sur les {SEUIL_YEARS.length} dernières
+        Seuils d'admission par lycée sur les {seuilYears.length} dernières
         années
       </p>
 
@@ -122,7 +124,7 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
                 <span className="th-content">Lycée <SortIcon active={sortKey === 'name'} direction={sortDir} /></span>
               </th>
               {visibleYears.map((year) => {
-                const idx = SEUIL_YEARS.indexOf(year);
+                const idx = seuilYears.indexOf(year);
                 return (
                   <th key={year} className="col-year sortable" onClick={() => handleSort(idx)}>
                     <span className="th-content">{year} <SortIcon active={sortKey === idx} direction={sortDir} /></span>

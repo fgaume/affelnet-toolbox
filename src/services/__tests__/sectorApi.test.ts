@@ -26,6 +26,12 @@ describe('findCollegeDeSecteur', () => {
   });
 
   it('throws when no college found', async () => {
+    // First attempt (current year) returns empty
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ features: [] }),
+    });
+    // Fallback (previous year) also returns empty
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ features: [] }),

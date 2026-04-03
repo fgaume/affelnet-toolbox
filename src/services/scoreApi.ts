@@ -5,7 +5,7 @@ import type {
 } from '../types/index.ts';
 import { DISCIPLINARY_FIELDS } from '../types/index.ts';
 
-/** URL for the legacy 2025 stats (year-based dataset) */
+/** URL for the legacy year-based stats dataset */
 const LEGACY_API_URL =
   'https://datasets-server.huggingface.co/rows?dataset=fgaume%2Faffelnet-paris-statistiques-champs-disciplinaires&config=default&split=train&offset=0&length=100';
 
@@ -26,9 +26,8 @@ const FIELD_MAPPING: Record<string, DisciplinaryField> = {
 /** Default stats model key */
 export const DEFAULT_STATS_MODEL = 'V2';
 
-/** Human-readable labels for each stats key */
+/** Human-readable labels for each stats key (legacy year added dynamically) */
 export const STATS_MODEL_LABELS: Record<string, string> = {
-  '2025': '2025',
   V1: 'Modèle 1',
   V2: 'Modèle 2',
 };
@@ -70,7 +69,7 @@ function parseRows(
 }
 
 /**
- * Fetches all academic statistics: 2025 from the legacy dataset, V1/V2 from the models dataset.
+ * Fetches all academic statistics: latest year from the legacy dataset, V1/V2 from the models dataset.
  * Returns available keys and stats indexed by key.
  */
 export async function fetchAllAcademicStats(): Promise<AllStatsResult> {
@@ -94,11 +93,18 @@ export async function fetchAllAcademicStats(): Promise<AllStatsResult> {
   const statsByKey = new Map<string, Record<DisciplinaryField, AcademicStats>>();
   const keys: string[] = [];
 
-  // Parse 2025 from legacy dataset
-  const legacy2025Rows = (legacyData.rows ?? []).filter((r) => r.row.annee === 2025);
-  if (legacy2025Rows.length > 0) {
-    statsByKey.set('2025', parseRows(legacy2025Rows));
-    keys.push('2025');
+  // Parse latest year from legacy dataset: try current year, fallback to previous
+  const legacyRows = legacyData.rows ?? [];
+  const currentYear = new Date().getFullYear();
+  const legacyCurrentRows = legacyRows.filter((r) => r.row.annee === currentYear);
+  const legacyTargetRows = legacyCurrentRows.length > 0
+    ? legacyCurrentRows
+    : legacyRows.filter((r) => r.row.annee === currentYear - 1);
+  if (legacyTargetRows.length > 0) {
+    const legacyYear = String(legacyTargetRows[0].row.annee);
+    statsByKey.set(legacyYear, parseRows(legacyTargetRows));
+    keys.push(legacyYear);
+    STATS_MODEL_LABELS[legacyYear] = legacyYear;
   }
 
   // Parse V1/V2 from models dataset

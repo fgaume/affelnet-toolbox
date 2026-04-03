@@ -4,6 +4,19 @@
   animation: slideDown 0.2s ease-out;
 }
 
+.concurrence-subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.concurrence-subtitle-detail {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
 @keyframes slideDown {
   from { opacity: 0; max-height: 0; }
   to { opacity: 1; max-height: 500px; }
