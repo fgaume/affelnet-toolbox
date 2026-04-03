@@ -3,7 +3,8 @@ import type { SectorResult, LyceeSecteur, Address, College } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
 import { SectorMap } from './SectorMap';
-import { ScolarisationSection, type ScolarisationStatus } from './ScolarisationSection';
+import type { ScolarisationStatus } from '../types';
+import { ScolarisationSection } from './ScolarisationSection';
 import { LyceeListSection } from './LyceeListSection';
 import './CollegeCard.css';
 

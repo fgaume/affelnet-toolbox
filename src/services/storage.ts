@@ -1,4 +1,4 @@
-import type { SectorResult, Address, SearchHistory, UserGrades, UserScore } from '../types';
+import type { SectorResult, Address, SearchHistory, UserGrades, UserScore, ScolarisationStatus, College } from '../types';
 
 const STORAGE_KEY = 'college-secteur-history';
 const STORAGE_VERSION = 2;
@@ -70,6 +70,20 @@ export function addToHistory(address: Address, result: SectorResult): SearchHist
 
 export function clearHistory(): void {
   localStorage.removeItem(STORAGE_KEY);
+}
+
+export function updateHistoryScolarisation(
+  addressLabel: string,
+  scolarisation: ScolarisationStatus,
+  collegeScolarisation: College | null
+): void {
+  const history = getSearchHistory();
+  const updated = history.map((h) =>
+    h.address.label === addressLabel
+      ? { ...h, scolarisation, collegeScolarisation }
+      : h
+  );
+  saveSearchHistory(updated);
 }
 
 export function removeFromHistory(id: string): void {

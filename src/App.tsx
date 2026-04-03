@@ -10,7 +10,7 @@ import type {
   AcademicStats,
   DisciplinaryField
 } from './types';
-import type { ScolarisationStatus } from './components/ScolarisationSection';
+import type { ScolarisationStatus } from './types';
 import { useSectorSearch } from './hooks/useSectorSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
 import { useTheme } from './hooks/useTheme';
@@ -28,6 +28,7 @@ import {
   AdmissionHistoryTable,
   DisclaimerModal,
 } from './components';
+import { updateHistoryScolarisation } from './services/storage';
 import {
   fetchAllAcademicStats,
   DEFAULT_STATS_MODEL,
@@ -128,6 +129,13 @@ function App() {
     }
   }, [topTab, allStatsByKey]);
 
+  // Persist scolarisation choice to history when it changes
+  useEffect(() => {
+    if (scolarisation !== 'pending' && searchedAddress) {
+      updateHistoryScolarisation(searchedAddress.label, scolarisation, collegeScolarisation);
+    }
+  }, [scolarisation, collegeScolarisation, searchedAddress]);
+
   // Derive the UAI to use for IPS bonus (scolarisation college, not sector)
   const ipsTargetUai = useMemo(() => {
     if (scolarisation === 'same') return result?.college.uai ?? null;
@@ -162,6 +170,8 @@ function App() {
   const handleHistorySelect = useCallback(
     (entry: SearchHistoryType) => {
       showResult(entry.address, entry.result);
+      setScolarisation(entry.scolarisation ?? 'pending');
+      setCollegeScolarisation(entry.collegeScolarisation ?? null);
       refresh();
       setTopTab('search');
       setSearchMode('address');

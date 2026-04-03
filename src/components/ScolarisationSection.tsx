@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { CollegeAutocomplete } from './CollegeAutocomplete';
 import { IpsGauge } from './IpsGauge';
 import { fetchCollegeIps } from '../services/collegeApi';
-import type { College, IpsInfo } from '../types';
-
-export type ScolarisationStatus = 'pending' | 'same' | 'other';
+import type { College, IpsInfo, ScolarisationStatus } from '../types';
 
 interface ScolarisationSectionProps {
   collegeUai: string;
