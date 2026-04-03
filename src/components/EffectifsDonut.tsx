@@ -137,6 +137,8 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
   const total = effectifs.reduce((sum, e) => sum + e.effectif, 0);
   if (total === 0) return null;
 
+  const annee = effectifs[0]?.annee ?? '';
+
   const colorOf = (e: EffectifLycee) => difficulties.get(e.uai)?.color ?? DEFAULT_COLOR;
 
   // Sort by effectif desc, then separate same colors
@@ -160,6 +162,9 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
       role="img"
       aria-label={`Répartition des ${total} places de seconde entre ${effectifs.length} lycées de secteur 1`}
     >
+      <p className="effectifs-donut-caption">
+        Effectifs de classe de seconde {annee ? `(${annee}) ` : ''}des {effectifs.length} lycées de secteur 1
+      </p>
       <div className="effectifs-donut-chart">
         <ResponsiveContainer width="100%" height={290}>
           <PieChart>

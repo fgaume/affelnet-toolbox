@@ -3,6 +3,13 @@
   padding: 0;
 }
 
+.effectifs-donut-caption {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 4px;
+}
+
 .effectifs-donut-chart {
   display: flex;
   justify-content: center;
