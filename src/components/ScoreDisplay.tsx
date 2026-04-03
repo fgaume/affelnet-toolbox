@@ -1,7 +1,11 @@
 import React, { useState, useCallback } from "react";
 import type { UserScore, DisciplinaryField, AcademicStats } from "../types";
 import { DISCIPLINARY_FIELDS } from "../types";
-import { calculateFinalScores, GEO_BONUS, FIELD_WEIGHTS } from "../services/scoreCalculation";
+import {
+  calculateFinalScores,
+  GEO_BONUS,
+  FIELD_WEIGHTS,
+} from "../services/scoreCalculation";
 import { STATS_MODEL_LABELS } from "../services/scoreApi";
 import type { CustomStatsModel } from "../services/customModelsStorage";
 import { ScoreGauge } from "./ScoreGauge";
@@ -22,7 +26,10 @@ interface ScoreDisplayProps {
   allSeuilsRange?: { min: number; max: number };
   customModels: CustomStatsModel[];
   onCreateCustomModel: (baseKey: string) => void;
-  onUpdateCustomModel: (id: string, stats: Record<DisciplinaryField, AcademicStats>) => void;
+  onUpdateCustomModel: (
+    id: string,
+    stats: Record<DisciplinaryField, AcademicStats>,
+  ) => void;
   onDeleteCustomModel: (id: string) => void;
 }
 
@@ -52,7 +59,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   onUpdateCustomModel,
   onDeleteCustomModel,
 }) => {
-  const [baseKey, setBaseKey] = useState(availableStatsKeys[0] ?? '');
+  const [baseKey, setBaseKey] = useState(availableStatsKeys[0] ?? "");
 
   const handleCreate = useCallback(() => {
     if (baseKey) onCreateCustomModel(baseKey);
@@ -69,7 +76,9 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   }
 
   const finalScores = calculateFinalScores(score.totalScore, ipsBonus);
-  const activeCustomModel = customModels.find(m => `custom:${m.id}` === statsKey);
+  const activeCustomModel = customModels.find(
+    (m) => `custom:${m.id}` === statsKey,
+  );
 
   return (
     <div className="score-display">
@@ -140,6 +149,16 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
 
       <div className="score-breakdown">
         <h3>Détails par champ disciplinaire</h3>
+        <p className="harmonisation-explanation">
+          La note harmonisée replace chaque moyenne dans le contexte académique
+          : elle mesure l'écart à la moyenne de l'académie, rapporté à la
+          dispersion des résultats. Concrètement, on prend la note brute, on lui
+          soustrait la moyenne académique, puis on divise par l'écart-type. On y
+          ajoute 10 puis on multiplie le tout par 10 pour obtenir une note
+          harmonisée autour de 100. Les moyennes académiques et les écarts-types
+          utilisés pour cette harmonisation sont fournis pas les modèles tout en
+          bas.
+        </p>
         <table className="score-table">
           <thead>
             <tr>
@@ -161,7 +180,12 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
                 <tr key={field}>
                   <td>{FIELD_NAMES[field]}</td>
                   <td className="numeric">{detail.rawAverage.toFixed(2)}</td>
-                  <td className="numeric"><span className="weight-prefix">{FIELD_WEIGHTS[field]}x</span> {harmonizedValue.toFixed(3)}</td>
+                  <td className="numeric">
+                    <span className="weight-prefix">
+                      {FIELD_WEIGHTS[field]}x
+                    </span>{" "}
+                    {harmonizedValue.toFixed(3)}
+                  </td>
                 </tr>
               );
             })}
@@ -178,7 +202,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
         </table>
       </div>
 
-      <div className="score-summary-breakdown" style={{ marginTop: '1rem' }}>
+      <div className="score-summary-breakdown" style={{ marginTop: "1rem" }}>
         <div className="summary-item summary-item-emphasis">
           <span className="multiplier-label">
             Coefficient de pondération
@@ -206,44 +230,49 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
         </div>
       </div>
 
-      {(availableStatsKeys.length > 1 || customModels.length > 0) && statsKey && (
-        <div className="stats-year-selector">
-          <span className="stats-year-label">
-            Statistiques d'harmonisation :
-          </span>
-          <div className="stats-year-buttons">
-            {availableStatsKeys.map((key) => (
-              <button
-                key={key}
-                className={`stats-year-btn${statsKey === key ? " active" : ""}`}
-                onClick={() => onStatsKeyChange(key)}
-              >
-                {STATS_MODEL_LABELS[key] ?? key}
-              </button>
-            ))}
-            {customModels.map((m) => (
-              <button
-                key={m.id}
-                className={`stats-year-btn${statsKey === `custom:${m.id}` ? " active" : ""}`}
-                onClick={() => onStatsKeyChange(`custom:${m.id}`)}
-              >
-                {m.name}
-              </button>
-            ))}
+      {(availableStatsKeys.length > 1 || customModels.length > 0) &&
+        statsKey && (
+          <div className="stats-year-selector">
+            <span className="stats-year-label">
+              Statistiques d'harmonisation :
+            </span>
+            <div className="stats-year-buttons">
+              {availableStatsKeys.map((key) => (
+                <button
+                  key={key}
+                  className={`stats-year-btn${statsKey === key ? " active" : ""}`}
+                  onClick={() => onStatsKeyChange(key)}
+                >
+                  {STATS_MODEL_LABELS[key] ?? key}
+                </button>
+              ))}
+              {customModels.map((m) => (
+                <button
+                  key={m.id}
+                  className={`stats-year-btn${statsKey === `custom:${m.id}` ? " active" : ""}`}
+                  onClick={() => onStatsKeyChange(`custom:${m.id}`)}
+                >
+                  {m.name}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       <div className="custom-model-create">
-        <span className="custom-model-create-label">Créer un modèle perso à partir de :</span>
+        <span className="custom-model-create-label">
+          Créer un modèle perso à partir de :
+        </span>
         <div className="custom-model-create-controls">
           <select
             className="custom-model-base-select"
             value={baseKey}
-            onChange={e => setBaseKey(e.target.value)}
+            onChange={(e) => setBaseKey(e.target.value)}
           >
-            {availableStatsKeys.map(key => (
-              <option key={key} value={key}>{STATS_MODEL_LABELS[key] ?? key}</option>
+            {availableStatsKeys.map((key) => (
+              <option key={key} value={key}>
+                {STATS_MODEL_LABELS[key] ?? key}
+              </option>
             ))}
           </select>
           <button className="custom-model-create-btn" onClick={handleCreate}>

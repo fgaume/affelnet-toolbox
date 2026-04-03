@@ -224,8 +224,15 @@
 
 .score-breakdown h3 {
   font-size: 1.1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: var(--color-text-primary);
+}
+
+.harmonisation-explanation {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin: 0 0 1rem;
 }
 
 .score-table {

@@ -59,11 +59,15 @@ export interface SectorResult {
   lyceeError?: string;
 }
 
+export type ScolarisationStatus = 'pending' | 'same' | 'other';
+
 export interface SearchHistory {
   id: string;
   address: Address;
   result: SectorResult;
   timestamp: number;
+  scolarisation?: ScolarisationStatus;
+  collegeScolarisation?: College | null;
 }
 
 export interface ApiAddressResponse {
