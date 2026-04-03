@@ -76,9 +76,14 @@ const SOURCES = [
         description: 'Affectations secteur 1 de 2025 (détection des changements)',
       },
       {
-        name: 'Statistiques par champ disciplinaire',
+        name: 'Statistiques par champ disciplinaire (2025)',
         url: 'https://huggingface.co/datasets/fgaume/affelnet-paris-statistiques-champs-disciplinaires',
-        description: 'Moyennes et écarts-types pour le calcul du score',
+        description: 'Moyennes et écarts-types historiques par année',
+      },
+      {
+        name: "Modèles de statistiques d'harmonisation",
+        url: 'https://huggingface.co/datasets/fgaume/affelnet-paris-stats-models',
+        description: 'Modèles V1 et V2 pour le calcul du score harmonisé',
       },
     ],
   },

@@ -5,8 +5,13 @@ import type {
 } from '../types/index.ts';
 import { DISCIPLINARY_FIELDS } from '../types/index.ts';
 
-const API_URL =
+/** URL for the legacy 2025 stats (year-based dataset) */
+const LEGACY_API_URL =
   'https://datasets-server.huggingface.co/rows?dataset=fgaume%2Faffelnet-paris-statistiques-champs-disciplinaires&config=default&split=train&offset=0&length=100';
+
+/** URL for the new stats models V1/V2 dataset */
+const MODELS_API_URL =
+  'https://datasets-server.huggingface.co/rows?dataset=fgaume%2Faffelnet-paris-stats-models&config=default&split=train';
 
 const FIELD_MAPPING: Record<string, DisciplinaryField> = {
   FRANCAIS: 'FRANCAIS',
@@ -18,86 +23,103 @@ const FIELD_MAPPING: Record<string, DisciplinaryField> = {
   EPS: 'EPS',
 };
 
-/** Alternative 2026 model with different µ/σ values */
-const ALT_MODEL_LABEL = '2026 (alt)';
-const ALT_MODEL_KEY = -2026; // negative to distinguish from real years
+/** Default stats model key */
+export const DEFAULT_STATS_MODEL = 'V2';
 
-const ALT_MODEL_STATS: Record<DisciplinaryField, AcademicStats> = {
-  FRANCAIS:           { moyenne: 12.583, ecartType: 3.145 },
-  MATHEMATIQUES:      { moyenne: 12.049, ecartType: 3.962 },
-  HISTOIRE_GEO:       { moyenne: 12.885, ecartType: 3.039 },
-  LANGUES_VIVANTES:   { moyenne: 13.273, ecartType: 3.050 },
-  SCIENCES_TECHNO_DP: { moyenne: 13.157, ecartType: 2.681 },
-  ARTS:               { moyenne: 14.700, ecartType: 1.855 },
-  EPS:                { moyenne: 14.807, ecartType: 1.774 },
+/** Human-readable labels for each stats key */
+export const STATS_MODEL_LABELS: Record<string, string> = {
+  '2025': '2025',
+  V1: 'Modèle 1',
+  V2: 'Modèle 2',
 };
 
-export { ALT_MODEL_LABEL, ALT_MODEL_KEY };
+interface StatsModelsResponse {
+  rows: Array<{
+    row: {
+      model: string;
+      champ: string;
+      moyenne: number;
+      'ecart-type': number;
+    };
+  }>;
+  num_rows_total: number;
+}
 
 interface AllStatsResult {
-  availableYears: number[];
-  statsByYear: Map<number, Record<DisciplinaryField, AcademicStats>>;
+  availableKeys: string[];
+  statsByKey: Map<string, Record<DisciplinaryField, AcademicStats>>;
 }
 
 let cachedAllStats: AllStatsResult | null = null;
 
+function parseRows(
+  rows: Array<{ row: { champ: string; moyenne: number; 'ecart-type': number } }>,
+): Record<DisciplinaryField, AcademicStats> {
+  const partial: Partial<Record<DisciplinaryField, AcademicStats>> = {};
+  for (const r of rows) {
+    const field = FIELD_MAPPING[r.row.champ];
+    if (field) {
+      partial[field] = { moyenne: r.row.moyenne, ecartType: r.row['ecart-type'] };
+    }
+  }
+  const result = {} as Record<DisciplinaryField, AcademicStats>;
+  DISCIPLINARY_FIELDS.forEach((field) => {
+    result[field] = partial[field] || { moyenne: 0, ecartType: 0 };
+  });
+  return result;
+}
+
 /**
- * Fetches all academic statistics from the Hugging Face API.
- * Returns available years and stats indexed by year.
+ * Fetches all academic statistics: 2025 from the legacy dataset, V1/V2 from the models dataset.
+ * Returns available keys and stats indexed by key.
  */
 export async function fetchAllAcademicStats(): Promise<AllStatsResult> {
   if (cachedAllStats) return cachedAllStats;
 
-  const response = await fetch(API_URL);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch academic stats: ${response.statusText}`);
+  const [legacyResponse, modelsResponse] = await Promise.all([
+    fetch(LEGACY_API_URL),
+    fetch(MODELS_API_URL),
+  ]);
+
+  if (!legacyResponse.ok) {
+    throw new Error(`Failed to fetch legacy stats: ${legacyResponse.statusText}`);
+  }
+  if (!modelsResponse.ok) {
+    throw new Error(`Failed to fetch stats models: ${modelsResponse.statusText}`);
   }
 
-  const data: AcademicStatsResponse = await response.json();
+  const legacyData: AcademicStatsResponse = await legacyResponse.json();
+  const modelsData: StatsModelsResponse = await modelsResponse.json();
 
-  if (!data.rows || data.rows.length === 0) {
-    throw new Error('No data found in academic stats response');
+  const statsByKey = new Map<string, Record<DisciplinaryField, AcademicStats>>();
+  const keys: string[] = [];
+
+  // Parse 2025 from legacy dataset
+  const legacy2025Rows = (legacyData.rows ?? []).filter((r) => r.row.annee === 2025);
+  if (legacy2025Rows.length > 0) {
+    statsByKey.set('2025', parseRows(legacy2025Rows));
+    keys.push('2025');
   }
 
-  const years = [...new Set(data.rows.map((r) => r.row.annee))].filter(y => y >= 2025).sort();
-  const statsByYear = new Map<number, Record<DisciplinaryField, AcademicStats>>();
-
-  for (const year of years) {
-    const partial: Partial<Record<DisciplinaryField, AcademicStats>> = {};
-    data.rows
-      .filter((r) => r.row.annee === year)
-      .forEach((r) => {
-        const field = FIELD_MAPPING[r.row.champ];
-        if (field) {
-          partial[field] = {
-            moyenne: r.row.moyenne,
-            ecartType: r.row['ecart-type'],
-          };
-        }
-      });
-
-    const result = {} as Record<DisciplinaryField, AcademicStats>;
-    DISCIPLINARY_FIELDS.forEach((field) => {
-      result[field] = partial[field] || { moyenne: 0, ecartType: 0 };
-    });
-    statsByYear.set(year, result);
+  // Parse V1/V2 from models dataset
+  const modelNames = [...new Set((modelsData.rows ?? []).map((r) => r.row.model))].sort();
+  for (const model of modelNames) {
+    const modelRows = modelsData.rows.filter((r) => r.row.model === model);
+    statsByKey.set(model, parseRows(modelRows));
+    keys.push(model);
   }
 
-  // Inject alternative 2026 model
-  statsByYear.set(ALT_MODEL_KEY, ALT_MODEL_STATS);
-  years.push(ALT_MODEL_KEY);
-
-  cachedAllStats = { availableYears: years, statsByYear };
+  cachedAllStats = { availableKeys: keys, statsByKey };
   return cachedAllStats;
 }
 
 /**
- * Fetches academic statistics for a specific year (defaults to most recent).
+ * Fetches academic statistics for a specific key (defaults to DEFAULT_STATS_MODEL).
  */
-export async function fetchAcademicStats(year?: number): Promise<Record<DisciplinaryField, AcademicStats>> {
-  const { availableYears, statsByYear } = await fetchAllAcademicStats();
-  const targetYear = year ?? Math.max(...availableYears);
-  const stats = statsByYear.get(targetYear);
-  if (!stats) throw new Error(`No stats available for year ${targetYear}`);
+export async function fetchAcademicStats(key?: string): Promise<Record<DisciplinaryField, AcademicStats>> {
+  const { availableKeys, statsByKey } = await fetchAllAcademicStats();
+  const targetKey = key ?? DEFAULT_STATS_MODEL;
+  const stats = statsByKey.get(targetKey);
+  if (!stats) throw new Error(`No stats available for key ${targetKey} (available: ${availableKeys.join(', ')})`);
   return stats;
 }

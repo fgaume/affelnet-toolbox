@@ -85,6 +85,11 @@
   color: var(--color-text-secondary);
 }
 
+.summary-item-emphasis {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
 .summary-value {
   font-weight: 600;
   color: var(--color-text-primary);
@@ -226,7 +231,7 @@
 .score-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .score-table th,
@@ -254,6 +259,11 @@
 
 .score-table td.numeric {
   color: var(--color-text-primary);
+}
+
+.weight-prefix {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
 }
 
 .score-total-row td {

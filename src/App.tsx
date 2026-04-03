@@ -30,12 +30,19 @@ import {
 } from './components';
 import {
   fetchAllAcademicStats,
-  ALT_MODEL_KEY,
+  DEFAULT_STATS_MODEL,
 } from './services/scoreApi';
 import { useAdmissionHistory } from './hooks/useAdmissionHistory';
 import { fetchCollegeIps } from './services/collegeApi';
 import { fetchSeuils, getAdmissionDifficulty } from './services/seuilsApi';
 import { calculateAffelnetScore, DEFAULT_MULTIPLIER } from './services/scoreCalculation';
+import {
+  getCustomModels,
+  addCustomModel,
+  updateCustomModel as updateCustomModelStorage,
+  deleteCustomModel as deleteCustomModelStorage,
+  type CustomStatsModel,
+} from './services/customModelsStorage';
 import './App.css';
 
 function App() {
@@ -48,10 +55,9 @@ function App() {
 
   // Score calculation state
   const [score, setScore] = useState<UserScore | null>(null);
-  const [allStatsByYear, setAllStatsByYear] = useState<Map<number, Record<DisciplinaryField, AcademicStats>> | null>(null);
-  const [availableStatsYears, setAvailableStatsYears] = useState<number[]>([]);
-  const [statsYear, setStatsYear] = useState<number | null>(null);
-  const stats = statsYear && allStatsByYear ? allStatsByYear.get(statsYear) ?? null : null;
+  const [allStatsByKey, setAllStatsByKey] = useState<Map<string, Record<DisciplinaryField, AcademicStats>> | null>(null);
+  const [availableStatsKeys, setAvailableStatsKeys] = useState<string[]>([]);
+  const [statsKey, setStatsKey] = useState<string | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [ipsBonus, setIpsBonus] = useState(0);
   const [multiplier, setMultiplier] = useState(DEFAULT_MULTIPLIER);
@@ -60,6 +66,18 @@ function App() {
   const [seuils, setSeuils] = useState<Map<string, number> | null>(null);
   const [scolarisation, setScolarisation] = useState<ScolarisationStatus>('pending');
   const [collegeScolarisation, setCollegeScolarisation] = useState<College | null>(null);
+  const [customModels, setCustomModels] = useState<CustomStatsModel[]>(() => getCustomModels());
+
+  // Merge fetched stats with custom models so score calculation can resolve any active key
+  const mergedStats = useMemo(() => {
+    if (!allStatsByKey) return null;
+    const merged = new Map(allStatsByKey);
+    for (const m of customModels) {
+      merged.set(`custom:${m.id}`, m.stats as Record<DisciplinaryField, AcademicStats>);
+    }
+    return merged;
+  }, [allStatsByKey, customModels]);
+  const stats = statsKey && mergedStats ? mergedStats.get(statsKey) ?? null : null;
 
   // Fetch seuils when score tab is activated
   useEffect(() => {
@@ -95,20 +113,20 @@ function App() {
   // Fetch all academic stats when the score tab is activated
   const statsFetchingRef = useRef(false);
   useEffect(() => {
-    if (topTab === 'score' && !allStatsByYear && !statsFetchingRef.current) {
+    if (topTab === 'score' && !allStatsByKey && !statsFetchingRef.current) {
       statsFetchingRef.current = true;
       fetchAllAcademicStats()
-        .then(({ availableYears, statsByYear }) => {
-          setAllStatsByYear(statsByYear);
-          setAvailableStatsYears(availableYears);
-          setStatsYear(availableYears.includes(ALT_MODEL_KEY) ? ALT_MODEL_KEY : Math.max(...availableYears));
+        .then(({ availableKeys, statsByKey }) => {
+          setAllStatsByKey(statsByKey);
+          setAvailableStatsKeys(availableKeys);
+          setStatsKey(availableKeys.includes(DEFAULT_STATS_MODEL) ? DEFAULT_STATS_MODEL : availableKeys[availableKeys.length - 1]);
         })
         .catch(err => setStatsError(err instanceof Error ? err.message : String(err)))
         .finally(() => {
           statsFetchingRef.current = false;
         });
     }
-  }, [topTab, allStatsByYear]);
+  }, [topTab, allStatsByKey]);
 
   // Derive the UAI to use for IPS bonus (scolarisation college, not sector)
   const ipsTargetUai = useMemo(() => {
@@ -179,15 +197,57 @@ function App() {
     });
   }, [lastGrades, stats]);
 
-  const handleStatsYearChange = useCallback((year: number) => {
-    setStatsYear(year);
-    if (lastGrades && allStatsByYear) {
-      const yearStats = allStatsByYear.get(year);
-      if (yearStats) {
-        setScore(calculateAffelnetScore(lastGrades, yearStats, multiplier));
+  const handleStatsKeyChange = useCallback((key: string) => {
+    setStatsKey(key);
+    if (lastGrades && mergedStats) {
+      const keyStats = mergedStats.get(key);
+      if (keyStats) {
+        setScore(calculateAffelnetScore(lastGrades, keyStats, multiplier));
       }
     }
-  }, [lastGrades, allStatsByYear, multiplier]);
+  }, [lastGrades, mergedStats, multiplier]);
+
+  const handleCreateCustomModel = useCallback((baseKey: string) => {
+    if (!allStatsByKey) return;
+    const baseStats = allStatsByKey.get(baseKey);
+    if (!baseStats) return;
+    const id = crypto.randomUUID();
+    const name = `Perso ${customModels.length + 1}`;
+    const roundedStats = {} as Record<DisciplinaryField, AcademicStats>;
+    for (const [field, val] of Object.entries(baseStats) as [DisciplinaryField, AcademicStats][]) {
+      roundedStats[field] = {
+        moyenne: Math.round(val.moyenne * 10) / 10,
+        ecartType: Math.round(val.ecartType * 10) / 10,
+      };
+    }
+    const model: CustomStatsModel = {
+      id,
+      name,
+      stats: roundedStats,
+    };
+    const updated = addCustomModel(model);
+    setCustomModels(updated);
+    setStatsKey(`custom:${id}`);
+    if (lastGrades) {
+      setScore(calculateAffelnetScore(lastGrades, baseStats, multiplier));
+    }
+  }, [allStatsByKey, customModels.length, lastGrades, multiplier]);
+
+  const handleUpdateCustomModel = useCallback((id: string, stats: Record<DisciplinaryField, AcademicStats>) => {
+    const updated = updateCustomModelStorage(id, stats);
+    setCustomModels(updated);
+    if (statsKey === `custom:${id}` && lastGrades) {
+      setScore(calculateAffelnetScore(lastGrades, stats, multiplier));
+    }
+  }, [statsKey, lastGrades, multiplier]);
+
+  const handleDeleteCustomModel = useCallback((id: string) => {
+    const updated = deleteCustomModelStorage(id);
+    setCustomModels(updated);
+    if (statsKey === `custom:${id}`) {
+      setStatsKey(availableStatsKeys.includes(DEFAULT_STATS_MODEL) ? DEFAULT_STATS_MODEL : availableStatsKeys[0]);
+    }
+  }, [statsKey, availableStatsKeys]);
 
   const handleTopTabChange = (tab: TopTab) => {
     setTopTab(tab);
@@ -215,7 +275,7 @@ function App() {
             className={`input-tab${topTab === 'search' ? ' active' : ''}`}
             onClick={() => handleTopTabChange('search')}
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
             </svg>
             Lycées de secteur
@@ -224,8 +284,8 @@ function App() {
             className={`input-tab${topTab === 'score' ? ' active' : ''}`}
             onClick={() => handleTopTabChange('score')}
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2zm0 8H7v-2h10v2z" />
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z" />
             </svg>
             Simuler son barème
           </button>
@@ -233,7 +293,7 @@ function App() {
             className={`input-tab${topTab === 'history' ? ' active' : ''}`}
             onClick={() => handleTopTabChange('history')}
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
             </svg>
             Historique des seuils admission
@@ -248,16 +308,16 @@ function App() {
                   className={`search-mode-tab${searchMode === 'address' ? ' active' : ''}`}
                   onClick={() => setSearchMode('address')}
                 >
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                   </svg>
-                  Par adresse de votre domicile
+                  Par adresse du domicile
                 </button>
                 <button
                   className={`search-mode-tab${searchMode === 'college' ? ' active' : ''}`}
                   onClick={() => setSearchMode('college')}
                 >
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
                   </svg>
                   Par collège de secteur
@@ -318,7 +378,7 @@ function App() {
 
         <div className="tab-panel" style={{ display: topTab === 'score' ? undefined : 'none' }}>
           <div className="score-calculation-container">
-            {topTab === 'score' && !allStatsByYear && !statsError && <LoadingState />}
+            {topTab === 'score' && !allStatsByKey && !statsError && <LoadingState />}
             {statsError && <ErrorMessage message={`Erreur lors du chargement des statistiques : ${statsError}`} />}
             {stats && (
               <div className="score-grid">
@@ -329,11 +389,15 @@ function App() {
                   collegeName={scolarisation === 'other' && collegeScolarisation ? collegeScolarisation.nom : result?.college.nom}
                   multiplier={multiplier}
                   onMultiplierChange={handleMultiplierChange}
-                  statsYear={statsYear}
-                  availableStatsYears={availableStatsYears}
-                  onStatsYearChange={handleStatsYearChange}
+                  statsKey={statsKey}
+                  availableStatsKeys={availableStatsKeys}
+                  onStatsKeyChange={handleStatsKeyChange}
                   sector1Lycees={sector1LyceesWithSeuils}
                   allSeuilsRange={allSeuilsRange}
+                  customModels={customModels}
+                  onCreateCustomModel={handleCreateCustomModel}
+                  onUpdateCustomModel={handleUpdateCustomModel}
+                  onDeleteCustomModel={handleDeleteCustomModel}
                 />
               </div>
             )}

@@ -1,10 +1,12 @@
-import React from "react";
-import type { UserScore, DisciplinaryField } from "../types";
+import React, { useState, useCallback } from "react";
+import type { UserScore, DisciplinaryField, AcademicStats } from "../types";
 import { DISCIPLINARY_FIELDS } from "../types";
-import { calculateFinalScores, GEO_BONUS } from "../services/scoreCalculation";
-import { ALT_MODEL_KEY, ALT_MODEL_LABEL } from "../services/scoreApi";
+import { calculateFinalScores, GEO_BONUS, FIELD_WEIGHTS } from "../services/scoreCalculation";
+import { STATS_MODEL_LABELS } from "../services/scoreApi";
+import type { CustomStatsModel } from "../services/customModelsStorage";
 import { ScoreGauge } from "./ScoreGauge";
 import type { LyceeSeuil } from "./ScoreGauge";
+import { CustomModelEditor } from "./CustomModelEditor";
 import "./ScoreDisplay.css";
 
 interface ScoreDisplayProps {
@@ -13,11 +15,15 @@ interface ScoreDisplayProps {
   collegeName?: string;
   multiplier: number;
   onMultiplierChange: (delta: number) => void;
-  statsYear: number | null;
-  availableStatsYears: number[];
-  onStatsYearChange: (year: number) => void;
+  statsKey: string | null;
+  availableStatsKeys: string[];
+  onStatsKeyChange: (key: string) => void;
   sector1Lycees?: LyceeSeuil[];
   allSeuilsRange?: { min: number; max: number };
+  customModels: CustomStatsModel[];
+  onCreateCustomModel: (baseKey: string) => void;
+  onUpdateCustomModel: (id: string, stats: Record<DisciplinaryField, AcademicStats>) => void;
+  onDeleteCustomModel: (id: string) => void;
 }
 
 const FIELD_NAMES: Record<DisciplinaryField, string> = {
@@ -36,12 +42,22 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   collegeName,
   multiplier,
   onMultiplierChange,
-  statsYear,
-  availableStatsYears,
-  onStatsYearChange,
+  statsKey,
+  availableStatsKeys,
+  onStatsKeyChange,
   sector1Lycees,
   allSeuilsRange,
+  customModels,
+  onCreateCustomModel,
+  onUpdateCustomModel,
+  onDeleteCustomModel,
 }) => {
+  const [baseKey, setBaseKey] = useState(availableStatsKeys[0] ?? '');
+
+  const handleCreate = useCallback(() => {
+    if (baseKey) onCreateCustomModel(baseKey);
+  }, [baseKey, onCreateCustomModel]);
+
   if (!score) {
     return (
       <div className="score-display">
@@ -53,6 +69,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   }
 
   const finalScores = calculateFinalScores(score.totalScore, ipsBonus);
+  const activeCustomModel = customModels.find(m => `custom:${m.id}` === statsKey);
 
   return (
     <div className="score-display">
@@ -81,32 +98,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
 
       <div className="score-summary-breakdown">
         <div className="summary-item">
-          <span>Total pondéré des champs disciplinaires</span>
-          <span className="summary-value">
-            {Math.round(score.weightedSum).toLocaleString()}
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="multiplier-label">
-            Coefficient de pondération
-            <span className="multiplier-controls">
-              <button
-                className="multiplier-btn"
-                onClick={() => onMultiplierChange(-0.1)}
-                aria-label="Diminuer"
-              >
-                −
-              </button>
-              <span className="multiplier-value">×{multiplier.toFixed(1)}</span>
-              <button
-                className="multiplier-btn"
-                onClick={() => onMultiplierChange(0.1)}
-                aria-label="Augmenter"
-              >
-                +
-              </button>
-            </span>
-          </span>
+          <span>Barème scolaire total</span>
           <span className="summary-value">
             {Math.round(score.totalScore).toLocaleString()}
           </span>
@@ -169,14 +161,14 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
                 <tr key={field}>
                   <td>{FIELD_NAMES[field]}</td>
                   <td className="numeric">{detail.rawAverage.toFixed(2)}</td>
-                  <td className="numeric">{harmonizedValue.toFixed(3)}</td>
+                  <td className="numeric"><span className="weight-prefix">{FIELD_WEIGHTS[field]}x</span> {harmonizedValue.toFixed(3)}</td>
                 </tr>
               );
             })}
           </tbody>
           <tfoot>
             <tr className="score-total-row">
-              <td>Total pondéré (x5 et x4)</td>
+              <td>Total pondéré</td>
               <td className="numeric"></td>
               <td className="numeric">
                 {Math.round(score.weightedSum).toLocaleString()}
@@ -186,23 +178,89 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
         </table>
       </div>
 
-      {availableStatsYears.length > 1 && statsYear && (
+      <div className="score-summary-breakdown" style={{ marginTop: '1rem' }}>
+        <div className="summary-item summary-item-emphasis">
+          <span className="multiplier-label">
+            Coefficient de pondération
+            <span className="multiplier-controls">
+              <button
+                className="multiplier-btn"
+                onClick={() => onMultiplierChange(-0.1)}
+                aria-label="Diminuer"
+              >
+                −
+              </button>
+              <span className="multiplier-value">×{multiplier.toFixed(1)}</span>
+              <button
+                className="multiplier-btn"
+                onClick={() => onMultiplierChange(0.1)}
+                aria-label="Augmenter"
+              >
+                +
+              </button>
+            </span>
+          </span>
+          <span className="summary-value">
+            {Math.round(score.totalScore).toLocaleString()}
+          </span>
+        </div>
+      </div>
+
+      {(availableStatsKeys.length > 1 || customModels.length > 0) && statsKey && (
         <div className="stats-year-selector">
           <span className="stats-year-label">
             Statistiques d'harmonisation :
           </span>
           <div className="stats-year-buttons">
-            {availableStatsYears.map((year) => (
+            {availableStatsKeys.map((key) => (
               <button
-                key={year}
-                className={`stats-year-btn${statsYear === year ? " active" : ""}`}
-                onClick={() => onStatsYearChange(year)}
+                key={key}
+                className={`stats-year-btn${statsKey === key ? " active" : ""}`}
+                onClick={() => onStatsKeyChange(key)}
               >
-                {year === ALT_MODEL_KEY ? ALT_MODEL_LABEL : year}
+                {STATS_MODEL_LABELS[key] ?? key}
+              </button>
+            ))}
+            {customModels.map((m) => (
+              <button
+                key={m.id}
+                className={`stats-year-btn${statsKey === `custom:${m.id}` ? " active" : ""}`}
+                onClick={() => onStatsKeyChange(`custom:${m.id}`)}
+              >
+                {m.name}
               </button>
             ))}
           </div>
         </div>
+      )}
+
+      <div className="custom-model-create">
+        <span className="custom-model-create-label">Créer un modèle perso à partir de :</span>
+        <div className="custom-model-create-controls">
+          <select
+            className="custom-model-base-select"
+            value={baseKey}
+            onChange={e => setBaseKey(e.target.value)}
+          >
+            {availableStatsKeys.map(key => (
+              <option key={key} value={key}>{STATS_MODEL_LABELS[key] ?? key}</option>
+            ))}
+          </select>
+          <button className="custom-model-create-btn" onClick={handleCreate}>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Créer
+          </button>
+        </div>
+      </div>
+
+      {activeCustomModel && (
+        <CustomModelEditor
+          model={activeCustomModel}
+          onUpdate={onUpdateCustomModel}
+          onDelete={onDeleteCustomModel}
+        />
       )}
 
       <div className="score-info">
