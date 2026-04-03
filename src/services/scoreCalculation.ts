@@ -25,7 +25,7 @@ const FIELD_MAPPING: Record<DisciplinaryField, Subject[]> = {
   EPS: ['EPS'],
 };
 
-const FIELD_WEIGHTS: Record<DisciplinaryField, number> = {
+export const FIELD_WEIGHTS: Record<DisciplinaryField, number> = {
   FRANCAIS: 5,
   MATHEMATIQUES: 5,
   HISTOIRE_GEO: 4,
