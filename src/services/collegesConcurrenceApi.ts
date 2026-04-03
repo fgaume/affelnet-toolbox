@@ -34,7 +34,7 @@ const IPS_COLLEGES_URL =
 
 interface IpsCollegeRow {
   Identifiant: string;
-  Bonus_IPS_2026: number | null;
+  [key: string]: string | number | null;
 }
 
 let ipsCache: Map<string, number> | null = null;
@@ -46,10 +46,17 @@ export async function fetchBonusIpsColleges(): Promise<Map<string, number>> {
   if (!response.ok) throw new Error(`Erreur chargement bonus IPS: ${response.status}`);
 
   const rows = (await response.json()) as IpsCollegeRow[];
+
+  const currentYear = new Date().getFullYear();
+  const currentField = `Bonus_IPS_${currentYear}`;
+  const previousField = `Bonus_IPS_${currentYear - 1}`;
+  const field = (rows[0]?.[currentField] !== undefined) ? currentField : previousField;
+
   ipsCache = new Map();
   for (const row of rows) {
-    if (row.Bonus_IPS_2026 != null) {
-      ipsCache.set(row.Identifiant, row.Bonus_IPS_2026);
+    const value = row[field];
+    if (typeof value === 'number') {
+      ipsCache.set(row.Identifiant, value);
     }
   }
   return ipsCache;
@@ -60,16 +67,22 @@ const DNB_API_BASE =
 
 interface DnbRow {
   uai: string;
+  session: number;
   nb_candidats_g: number;
   taux_de_reussite_g: number;
 }
 
-let dnbCache: Map<string, number> | null = null;
+interface DnbResult {
+  admisMap: Map<string, number>;
+  session: number | null;
+}
 
-export async function fetchDnbAdmisColleges(): Promise<Map<string, number>> {
+let dnbCache: DnbResult | null = null;
+
+export async function fetchDnbAdmisColleges(): Promise<DnbResult> {
   if (dnbCache) return dnbCache;
 
-  const select = 'uai,nb_candidats_g,taux_de_reussite_g';
+  const select = 'uai,session,nb_candidats_g,taux_de_reussite_g';
   const where = encodeURIComponent("academie = 'PARIS' AND secteur = 'PU'");
   const url = `${DNB_API_BASE}?select=${select}&where=${where}&order_by=session+desc&limit=-1`;
 
@@ -77,13 +90,18 @@ export async function fetchDnbAdmisColleges(): Promise<Map<string, number>> {
   if (!response.ok) throw new Error(`Erreur chargement DNB: ${response.status}`);
 
   const rows = (await response.json()) as DnbRow[];
-  dnbCache = new Map();
+  const admisMap = new Map<string, number>();
+  let session: number | null = null;
   // Data is ordered by session desc, so first occurrence per UAI is the latest year
   for (const row of rows) {
-    if (!dnbCache.has(row.uai)) {
-      dnbCache.set(row.uai, Math.round(row.nb_candidats_g * row.taux_de_reussite_g / 100));
+    if (session === null && row.session != null) {
+      session = row.session;
+    }
+    if (!admisMap.has(row.uai)) {
+      admisMap.set(row.uai, Math.round(row.nb_candidats_g * row.taux_de_reussite_g / 100));
     }
   }
+  dnbCache = { admisMap, session };
   return dnbCache;
 }
 
@@ -94,27 +112,33 @@ export interface CollegeConcurrent {
   nbAdmis: number;   // 0 if unknown
 }
 
-const concurrentsCache = new Map<string, CollegeConcurrent[]>();
+export interface ConcurrenceResult {
+  colleges: CollegeConcurrent[];
+  dnbSession: number | null;
+}
 
-export async function fetchCollegesConcurrents(uaiLycee: string): Promise<CollegeConcurrent[]> {
+const concurrentsCache = new Map<string, ConcurrenceResult>();
+
+export async function fetchCollegesConcurrents(uaiLycee: string): Promise<ConcurrenceResult> {
   const cached = concurrentsCache.get(uaiLycee);
   if (cached) return cached;
 
-  const colleges = await fetchCollegesForLycee(uaiLycee);
-  if (colleges.length === 0) return [];
+  const collegeRefs = await fetchCollegesForLycee(uaiLycee);
+  if (collegeRefs.length === 0) return { colleges: [], dnbSession: null };
 
-  const [ipsMap, dnbMap] = await Promise.all([
+  const [ipsMap, dnbResult] = await Promise.all([
     fetchBonusIpsColleges(),
     fetchDnbAdmisColleges(),
   ]);
 
-  const result: CollegeConcurrent[] = colleges.map((c) => ({
+  const colleges: CollegeConcurrent[] = collegeRefs.map((c) => ({
     uai: c.uai,
     nom: c.nom,
     bonusIps: ipsMap.get(c.uai) ?? -1,
-    nbAdmis: dnbMap.get(c.uai) ?? 0,
+    nbAdmis: dnbResult.admisMap.get(c.uai) ?? 0,
   }));
 
+  const result: ConcurrenceResult = { colleges, dnbSession: dnbResult.session };
   concurrentsCache.set(uaiLycee, result);
   return result;
 }

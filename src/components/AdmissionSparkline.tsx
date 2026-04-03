@@ -1,5 +1,5 @@
 import { LineChart, Line, Tooltip, YAxis } from "recharts";
-import { SEUIL_YEARS } from "../services/seuilsApi";
+import { getSeuilYears } from "../services/seuilsApi";
 import { isValidSeuil, hasValidSparklineData } from "./sparklineUtils";
 
 interface AdmissionSparklineProps {
@@ -39,7 +39,8 @@ function AdmissionSparkline({ seuils }: AdmissionSparklineProps) {
 
   const trendColor = slope <= 0 ? "#16a34a" : "#dc2626";
 
-  const chartData = SEUIL_YEARS.map((year, i) => {
+  const seuilYears = getSeuilYears();
+  const chartData = seuilYears.map((year, i) => {
     const rawSeuil = (seuils || [])[i];
     // Si la valeur est invalide, on force à null pour Recharts
     const seuilValue = isValidSeuil(rawSeuil) ? Number(rawSeuil) : null;

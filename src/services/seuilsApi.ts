@@ -1,9 +1,14 @@
 const DATASET_URL =
   'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-seuils-admission-lycees&config=default&split=train&offset=0&length=100';
 
-const SEUIL_2025_INDEX = 4;
+const SEUIL_START_YEAR = 2021;
 
-export const SEUIL_YEARS = [2021, 2022, 2023, 2024, 2025] as const;
+/** Derived dynamically after first fetch — default until then. */
+let seuilYears: number[] = [];
+
+export function getSeuilYears(): readonly number[] {
+  return seuilYears;
+}
 
 export interface AdmissionDifficulty {
   color: string;
@@ -25,9 +30,20 @@ import type { LyceeAdmissionHistory } from '../types';
 let cache: Map<string, number> | null = null;
 let historyCache: readonly LyceeAdmissionHistory[] | null = null;
 
+function deriveYears(rows: DatasetRow[]): void {
+  const length = rows[0]?.row.seuils.length ?? 0;
+  const currentYear = new Date().getFullYear();
+  const allYears = Array.from({ length }, (_, i) => SEUIL_START_YEAR + i);
+  const lastDataYear = allYears[allYears.length - 1] ?? currentYear;
+  // Keep up to current year; if dataset has future data, cap it
+  seuilYears = lastDataYear > currentYear
+    ? allYears.filter((y) => y <= currentYear)
+    : allYears;
+}
+
 /**
  * Fetch all lycée admission thresholds from HuggingFace dataset.
- * Returns a Map: UAI code → seuil 2025.
+ * Returns a Map: UAI code → latest seuil.
  * Cached after first call.
  */
 export async function fetchSeuils(): Promise<Map<string, number>> {
@@ -41,9 +57,12 @@ export async function fetchSeuils(): Promise<Map<string, number>> {
   const data = await response.json();
   const rows: DatasetRow[] = data.rows;
 
+  if (seuilYears.length === 0) deriveYears(rows);
+  const latestIndex = seuilYears.length - 1;
+
   cache = new Map();
   for (const { row } of rows) {
-    const seuil = row.seuils[SEUIL_2025_INDEX];
+    const seuil = row.seuils[latestIndex];
     if (seuil != null) {
       cache.set(row.code, seuil);
     }
@@ -67,6 +86,8 @@ export async function fetchAllSeuils(): Promise<readonly LyceeAdmissionHistory[]
 
   const data = await response.json();
   const rows: DatasetRow[] = data.rows;
+
+  if (seuilYears.length === 0) deriveYears(rows);
 
   historyCache = rows
     .map(({ row }) => ({

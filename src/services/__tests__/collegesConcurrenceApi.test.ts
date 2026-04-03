@@ -98,8 +98,8 @@ describe('collegesConcurrenceApi', () => {
       const { fetchDnbAdmisColleges } = await import('../collegesConcurrenceApi');
       const result = await fetchDnbAdmisColleges();
 
-      expect(result.get('0752536Z')).toBe(92); // Math.round(100 * 92 / 100)
-      expect(result.get('0752319N')).toBe(76); // Math.round(80 * 95 / 100)
+      expect(result.admisMap.get('0752536Z')).toBe(92); // Math.round(100 * 92 / 100)
+      expect(result.admisMap.get('0752319N')).toBe(76); // Math.round(80 * 95 / 100)
     });
 
     it('caches results across calls', async () => {
@@ -159,14 +159,14 @@ describe('collegesConcurrenceApi', () => {
       const { fetchCollegesConcurrents } = await import('../collegesConcurrenceApi');
       const result = await fetchCollegesConcurrents('0750676C');
 
-      expect(result).toHaveLength(2);
-      expect(result).toContainEqual({
+      expect(result.colleges).toHaveLength(2);
+      expect(result.colleges).toContainEqual({
         uai: '0752536Z',
         nom: 'VOLTAIRE',
         bonusIps: 800,
         nbAdmis: 92,
       });
-      expect(result).toContainEqual({
+      expect(result.colleges).toContainEqual({
         uai: '0752319N',
         nom: 'COYSEVOX',
         bonusIps: 1200,
@@ -205,8 +205,8 @@ describe('collegesConcurrenceApi', () => {
       const { fetchCollegesConcurrents } = await import('../collegesConcurrenceApi');
       const result = await fetchCollegesConcurrents('0750676C');
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({
+      expect(result.colleges).toHaveLength(1);
+      expect(result.colleges[0]).toEqual({
         uai: '0752536Z',
         nom: 'VOLTAIRE',
         bonusIps: -1,
