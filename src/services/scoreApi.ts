@@ -23,14 +23,11 @@ const FIELD_MAPPING: Record<string, DisciplinaryField> = {
   EPS: 'EPS',
 };
 
-/** Default stats model key */
-export const DEFAULT_STATS_MODEL = 'V2';
+/** Default stats model key – resolved dynamically to latest year */
+export let DEFAULT_STATS_MODEL = '2025';
 
-/** Human-readable labels for each stats key (legacy year added dynamically) */
-export const STATS_MODEL_LABELS: Record<string, string> = {
-  V1: 'Modèle 1',
-  V2: 'Modèle 2',
-};
+/** Human-readable labels for each stats key (populated dynamically) */
+export const STATS_MODEL_LABELS: Record<string, string> = {};
 
 interface StatsModelsResponse {
   rows: Array<{
@@ -105,14 +102,16 @@ export async function fetchAllAcademicStats(): Promise<AllStatsResult> {
     statsByKey.set(legacyYear, parseRows(legacyTargetRows));
     keys.push(legacyYear);
     STATS_MODEL_LABELS[legacyYear] = legacyYear;
+    DEFAULT_STATS_MODEL = legacyYear;
   }
 
-  // Parse V1/V2 from models dataset
+  // Parse all experimental models from models dataset
   const modelNames = [...new Set((modelsData.rows ?? []).map((r) => r.row.model))].sort();
   for (const model of modelNames) {
     const modelRows = modelsData.rows.filter((r) => r.row.model === model);
     statsByKey.set(model, parseRows(modelRows));
     keys.push(model);
+    STATS_MODEL_LABELS[model] = model;
   }
 
   cachedAllStats = { availableKeys: keys, statsByKey };
