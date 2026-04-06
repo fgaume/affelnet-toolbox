@@ -1,9 +1,10 @@
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useMemo } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts';
 import { fetchNiveauScolaire, fetchMedianTBByYear, fetchMedianAccesByYear, type NiveauScolaireResult } from '../services/niveauScolaireApi';
 import { fetchIps, fetchMedianIpsByYear, type IpsResult } from '../services/ipsApi';
+import { useTheme } from '../hooks/useTheme';
 import './LyceeDetail.css';
 
 interface LyceeInfo {
@@ -24,6 +25,8 @@ interface LyceeData {
 const SHORT_NAME_LIMIT = 14;
 const MEDIAN_KEY = '__median__';
 const MEDIAN_COLOR = '#9ca3af';
+const DARK_MODE_PURPLE = '#d8b4fe';
+const INACCESSIBLE_BLACK = '#1a1a1a';
 
 function shortName(nom: string): string {
   if (nom.length <= SHORT_NAME_LIMIT) return nom;
@@ -69,6 +72,15 @@ const INITIAL_STATE: FetchState = {
 
 export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   const [state, dispatch] = useReducer(fetchReducer, INITIAL_STATE);
+  const { resolvedTheme } = useTheme();
+
+  const themeLycees = useMemo(() => {
+    if (resolvedTheme !== 'dark') return lycees;
+    return lycees.map(l => ({
+      ...l,
+      color: l.color === INACCESSIBLE_BLACK ? DARK_MODE_PURPLE : l.color
+    }));
+  }, [lycees, resolvedTheme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -211,6 +223,27 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
     return lycee ? shortName(lycee.nom) : key;
   };
 
+  const chartThemeProps = {
+    cartesianGrid: { strokeDasharray: '3 3', stroke: 'var(--color-border)' },
+    xAxis: { tick: { fontSize: 11, fill: 'var(--color-text-muted)' }, stroke: 'var(--color-border)' },
+    yAxis: { tick: { fontSize: 11, fill: 'var(--color-text-muted)' }, stroke: 'var(--color-border)' },
+    tooltip: {
+      contentStyle: {
+        background: 'var(--color-bg-card, #fff)',
+        border: '1px solid var(--color-border, #ddd)',
+        borderRadius: 6,
+        fontSize: 11,
+        padding: '4px 8px',
+        color: 'var(--color-text-primary)'
+      },
+      itemStyle: { padding: '2px 0' },
+      wrapperStyle: { zIndex: 10 }
+    },
+    legend: {
+      wrapperStyle: { fontSize: 11, color: 'var(--color-text-secondary)' }
+    }
+  };
+
   return (
     <div className="lycee-detail">
       {hasTB && (
@@ -218,23 +251,22 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
           <h5>Taux de mentions TB au Bac (%)</h5>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={tbChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} unit="%" />
+              <CartesianGrid {...chartThemeProps.cartesianGrid} />
+              <XAxis dataKey="annee" {...chartThemeProps.xAxis} />
+              <YAxis unit="%" {...chartThemeProps.yAxis} />
               <Tooltip
+                {...chartThemeProps.tooltip}
                 formatter={(v: unknown, name: unknown) => [
                   `${Number(v).toFixed(1)}%`,
                   formatName(String(name ?? '')),
                 ]}
                 itemSorter={(item) => tbRank.get(String(item.dataKey ?? '')) ?? 9999}
-                contentStyle={{ background: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border, #ddd)', borderRadius: 6, fontSize: 11, padding: '4px 8px' }}
-                wrapperStyle={{ zIndex: 10 }}
               />
               <Legend
+                {...chartThemeProps.legend}
                 formatter={(key: string) => formatName(key)}
-                wrapperStyle={{ fontSize: 11 }}
               />
-              {[...lycees].sort((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l) => (
+              {[...themeLycees].sort((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"
@@ -265,23 +297,22 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
           <h5>Taux d'accès 2nde → Terminale (%)</h5>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={accesChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} unit="%" domain={['auto', 100]} />
+              <CartesianGrid {...chartThemeProps.cartesianGrid} />
+              <XAxis dataKey="annee" {...chartThemeProps.xAxis} />
+              <YAxis unit="%" domain={['auto', 100]} {...chartThemeProps.yAxis} />
               <Tooltip
+                {...chartThemeProps.tooltip}
                 formatter={(v: unknown, name: unknown) => [
                   `${Number(v).toFixed(1)}%`,
                   formatName(String(name ?? '')),
                 ]}
                 itemSorter={(item) => accesRank.get(String(item.dataKey ?? '')) ?? 9999}
-                contentStyle={{ background: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border, #ddd)', borderRadius: 6, fontSize: 11, padding: '4px 8px' }}
-                wrapperStyle={{ zIndex: 10 }}
               />
               <Legend
+                {...chartThemeProps.legend}
                 formatter={(key: string) => formatName(key)}
-                wrapperStyle={{ fontSize: 11 }}
               />
-              {[...lycees].sort((a, b) => (accesRank.get(a.uai) ?? 99) - (accesRank.get(b.uai) ?? 99)).map((l) => (
+              {[...themeLycees].sort((a, b) => (accesRank.get(a.uai) ?? 99) - (accesRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"
@@ -312,23 +343,22 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
           <h5>Indice de Position Sociale (IPS)</h5>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={ipsChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} domain={['auto', 'auto']} />
+              <CartesianGrid {...chartThemeProps.cartesianGrid} />
+              <XAxis dataKey="annee" {...chartThemeProps.xAxis} />
+              <YAxis domain={['auto', 'auto']} {...chartThemeProps.yAxis} />
               <Tooltip
+                {...chartThemeProps.tooltip}
                 formatter={(v: unknown, name: unknown) => [
                   Number(v).toFixed(1),
                   formatName(String(name ?? '')),
                 ]}
                 itemSorter={(item) => ipsRank.get(String(item.dataKey ?? '')) ?? 9999}
-                contentStyle={{ background: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border, #ddd)', borderRadius: 6, fontSize: 11, padding: '4px 8px' }}
-                wrapperStyle={{ zIndex: 10 }}
               />
               <Legend
+                {...chartThemeProps.legend}
                 formatter={(key: string) => formatName(key)}
-                wrapperStyle={{ fontSize: 11 }}
               />
-              {[...lycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
+              {[...themeLycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"
