@@ -213,53 +213,6 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
 
   return (
     <div className="lycee-detail">
-      {hasIPS && (
-        <div className="lycee-detail-chart">
-          <h5>Indice de Position Sociale (IPS)</h5>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={ipsChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} domain={['auto', 'auto']} />
-              <Tooltip
-                formatter={(v: unknown, name: unknown) => [
-                  Number(v).toFixed(1),
-                  formatName(String(name ?? '')),
-                ]}
-                itemSorter={(item) => ipsRank.get(String(item.dataKey ?? '')) ?? 9999}
-                contentStyle={{ background: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border, #ddd)', borderRadius: 6, fontSize: 11, padding: '4px 8px' }}
-                wrapperStyle={{ zIndex: 10 }}
-              />
-              <Legend
-                formatter={(key: string) => formatName(key)}
-                wrapperStyle={{ fontSize: 11 }}
-              />
-              {[...lycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
-                <Line
-                  key={l.uai}
-                  type="monotone"
-                  dataKey={l.uai}
-                  stroke={l.color}
-                  strokeWidth={2}
-                  dot={{ r: 2.5 }}
-                  connectNulls
-                />
-              ))}
-              <Line
-                key={MEDIAN_KEY}
-                type="monotone"
-                dataKey={MEDIAN_KEY}
-                stroke={MEDIAN_COLOR}
-                strokeWidth={1.5}
-                strokeDasharray="6 3"
-                dot={false}
-                connectNulls
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
       {hasTB && (
         <div className="lycee-detail-chart">
           <h5>Taux de mentions TB au Bac (%)</h5>
@@ -329,6 +282,53 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 wrapperStyle={{ fontSize: 11 }}
               />
               {[...lycees].sort((a, b) => (accesRank.get(a.uai) ?? 99) - (accesRank.get(b.uai) ?? 99)).map((l) => (
+                <Line
+                  key={l.uai}
+                  type="monotone"
+                  dataKey={l.uai}
+                  stroke={l.color}
+                  strokeWidth={2}
+                  dot={{ r: 2.5 }}
+                  connectNulls
+                />
+              ))}
+              <Line
+                key={MEDIAN_KEY}
+                type="monotone"
+                dataKey={MEDIAN_KEY}
+                stroke={MEDIAN_COLOR}
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                connectNulls
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {hasIPS && (
+        <div className="lycee-detail-chart">
+          <h5>Indice de Position Sociale (IPS)</h5>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={ipsChartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+              <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} domain={['auto', 'auto']} />
+              <Tooltip
+                formatter={(v: unknown, name: unknown) => [
+                  Number(v).toFixed(1),
+                  formatName(String(name ?? '')),
+                ]}
+                itemSorter={(item) => ipsRank.get(String(item.dataKey ?? '')) ?? 9999}
+                contentStyle={{ background: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border, #ddd)', borderRadius: 6, fontSize: 11, padding: '4px 8px' }}
+                wrapperStyle={{ zIndex: 10 }}
+              />
+              <Legend
+                formatter={(key: string) => formatName(key)}
+                wrapperStyle={{ fontSize: 11 }}
+              />
+              {[...lycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"
