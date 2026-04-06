@@ -10,11 +10,13 @@ interface ApiRow {
   nb_mentions_tb_sansf_g: number | null;
   nb_mentions_tb_avecf_g: number | null;
   presents_gnle: number;
+  taux_acces_2nde: number | null;
 }
 
 export interface NiveauScolairePoint {
   annee: string;
   tauxTB: number;
+  tauxAcces: number | null;
 }
 
 export interface NiveauScolaireResult {
@@ -32,7 +34,7 @@ export function computeTauxTB(sansF: number | null, avecF: number | null, presen
 async function fetchAllParis(): Promise<ApiRow[]> {
   if (cache) return cache;
 
-  const select = 'annee,uai,nb_mentions_tb_sansf_g,nb_mentions_tb_avecf_g,presents_gnle';
+  const select = 'annee,uai,nb_mentions_tb_sansf_g,nb_mentions_tb_avecf_g,presents_gnle,taux_acces_2nde';
   const where = encodeURIComponent(
     "(code_departement = '75') AND (secteur = 'public') AND (nb_mentions_tb_sansf_g is not null) AND (presents_gnle > 0)"
   );
@@ -73,6 +75,27 @@ export async function fetchMedianTBByYear(): Promise<Map<string, number>> {
   }
 }
 
+export async function fetchMedianAccesByYear(): Promise<Map<string, number>> {
+  try {
+    const allRows = await fetchAllParis();
+    const byYear = new Map<string, number[]>();
+    for (const r of allRows) {
+      if (r.taux_acces_2nde == null) continue;
+      const annee = r.annee.slice(0, 4);
+      const arr = byYear.get(annee);
+      if (arr) arr.push(r.taux_acces_2nde);
+      else byYear.set(annee, [r.taux_acces_2nde]);
+    }
+    const result = new Map<string, number>();
+    for (const [annee, values] of byYear) {
+      result.set(annee, median(values));
+    }
+    return result;
+  } catch {
+    return new Map();
+  }
+}
+
 export async function fetchNiveauScolaire(uai: string): Promise<NiveauScolaireResult | null> {
   try {
     const allRows = await fetchAllParis();
@@ -84,6 +107,7 @@ export async function fetchNiveauScolaire(uai: string): Promise<NiveauScolaireRe
     const history: NiveauScolairePoint[] = lyceeRows.map((r) => ({
       annee: r.annee.slice(0, 4),
       tauxTB: computeTauxTB(r.nb_mentions_tb_sansf_g, r.nb_mentions_tb_avecf_g, r.presents_gnle),
+      tauxAcces: r.taux_acces_2nde,
     }));
 
     // Decile: compare latest year across all Paris lycées

@@ -43,7 +43,7 @@ const SOURCES = [
       {
         name: 'Résultats des lycées',
         url: 'https://data.education.gouv.fr/explore/dataset/fr-en-indicateurs-de-resultat-des-lycees-gt_v2/',
-        description: 'Taux de mentions Très Bien au bac',
+        description: "Taux de mentions TB et taux d'accès en terminale",
       },
       {
         name: 'Résultats des collèges (DNB)',
