@@ -51,13 +51,13 @@ describe('fetchNiveauScolaire', () => {
     vi.resetModules();
   });
 
-  it('fetches TB history and decile for a lycée', async () => {
+  it('fetches TB history, access rate and decile for a lycée', async () => {
     // Flat array — matches /exports/json format
     const mockData = [
-      { annee: '2022', uai: '0750680G', nb_mentions_tb_sansf_g: 20, nb_mentions_tb_avecf_g: 10, presents_gnle: 200 },
-      { annee: '2023', uai: '0750680G', nb_mentions_tb_sansf_g: 25, nb_mentions_tb_avecf_g: 15, presents_gnle: 200 },
-      { annee: '2022', uai: '0750693W', nb_mentions_tb_sansf_g: 10, nb_mentions_tb_avecf_g: 5, presents_gnle: 100 },
-      { annee: '2023', uai: '0750693W', nb_mentions_tb_sansf_g: 12, nb_mentions_tb_avecf_g: 8, presents_gnle: 100 },
+      { annee: '2022', uai: '0750680G', nb_mentions_tb_sansf_g: 20, nb_mentions_tb_avecf_g: 10, presents_gnle: 200, taux_acces_2nde: 90 },
+      { annee: '2023', uai: '0750680G', nb_mentions_tb_sansf_g: 25, nb_mentions_tb_avecf_g: 15, presents_gnle: 200, taux_acces_2nde: 92 },
+      { annee: '2022', uai: '0750693W', nb_mentions_tb_sansf_g: 10, nb_mentions_tb_avecf_g: 5, presents_gnle: 100, taux_acces_2nde: 85 },
+      { annee: '2023', uai: '0750693W', nb_mentions_tb_sansf_g: 12, nb_mentions_tb_avecf_g: 8, presents_gnle: 100, taux_acces_2nde: 88 },
     ];
 
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
@@ -72,7 +72,9 @@ describe('fetchNiveauScolaire', () => {
     expect(result!.history).toHaveLength(2);
     expect(result!.history[0].annee).toBe('2022');
     expect(result!.history[0].tauxTB).toBeCloseTo(15);
+    expect(result!.history[0].tauxAcces).toBe(90);
     expect(result!.history[1].tauxTB).toBeCloseTo(20);
+    expect(result!.history[1].tauxAcces).toBe(92);
     expect(result!.decile).toBeGreaterThanOrEqual(1);
     expect(result!.decile).toBeLessThanOrEqual(10);
   });

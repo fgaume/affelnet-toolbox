@@ -2,7 +2,7 @@ import { useReducer, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts';
-import { fetchNiveauScolaire, fetchMedianTBByYear, type NiveauScolaireResult } from '../services/niveauScolaireApi';
+import { fetchNiveauScolaire, fetchMedianTBByYear, fetchMedianAccesByYear, type NiveauScolaireResult } from '../services/niveauScolaireApi';
 import { fetchIps, fetchMedianIpsByYear, type IpsResult } from '../services/ipsApi';
 import './LyceeDetail.css';
 
@@ -36,12 +36,13 @@ interface FetchState {
   loading: boolean;
   data: Map<string, LyceeData>;
   medianTB: Map<string, number>;
+  medianAcces: Map<string, number>;
   medianIPS: Map<string, number>;
 }
 
 type FetchAction =
   | { type: 'FETCH_START' }
-  | { type: 'FETCH_SUCCESS'; data: Map<string, LyceeData>; medianTB: Map<string, number>; medianIPS: Map<string, number> };
+  | { type: 'FETCH_SUCCESS'; data: Map<string, LyceeData>; medianTB: Map<string, number>; medianAcces: Map<string, number>; medianIPS: Map<string, number> };
 
 function fetchReducer(state: FetchState, action: FetchAction): FetchState {
   switch (action.type) {
@@ -52,6 +53,7 @@ function fetchReducer(state: FetchState, action: FetchAction): FetchState {
         loading: false,
         data: action.data,
         medianTB: action.medianTB,
+        medianAcces: action.medianAcces,
         medianIPS: action.medianIPS,
       };
   }
@@ -61,6 +63,7 @@ const INITIAL_STATE: FetchState = {
   loading: true,
   data: new Map(),
   medianTB: new Map(),
+  medianAcces: new Map(),
   medianIPS: new Map(),
 };
 
@@ -88,8 +91,9 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
       ),
       // Fetch medians
       fetchMedianTBByYear(),
+      fetchMedianAccesByYear(),
       fetchMedianIpsByYear(),
-    ]).then(([results, tbMedians, ipsMedians]) => {
+    ]).then(([results, tbMedians, accesMedians, ipsMedians]) => {
       if (cancelled) return;
       const map = new Map<string, LyceeData>();
       for (const r of results) {
@@ -101,6 +105,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
         type: 'FETCH_SUCCESS',
         data: map,
         medianTB: tbMedians,
+        medianAcces: accesMedians,
         medianIPS: ipsMedians,
       });
     });
@@ -108,7 +113,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
     return () => { cancelled = true; };
   }, [lycees]);
 
-  const { loading, data, medianTB, medianIPS } = state;
+  const { loading, data, medianTB, medianAcces, medianIPS } = state;
 
   if (loading) {
     return (
@@ -133,6 +138,25 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
       if (p) point[l.uai] = p.tauxTB;
     }
     const med = medianTB.get(annee);
+    if (med != null) point[MEDIAN_KEY] = med;
+    return point;
+  });
+
+  // Build merged chart data for Access rate
+  const allYearsAcces = new Set<string>();
+  for (const [, d] of data) {
+    d.niveau?.history.forEach((p) => p.tauxAcces !== null && allYearsAcces.add(p.annee));
+  }
+  for (const annee of medianAcces.keys()) allYearsAcces.add(annee);
+
+  const accesChartData = [...allYearsAcces].sort().map((annee) => {
+    const point: Record<string, unknown> = { annee };
+    for (const l of lycees) {
+      const d = data.get(l.uai);
+      const p = d?.niveau?.history.find((h) => h.annee === annee);
+      if (p?.tauxAcces != null) point[l.uai] = p.tauxAcces;
+    }
+    const med = medianAcces.get(annee);
     if (med != null) point[MEDIAN_KEY] = med;
     return point;
   });
@@ -172,12 +196,14 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   }
 
   const tbRank = lastYearRank(tbChartData);
+  const accesRank = lastYearRank(accesChartData);
   const ipsRank = lastYearRank(ipsChartData);
 
   const hasTB = tbChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.niveau);
+  const hasAcces = accesChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.niveau?.history.some(h => h.tauxAcces != null));
   const hasIPS = ipsChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.ips);
 
-  if (!hasTB && !hasIPS) return null;
+  if (!hasTB && !hasIPS && !hasAcces) return null;
 
   const formatName = (key: string) => {
     if (key === MEDIAN_KEY) return 'Médiane Paris';
@@ -256,6 +282,53 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 wrapperStyle={{ fontSize: 11 }}
               />
               {[...lycees].sort((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l) => (
+                <Line
+                  key={l.uai}
+                  type="monotone"
+                  dataKey={l.uai}
+                  stroke={l.color}
+                  strokeWidth={2}
+                  dot={{ r: 2.5 }}
+                  connectNulls
+                />
+              ))}
+              <Line
+                key={MEDIAN_KEY}
+                type="monotone"
+                dataKey={MEDIAN_KEY}
+                stroke={MEDIAN_COLOR}
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                connectNulls
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {hasAcces && (
+        <div className="lycee-detail-chart">
+          <h5>Taux d'accès 2nde → Terminale (%)</h5>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={accesChartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+              <XAxis dataKey="annee" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} unit="%" domain={['auto', 100]} />
+              <Tooltip
+                formatter={(v: unknown, name: unknown) => [
+                  `${Number(v).toFixed(1)}%`,
+                  formatName(String(name ?? '')),
+                ]}
+                itemSorter={(item) => accesRank.get(String(item.dataKey ?? '')) ?? 9999}
+                contentStyle={{ background: 'var(--color-bg-card, #fff)', border: '1px solid var(--color-border, #ddd)', borderRadius: 6, fontSize: 11, padding: '4px 8px' }}
+                wrapperStyle={{ zIndex: 10 }}
+              />
+              <Legend
+                formatter={(key: string) => formatName(key)}
+                wrapperStyle={{ fontSize: 11 }}
+              />
+              {[...lycees].sort((a, b) => (accesRank.get(a.uai) ?? 99) - (accesRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"
