@@ -96,7 +96,8 @@
   transition: background-color 0.15s;
 }
 
-.college-autocomplete-container .suggestion-item:hover {
+.college-autocomplete-container .suggestion-item:hover,
+.college-autocomplete-container .suggestion-item.highlighted {
   background-color: var(--color-bg-hover);
 }
 

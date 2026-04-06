@@ -263,6 +263,30 @@
   .app-footer {
     padding: 20px 16px;
   }
+
+  .search-mode-tab {
+    padding: 10px 8px;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .search-mode-tab svg {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .input-tab {
+    padding: 10px 8px;
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .input-tab svg {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
 }
 
 /* Safe area insets for notched devices */

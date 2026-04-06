@@ -4,6 +4,7 @@ import type {
   DisciplinaryField,
 } from '../types/index.ts';
 import { DISCIPLINARY_FIELDS } from '../types/index.ts';
+import { fetchWithHfCache } from './hfCache';
 
 /** URL for the legacy year-based stats dataset */
 const LEGACY_API_URL =
@@ -72,20 +73,10 @@ function parseRows(
 export async function fetchAllAcademicStats(): Promise<AllStatsResult> {
   if (cachedAllStats) return cachedAllStats;
 
-  const [legacyResponse, modelsResponse] = await Promise.all([
-    fetch(LEGACY_API_URL),
-    fetch(MODELS_API_URL),
+  const [legacyData, modelsData] = await Promise.all([
+    fetchWithHfCache<AcademicStatsResponse>(LEGACY_API_URL),
+    fetchWithHfCache<StatsModelsResponse>(MODELS_API_URL),
   ]);
-
-  if (!legacyResponse.ok) {
-    throw new Error(`Failed to fetch legacy stats: ${legacyResponse.statusText}`);
-  }
-  if (!modelsResponse.ok) {
-    throw new Error(`Failed to fetch stats models: ${modelsResponse.statusText}`);
-  }
-
-  const legacyData: AcademicStatsResponse = await legacyResponse.json();
-  const modelsData: StatsModelsResponse = await modelsResponse.json();
 
   const statsByKey = new Map<string, Record<DisciplinaryField, AcademicStats>>();
   const keys: string[] = [];

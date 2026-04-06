@@ -1,4 +1,5 @@
 import type { College, IpsInfo } from '../types';
+import { fetchWithHfCache } from './hfCache';
 
 const COLLEGE_LIST_URL =
   'https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-college-effectifs-niveau-sexe-lv/exports/json/' +
@@ -49,10 +50,8 @@ export function resetIpsCache(): void {
 
 async function loadIpsData(): Promise<IpsRawEntry[]> {
   if (ipsCache) return ipsCache;
-  const resp = await fetch(IPS_DATASET_URL);
-  if (!resp.ok) throw new Error('Impossible de charger les données IPS');
-  ipsCache = await resp.json();
-  return ipsCache!;
+  ipsCache = await fetchWithHfCache<IpsRawEntry[]>(IPS_DATASET_URL);
+  return ipsCache;
 }
 
 /** Fetch IPS + bonus for a given college UAI. Returns null if not found. */
