@@ -12,18 +12,26 @@ interface CollegeAutocompleteProps {
 export function CollegeAutocomplete({ onSelect, placeholder, disabled }: CollegeAutocompleteProps) {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const { suggestions, isLoading, error, search, clearSuggestions } = useCollegeSearch();
   const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
+        setHighlightedIndex(-1);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Reset highlight when suggestions change
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [suggestions]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -32,9 +40,10 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled }: College
     setShowSuggestions(true);
   };
 
-  const handleCollegeClick = (college: College) => {
+  const selectCollege = (college: College) => {
     setInputValue(college.nom);
     setShowSuggestions(false);
+    setHighlightedIndex(-1);
     clearSuggestions();
     onSelect(college);
   };
@@ -43,6 +52,41 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled }: College
     setInputValue('');
     clearSuggestions();
     setShowSuggestions(false);
+    setHighlightedIndex(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const next = e.shiftKey
+        ? (highlightedIndex <= 0 ? suggestions.length - 1 : highlightedIndex - 1)
+        : (highlightedIndex < suggestions.length - 1 ? highlightedIndex + 1 : 0);
+      setHighlightedIndex(next);
+      scrollToItem(next);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const next = highlightedIndex < suggestions.length - 1 ? highlightedIndex + 1 : 0;
+      setHighlightedIndex(next);
+      scrollToItem(next);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const next = highlightedIndex <= 0 ? suggestions.length - 1 : highlightedIndex - 1;
+      setHighlightedIndex(next);
+      scrollToItem(next);
+    } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+      e.preventDefault();
+      selectCollege(suggestions[highlightedIndex]);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setHighlightedIndex(-1);
+    }
+  };
+
+  const scrollToItem = (index: number) => {
+    const item = listRef.current?.children[index] as HTMLElement | undefined;
+    item?.scrollIntoView({ block: 'nearest' });
   };
 
   return (
@@ -58,9 +102,13 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled }: College
           placeholder={placeholder ?? 'Nom de votre collège...'}
           value={inputValue}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
           disabled={disabled}
           autoComplete="off"
+          role="combobox"
+          aria-expanded={showSuggestions && suggestions.length > 0}
+          aria-activedescendant={highlightedIndex >= 0 ? `college-option-${highlightedIndex}` : undefined}
         />
         {inputValue && (
           <button className="clear-button" onClick={handleClear} type="button" aria-label="Effacer">
@@ -84,13 +132,14 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled }: College
       )}
 
       {showSuggestions && suggestions.length > 0 && (
-        <ul className="suggestions-list">
-          {suggestions.map((college) => (
-            <li key={college.uai}>
+        <ul className="suggestions-list" ref={listRef} role="listbox">
+          {suggestions.map((college, index) => (
+            <li key={college.uai} role="option" id={`college-option-${index}`} aria-selected={index === highlightedIndex}>
               <button
-                className="suggestion-item"
-                onClick={() => handleCollegeClick(college)}
+                className={`suggestion-item${index === highlightedIndex ? ' highlighted' : ''}`}
+                onClick={() => selectCollege(college)}
                 type="button"
+                tabIndex={-1}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" width="20" height="20" style={{ flexShrink: 0 }}>
                   <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />

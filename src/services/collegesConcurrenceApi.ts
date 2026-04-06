@@ -1,4 +1,5 @@
 // src/services/collegesConcurrenceApi.ts
+import { fetchWithHfCache } from './hfCache';
 
 const ARCGIS_BASE = 'https://services9.arcgis.com/ekT8MJFiVh8nvlV5/arcgis/rest/services/Affectation_Lyc%C3%A9es/FeatureServer/0/query';
 
@@ -42,10 +43,7 @@ let ipsCache: Map<string, number> | null = null;
 export async function fetchBonusIpsColleges(): Promise<Map<string, number>> {
   if (ipsCache) return ipsCache;
 
-  const response = await fetch(IPS_COLLEGES_URL);
-  if (!response.ok) throw new Error(`Erreur chargement bonus IPS: ${response.status}`);
-
-  const rows = (await response.json()) as IpsCollegeRow[];
+  const rows = await fetchWithHfCache<IpsCollegeRow[]>(IPS_COLLEGES_URL);
 
   const currentYear = new Date().getFullYear();
   const currentField = `Bonus_IPS_${currentYear}`;

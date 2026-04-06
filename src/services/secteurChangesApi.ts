@@ -1,4 +1,5 @@
 import type { LyceeSecteur } from '../types';
+import { fetchWithHfCache } from './hfCache';
 
 const DATASET_BASE =
   'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-secteurs-2025&config=default&split=train';
@@ -27,12 +28,8 @@ export async function fetchPreviousSecteur1(): Promise<Map<string, Set<string>>>
   let total = Infinity;
 
   while (offset < total) {
-    const response = await fetch(`${DATASET_BASE}&offset=${offset}&length=${PAGE_SIZE}`);
-    if (!response.ok) {
-      throw new Error(`Erreur chargement secteurs précédents: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const url = `${DATASET_BASE}&offset=${offset}&length=${PAGE_SIZE}`;
+    const data = await fetchWithHfCache<{ num_rows_total: number; rows: SecteurRow[] }>(url);
     total = data.num_rows_total;
     const rows: SecteurRow[] = data.rows;
 

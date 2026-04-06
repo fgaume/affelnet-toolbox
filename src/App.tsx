@@ -54,6 +54,15 @@ function App() {
   const [topTab, setTopTab] = useState<TopTab>('search');
   const [searchMode, setSearchMode] = useState<SearchMode>('address');
 
+  // Focus the correct input when search mode changes
+  useEffect(() => {
+    const selector = searchMode === 'address' ? '.address-input' : '.college-input';
+    requestAnimationFrame(() => {
+      const input = document.querySelector<HTMLInputElement>(selector);
+      input?.focus();
+    });
+  }, [searchMode]);
+
   // Score calculation state
   const [score, setScore] = useState<UserScore | null>(null);
   const [allStatsByKey, setAllStatsByKey] = useState<Map<string, Record<DisciplinaryField, AcademicStats>> | null>(null);

@@ -26,6 +26,7 @@ interface DatasetRow {
 }
 
 import type { LyceeAdmissionHistory } from '../types';
+import { fetchWithHfCache } from './hfCache';
 
 let cache: Map<string, number> | null = null;
 let historyCache: readonly LyceeAdmissionHistory[] | null = null;
@@ -49,12 +50,7 @@ function deriveYears(rows: DatasetRow[]): void {
 export async function fetchSeuils(): Promise<Map<string, number>> {
   if (cache) return cache;
 
-  const response = await fetch(DATASET_URL);
-  if (!response.ok) {
-    throw new Error(`Erreur chargement seuils: ${response.status}`);
-  }
-
-  const data = await response.json();
+  const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(DATASET_URL);
   const rows: DatasetRow[] = data.rows;
 
   if (seuilYears.length === 0) deriveYears(rows);
@@ -79,12 +75,7 @@ export async function fetchSeuils(): Promise<Map<string, number>> {
 export async function fetchAllSeuils(): Promise<readonly LyceeAdmissionHistory[]> {
   if (historyCache) return historyCache;
 
-  const response = await fetch(DATASET_URL);
-  if (!response.ok) {
-    throw new Error(`Erreur chargement seuils: ${response.status}`);
-  }
-
-  const data = await response.json();
+  const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(DATASET_URL);
   const rows: DatasetRow[] = data.rows;
 
   if (seuilYears.length === 0) deriveYears(rows);
