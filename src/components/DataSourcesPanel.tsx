@@ -87,6 +87,16 @@ const SOURCES = [
       },
     ],
   },
+  {
+    category: 'Projet open source',
+    items: [
+      {
+        name: 'Code source (GitHub)',
+        url: 'https://github.com/fgaume/affelnet-toolbox',
+        description: 'Dépôt du projet Affelnet Toolbox',
+      },
+    ],
+  },
 ];
 
 export function DataSourcesPanel() {
