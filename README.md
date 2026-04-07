@@ -1,6 +1,15 @@
 # Affelnet Toolbox Paris
 
 [![React Doctor](https://www.react.doctor/share/badge?p=affelnet-paris&s=99&w=4&f=1)](https://www.react.doctor/share?p=affelnet-paris&s=99&w=4&f=1)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![Playwright Tests](https://img.shields.io/badge/tested_with-Playwright-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Vitest](https://img.shields.io/badge/tested_with-Vitest-729B1B.svg?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![ESLint](https://img.shields.io/badge/ESLint-4B32C3?logo=eslint&logoColor=white)](https://eslint.org/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed_on-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/)
+[![Last Commit](https://img.shields.io/github/last-commit/fgaume/affelnet-toolbox)](https://github.com/fgaume/affelnet-toolbox/commits/main)
+[![License](https://img.shields.io/github/license/fgaume/affelnet-toolbox)](https://github.com/fgaume/affelnet-toolbox/blob/main/LICENSE)
 
 Une application web interactive conçue pour aider les familles et les élèves parisiens à comprendre et anticiper leur affectation en lycée public via le système Affelnet.
 
