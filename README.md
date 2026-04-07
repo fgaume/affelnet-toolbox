@@ -1,5 +1,7 @@
 # Affelnet Toolbox Paris
 
+[![React Doctor](https://www.react.doctor/share/badge?p=affelnet-paris&s=99&w=4&f=1)](https://www.react.doctor/share?p=affelnet-paris&s=99&w=4&f=1)
+
 Une application web interactive conçue pour aider les familles et les élèves parisiens à comprendre et anticiper leur affectation en lycée public via le système Affelnet.
 
 L'outil permet de :
