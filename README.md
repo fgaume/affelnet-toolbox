@@ -31,7 +31,7 @@ L'outil permet de :
 ## Architecture & Technologies
 
 Ce projet est une application front-end moderne (SPA) construite avec :
-- **React 18** avec **TypeScript**
+- **React 19** avec **TypeScript**
 - **Vite** pour la compilation et le développement rapide
 - **Vanilla CSS** pour le style (sans framework externe, pour une personnalisation totale)
 - **Hugging Face Datasets** pour le stockage et la distribution de données statistiques statiques et de modèles
