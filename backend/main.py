@@ -6,6 +6,9 @@ from pathlib import Path
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from parser.fiche_bareme import clean_text, extract_seuils
+from services.seuils_store import consolidate_seuils
+
 app = FastAPI(title="Affelnet Upload", version="0.1.0")
 
 app.add_middleware(
@@ -51,12 +54,28 @@ async def upload_file(file: UploadFile) -> dict:
             detail=f"Fichier trop volumineux ({len(content) / 1024 / 1024:.1f} Mo). Maximum : 10 Mo.",
         )
 
-    # Save to disk
+    # Save raw file to disk
     dest = UPLOAD_DIR / _safe_filename(file.filename or "upload")
     dest.write_bytes(content)
 
-    return {
+    result: dict = {
         "filename": dest.name,
         "original_filename": file.filename,
         "size": len(content),
     }
+
+    # For text uploads: parse fiche-barème and consolidate seuils
+    if suffix == ".txt":
+        text = content.decode("utf-8", errors="replace")
+        cleaned_lines = clean_text(text)
+        if cleaned_lines:
+            # Save cleaned version alongside the raw file
+            cleaned_dest = dest.with_suffix(".cleaned.txt")
+            cleaned_dest.write_text("\n".join(cleaned_lines), encoding="utf-8")
+
+            voeux = extract_seuils(cleaned_lines)
+            matched = consolidate_seuils(voeux)
+            result["parsed_voeux"] = len(voeux)
+            result["matched_lycees"] = matched
+
+    return result

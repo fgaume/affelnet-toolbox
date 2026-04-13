@@ -1,0 +1,247 @@
+[
+  {
+    "code": "0750680G",
+    "nom": "ARAGO",
+    "seuils": []
+  },
+  {
+    "code": "0750693W",
+    "nom": "BUFFON",
+    "seuils": []
+  },
+  {
+    "code": "0750694X",
+    "nom": "CAMILLE SEE",
+    "seuils": []
+  },
+  {
+    "code": "0750704H",
+    "nom": "CARNOT",
+    "seuils": []
+  },
+  {
+    "code": "0750663N",
+    "nom": "CHAPTAL",
+    "seuils": []
+  },
+  {
+    "code": "0750652B",
+    "nom": "CHARLEMAGNE",
+    "seuils": []
+  },
+  {
+    "code": "0750698B",
+    "nom": "CLAUDE BERNARD",
+    "seuils": []
+  },
+  {
+    "code": "0750683K",
+    "nom": "CLAUDE MONET",
+    "seuils": []
+  },
+  {
+    "code": "0750673Z",
+    "nom": "COLBERT",
+    "seuils": [
+      40063,
+      40062.875
+    ]
+  },
+  {
+    "code": "0750667T",
+    "nom": "CONDORCET",
+    "seuils": [
+      26412,
+      26411.519
+    ]
+  },
+  {
+    "code": "0750712S",
+    "nom": "DIDEROT",
+    "seuils": []
+  },
+  {
+    "code": "0750676C",
+    "nom": "DORIAN",
+    "seuils": []
+  },
+  {
+    "code": "0750671X",
+    "nom": "EDGAR QUINET",
+    "seuils": []
+  },
+  {
+    "code": "0750692V",
+    "nom": "EMILE DUBOIS",
+    "seuils": []
+  },
+  {
+    "code": "0750660K",
+    "nom": "FENELON",
+    "seuils": []
+  },
+  {
+    "code": "0750684L",
+    "nom": "GABRIEL FAURE",
+    "seuils": []
+  },
+  {
+    "code": "0750714U",
+    "nom": "HELENE BOUCHER",
+    "seuils": [
+      39742,
+      39741.772
+    ]
+  },
+  {
+    "code": "0750711R",
+    "nom": "HENRI BERGSON",
+    "seuils": [
+      40689,
+      40689.429
+    ]
+  },
+  {
+    "code": "0750654D",
+    "nom": "HENRI IV",
+    "seuils": []
+  },
+  {
+    "code": "0750705J",
+    "nom": "HONORE DE BALZAC",
+    "seuils": []
+  },
+  {
+    "code": "0750668U",
+    "nom": "JACQUES DECOUR",
+    "seuils": []
+  },
+  {
+    "code": "0750699C",
+    "nom": "JANSON DE SAILLY",
+    "seuils": []
+  },
+  {
+    "code": "0750702F",
+    "nom": "JEAN DE LA FONTAINE",
+    "seuils": []
+  },
+  {
+    "code": "0750700D",
+    "nom": "JEAN-BAPTISTE SAY",
+    "seuils": []
+  },
+  {
+    "code": "0750669V",
+    "nom": "JULES FERRY",
+    "seuils": []
+  },
+  {
+    "code": "0750670W",
+    "nom": "LAMARTINE",
+    "seuils": [
+      40481,
+      40480.602
+    ]
+  },
+  {
+    "code": "0750656F",
+    "nom": "LAVOISIER",
+    "seuils": []
+  },
+  {
+    "code": "0750655E",
+    "nom": "LOUIS LE GRAND",
+    "seuils": []
+  },
+  {
+    "code": "0750715V",
+    "nom": "MAURICE RAVEL",
+    "seuils": []
+  },
+  {
+    "code": "0750703G",
+    "nom": "MOLIERE",
+    "seuils": []
+  },
+  {
+    "code": "0750657G",
+    "nom": "MONTAIGNE",
+    "seuils": []
+  },
+  {
+    "code": "0750685M",
+    "nom": "P.G. DE GENNES",
+    "seuils": []
+  },
+  {
+    "code": "0750689S",
+    "nom": "PAUL BERT",
+    "seuils": []
+  },
+  {
+    "code": "0750679F",
+    "nom": "PAUL VALERY",
+    "seuils": []
+  },
+  {
+    "code": "0750688R",
+    "nom": "RABELAIS",
+    "seuils": []
+  },
+  {
+    "code": "0750664P",
+    "nom": "RACINE",
+    "seuils": []
+  },
+  {
+    "code": "0750682J",
+    "nom": "RODIN",
+    "seuils": []
+  },
+  {
+    "code": "0750651A",
+    "nom": "SIMONE WEIL",
+    "seuils": [
+      38486,
+      38486.323
+    ]
+  },
+  {
+    "code": "0750653C",
+    "nom": "SOPHIE GERMAIN",
+    "seuils": [
+      24738,
+      24738.072
+    ]
+  },
+  {
+    "code": "0750647W",
+    "nom": "TURGOT",
+    "seuils": [
+      40310,
+      40310.043
+    ]
+  },
+  {
+    "code": "0750662M",
+    "nom": "VICTOR DURUY",
+    "seuils": []
+  },
+  {
+    "code": "0750648X",
+    "nom": "VICTOR HUGO",
+    "seuils": [
+      25161,
+      25160.656
+    ]
+  },
+  {
+    "code": "0750675B",
+    "nom": "VOLTAIRE",
+    "seuils": [
+      40042,
+      40042.431
+    ]
+  }
+]
