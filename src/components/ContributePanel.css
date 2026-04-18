@@ -11,11 +11,17 @@
   margin: 0 0 8px;
 }
 
-.contribute-description {
-  color: var(--color-text-muted);
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0 0 24px;
+.contribute-description a {
+  color: var(--color-primary, #3b82f6);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.contribute-description a:hover {
+  opacity: 0.8;
+  text-decoration: none;
 }
 
 /* Status messages */
@@ -55,7 +61,9 @@
 }
 
 @keyframes contribute-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .contribute-reset {
@@ -102,7 +110,9 @@
   border-radius: 12px;
   background: var(--color-bg-card, #fff);
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   color: var(--color-text-muted);
   text-align: center;
 }
@@ -135,7 +145,9 @@
   border-radius: 12px;
   background: var(--color-bg-card, #fff);
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   color: var(--color-text-muted);
   text-align: center;
   outline: none;
