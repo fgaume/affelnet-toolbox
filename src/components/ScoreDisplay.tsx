@@ -82,7 +82,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
 
   return (
     <div className="score-display">
-      <h2>Simuler votre barème</h2>
+      <h2>Barème selon le secteur</h2>
 
       <div className="final-scores-grid">
         <div className="final-score-card secteur-1">
