@@ -27,7 +27,7 @@ import {
   DataSourcesPanel,
   AdmissionHistoryTable,
   DisclaimerModal,
-  // ContributePanel, // hidden for now — re-enable when backend is deployed
+  ContributePanel,
 } from './components';
 import { updateHistoryScolarisation } from './services/storage';
 import {
@@ -318,7 +318,6 @@ function App() {
             </svg>
             Historique des seuils admission
           </button>
-          {/* Contribuer tab hidden for now — re-enable when backend is deployed
           <button
             className={`input-tab${topTab === 'contribute' ? ' active' : ''}`}
             onClick={() => handleTopTabChange('contribute')}
@@ -328,7 +327,6 @@ function App() {
             </svg>
             Contribuer
           </button>
-          */}
         </div>
 
         <div className="tab-panel" style={{ display: topTab === 'search' ? undefined : 'none' }}>
@@ -445,11 +443,9 @@ function App() {
           </div>
         </div>
 
-        {/* Contribuer panel hidden for now
         <div className="tab-panel" style={{ display: topTab === 'contribute' ? undefined : 'none' }}>
           <ContributePanel />
         </div>
-        */}
       </main>
 
       <footer className="app-footer">
