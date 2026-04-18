@@ -1,0 +1,203 @@
+.contribute-panel {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.contribute-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 8px;
+}
+
+.contribute-description {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+/* Status messages */
+.contribute-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.contribute-status--uploading {
+  background: var(--color-bg-info, #eff6ff);
+  color: var(--color-primary, #3b82f6);
+}
+
+.contribute-status--success {
+  background: var(--color-bg-success, #f0fdf4);
+  color: var(--color-success, #16a34a);
+}
+
+.contribute-status--error {
+  background: var(--color-bg-error, #fef2f2);
+  color: var(--color-error, #dc2626);
+}
+
+.contribute-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: contribute-spin 0.7s linear infinite;
+}
+
+@keyframes contribute-spin {
+  to { transform: rotate(360deg); }
+}
+
+.contribute-reset {
+  margin-left: auto;
+  padding: 4px 12px;
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.contribute-reset:hover {
+  opacity: 0.8;
+}
+
+/* Sections */
+.contribute-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.contribute-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 10px;
+}
+
+/* Dropzone */
+.contribute-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 20px;
+  border: 2px dashed var(--color-border, #d1d5db);
+  border-radius: 12px;
+  background: var(--color-bg-card, #fff);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.contribute-dropzone:hover,
+.contribute-dropzone--active {
+  border-color: var(--color-primary, #3b82f6);
+  background: var(--color-bg-info, #eff6ff);
+}
+
+.contribute-dropzone svg {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.contribute-dropzone-hint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Paste zone (image) */
+.contribute-paste-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 20px;
+  border: 2px dashed var(--color-border, #d1d5db);
+  border-radius: 12px;
+  background: var(--color-bg-card, #fff);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  color: var(--color-text-muted);
+  text-align: center;
+  outline: none;
+}
+
+.contribute-paste-zone:focus {
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px var(--color-primary-glow, rgba(59, 130, 246, 0.15));
+}
+
+.contribute-paste-zone svg {
+  opacity: 0.5;
+}
+
+/* Textarea */
+.contribute-textarea {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 10px;
+  background: var(--color-bg-card, #fff);
+  color: var(--color-text-primary);
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.contribute-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px var(--color-primary-glow, rgba(59, 130, 246, 0.15));
+}
+
+.contribute-textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+/* Send button */
+.contribute-send-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--color-primary, #3b82f6);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.contribute-send-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.contribute-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

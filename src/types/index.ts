@@ -165,5 +165,5 @@ export interface LyceeAdmissionHistory {
   readonly seuils: readonly number[];
 }
 
-export type TopTab = 'search' | 'score' | 'history';
+export type TopTab = 'search' | 'score' | 'history' | 'contribute';
 export type SearchMode = 'address' | 'college';
