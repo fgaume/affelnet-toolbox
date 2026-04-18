@@ -1,6 +1,7 @@
 import type { LyceeSecteur } from '../types';
 import { wgs84ToWebMercator } from './geo';
 import { fetchWithHfCache } from './hfCache';
+import { getCoordinates, loadCoordinates } from './coordinatesApi';
 
 const CAPGEO_BASE = 'https://capgeo2.paris.fr/public/rest/services/DASCO/DASCO_Carte_scolaire/MapServer/0/query';
 const ARCGIS_BASE = 'https://services9.arcgis.com/ekT8MJFiVh8nvlV5/arcgis/rest/services/Affectation_Lyc%C3%A9es/FeatureServer/0/query';
@@ -143,12 +144,13 @@ export async function findCollegeUAI(nomCollege: string): Promise<{ uai: string;
 
     return { uai, coordinates };
   } catch {
-    // Fallback: Hugging Face dataset
+    // Fallback: Hugging Face dataset + Annuaire coordinates
     const records = await loadHfSecteurs();
     const upperName = normalizedName.toUpperCase();
     const match = records.find((r) => r.nom_college === upperName);
     if (!match) throw new Error('Collège non référencé dans l\'annuaire Affelnet');
-    return { uai: match.uai_college };
+    const coordinates = await getCoordinates(match.uai_college);
+    return { uai: match.uai_college, coordinates };
   }
 }
 
@@ -170,8 +172,8 @@ export async function findCollegeCoordinates(uai: string): Promise<[number, numb
     const geom = data.features[0].geometry;
     return geom?.x != null && geom?.y != null ? [geom.x, geom.y] : undefined;
   } catch {
-    // ArcGIS unavailable — no coordinates from HF fallback
-    return undefined;
+    // ArcGIS unavailable — use Annuaire de l'Éducation
+    return getCoordinates(uai);
   }
 }
 
@@ -243,8 +245,8 @@ export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSect
 
     return applyRabelaisClosure(lycees, uaiCollege);
   } catch {
-    // Fallback: Hugging Face dataset (no coordinates available)
-    const records = await loadHfSecteurs();
+    // Fallback: Hugging Face dataset + Annuaire coordinates
+    const [records, coordsMap] = await Promise.all([loadHfSecteurs(), loadCoordinates()]);
     const matches = records.filter((r) => r.uai_college === uaiCollege);
     if (!matches.length) throw new Error('Aucun lycée de secteur trouvé');
 
@@ -252,6 +254,7 @@ export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSect
       uai: r.uai_lycee,
       nom: r.nom_lycee,
       secteur: r.secteur,
+      coordinates: coordsMap.get(r.uai_lycee),
     }));
 
     return applyRabelaisClosure(lycees, uaiCollege);
