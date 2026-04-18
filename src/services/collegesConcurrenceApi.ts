@@ -3,31 +3,73 @@ import { fetchWithHfCache } from './hfCache';
 
 const ARCGIS_BASE = 'https://services9.arcgis.com/ekT8MJFiVh8nvlV5/arcgis/rest/services/Affectation_Lyc%C3%A9es/FeatureServer/0/query';
 
+// ----- Hugging Face fallback when ArcGIS requires authentication -----
+const HF_SECTEURS_URL =
+  'https://huggingface.co/datasets/fgaume/affelnet-paris-secteurs/resolve/main/secteur_college_lycee_affelnet.json';
+const HF_SECTEURS_YEAR = 2025;
+
+interface HfSecteurRecord {
+  uai_college: string;
+  nom_college: string;
+  uai_lycee: string;
+  nom_lycee: string;
+  annee: number;
+  secteur: number;
+}
+
+let hfSecteursCache: HfSecteurRecord[] | null = null;
+
+async function loadHfSecteurs(): Promise<HfSecteurRecord[]> {
+  if (hfSecteursCache) return hfSecteursCache;
+  const all = await fetchWithHfCache<HfSecteurRecord[]>(HF_SECTEURS_URL);
+  hfSecteursCache = all.filter((r) => r.annee === HF_SECTEURS_YEAR);
+  return hfSecteursCache;
+}
+// ----- END Hugging Face fallback -----
+
 interface CollegeRef {
   uai: string;
   nom: string;
 }
 
 export async function fetchCollegesForLycee(uaiLycee: string): Promise<CollegeRef[]> {
-  const params = new URLSearchParams({
-    outFields: 'Réseau,Nom_tete',
-    returnGeometry: 'false',
-    f: 'pjson',
-    orderByFields: 'Nom_tete',
-  });
-  const whereClause = `secteur='1' and UAI='${uaiLycee}'`;
-  const url = `${ARCGIS_BASE}?${params}&where=${encodeURIComponent(whereClause).replace(/%27/g, "'").replace(/%3D/g, '=')}`;
+  try {
+    const params = new URLSearchParams({
+      outFields: 'Réseau,Nom_tete',
+      returnGeometry: 'false',
+      f: 'pjson',
+      orderByFields: 'Nom_tete',
+    });
+    const whereClause = `secteur='1' and UAI='${uaiLycee}'`;
+    const url = `${ARCGIS_BASE}?${params}&where=${encodeURIComponent(whereClause).replace(/%27/g, "'").replace(/%3D/g, '=')}`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Erreur de connexion à l\'annuaire Affelnet');
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('ArcGIS HTTP error');
 
-  const data = await response.json();
-  return (data.features || []).map(
-    (f: { attributes: { Réseau: string; Nom_tete: string } }) => ({
-      uai: f.attributes.Réseau,
-      nom: f.attributes.Nom_tete,
-    })
-  );
+    const data = await response.json();
+    if (typeof data === 'object' && data !== null && 'error' in data) {
+      throw new Error('ArcGIS token required');
+    }
+
+    return (data.features || []).map(
+      (f: { attributes: { Réseau: string; Nom_tete: string } }) => ({
+        uai: f.attributes.Réseau,
+        nom: f.attributes.Nom_tete,
+      })
+    );
+  } catch {
+    // Fallback: Hugging Face dataset
+    const records = await loadHfSecteurs();
+    const matches = records.filter((r) => r.uai_lycee === uaiLycee && r.secteur === 1);
+    const seen = new Set<string>();
+    return matches
+      .filter((r) => {
+        if (seen.has(r.uai_college)) return false;
+        seen.add(r.uai_college);
+        return true;
+      })
+      .map((r) => ({ uai: r.uai_college, nom: r.nom_college }));
+  }
 }
 
 const IPS_COLLEGES_URL =
