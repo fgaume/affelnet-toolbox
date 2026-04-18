@@ -4,12 +4,12 @@ import { fetchWithHfCache } from './hfCache';
 const COLLEGE_LIST_URL =
   'https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-college-effectifs-niveau-sexe-lv/exports/json/' +
   '?lang=fr' +
-  '&select=%60numero_college%60+as+uai%2C+%60patronyme%60+as+nom' +
+  '&select=numero_college+as+uai%2C+patronyme+as+nom' +
   '&timezone=Europe%2FParis' +
-  '&where=%28%28%60code_aca%60+%3D+%2201%22%29%29' +
-  '+AND+%28%28%60rentree_scolaire%60+%3D+%22YEAR%22%29%29' +
-  '+AND+%28%28%60secteur%60+%3D+%22PUBLIC%22%29%29' +
-  '+AND+%28%28%60denomination_principale%60+%3D+%22COLLEGE%22%29%29';
+  '&where=code_aca%3D%2201%22' +
+  '+AND+year(rentree_scolaire)%3DYEAR' +
+  '+AND+secteur%3D%22PUBLIC%22' +
+  '+AND+denomination_principale%3D%22COLLEGE%22';
 
 const IPS_DATASET_URL =
   'https://huggingface.co/datasets/fgaume/affelnet-paris-bonus-ips-colleges/raw/main/affelnet-paris-bonus-ips-colleges.json';

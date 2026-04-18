@@ -7,6 +7,8 @@ from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from parser.fiche_bareme import clean_text, extract_seuils
+from parser.notes_harmonisees import extract_notes
+from services.notes_store import append_notes
 from services.seuils_store import consolidate_seuils
 
 app = FastAPI(title="Affelnet Upload", version="0.1.0")
@@ -64,18 +66,27 @@ async def upload_file(file: UploadFile) -> dict:
         "size": len(content),
     }
 
-    # For text uploads: parse fiche-barème and consolidate seuils
+    # For text uploads: auto-detect type and parse
     if suffix == ".txt":
         text = content.decode("utf-8", errors="replace")
+
+        # Try fiche-barème first (starts with rank + bonus_secteur)
         cleaned_lines = clean_text(text)
         if cleaned_lines:
-            # Save cleaned version alongside the raw file
             cleaned_dest = dest.with_suffix(".cleaned.txt")
             cleaned_dest.write_text("\n".join(cleaned_lines), encoding="utf-8")
 
             voeux = extract_seuils(cleaned_lines)
             matched = consolidate_seuils(voeux)
+            result["type"] = "fiche_bareme"
             result["parsed_voeux"] = len(voeux)
             result["matched_lycees"] = matched
+        else:
+            # Try notes harmonisées (discipline + 2 floats)
+            notes = extract_notes(text)
+            if notes:
+                count = append_notes(notes)
+                result["type"] = "notes_harmonisees"
+                result["parsed_notes"] = count
 
     return result
