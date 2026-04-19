@@ -26,3 +26,8 @@ dist-ssr
 test-results/.last-run.json
 .worktrees/
 .claude/settings.local.json
+
+.playwright-mcp/
+scripts/__pycache__/
+scripts/tests/
+.claude/*
