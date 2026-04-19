@@ -3,7 +3,7 @@
   border-radius: 12px;
   padding: 1.25rem;
   box-shadow: var(--color-shadow-md);
-  margin-top: 2rem;
+  margin-top: 0;
   border: 1px solid var(--color-border);
   transition: background-color 0.3s ease;
   max-width: 600px;
