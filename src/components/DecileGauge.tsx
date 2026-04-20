@@ -12,7 +12,7 @@ interface DecileGaugeProps {
 }
 
 const SEGMENT_COLORS = [
-  '#dc2626', '#ef4444', '#f97316', '#fb923c', '#facc15',
+  '#dc2626', '#ef4444', '#d97706', '#fb923c', '#facc15',
   '#a3e635', '#4ade80', '#22c55e', '#16a34a', '#15803d',
 ];
 

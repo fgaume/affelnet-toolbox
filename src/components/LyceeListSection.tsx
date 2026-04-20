@@ -97,7 +97,7 @@ export function LyceeListSection({
             {([
               ['#1a1a1a', 'Inaccessible'],
               ['#dc2626', 'Difficile'],
-              ['#f97316', 'Moyen'],
+              ['#d97706', 'Moyen'],
               ['#2563eb', 'Accessible'],
               ['#16a34a', 'Très accessible'],
             ] as const).map(([color, label]) => (
@@ -150,7 +150,7 @@ export function LyceeListSection({
             {([
               ['#1a1a1a', 'Inaccessible'],
               ['#dc2626', 'Difficile'],
-              ['#f97316', 'Moyen'],
+              ['#d97706', 'Moyen'],
               ['#2563eb', 'Accessible'],
               ['#16a34a', 'Très accessible'],
             ] as const).map(([color, label]) => (

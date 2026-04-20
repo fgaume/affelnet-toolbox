@@ -180,7 +180,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   }
   for (const annee of medianIPS.keys()) allYearsIPS.add(annee);
 
-  const ipsChartData = [...allYearsIPS].sort().map((annee) => {
+  const ipsChartData = [...allYearsIPS].sort().filter((a) => a >= '2022').map((annee) => {
     const point: Record<string, unknown> = { annee };
     for (const l of lycees) {
       const d = data.get(l.uai);
