@@ -4,6 +4,7 @@ import { computeDecile } from './decile';
 const API_BASE =
   'https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets';
 const DATASET_OLD = 'fr-en-ips_lycees';
+const DATASET_2022 = 'fr-en-ips-lycees-ap2022';
 const DATASET_NEW = 'fr-en-ips-lycees-ap2023';
 
 interface ApiRow {
@@ -49,6 +50,22 @@ async function fetchOldDataset(): Promise<ApiRow[]> {
   }));
 }
 
+async function fetch2022Dataset(): Promise<ApiRow[]> {
+  const select = 'uai,rentree_scolaire,ips_voie_gt';
+  const where = encodeURIComponent("academie = 'PARIS' AND secteur = 'public' AND ips_voie_gt is not null");
+  const url = `${API_BASE}/${DATASET_2022}/exports/json?select=${select}&where=${where}&order_by=rentree_scolaire&limit=-1`;
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Erreur chargement IPS 2022: ${response.status}`);
+  const rows = (await response.json()) as Array<{ uai: string; rentree_scolaire: string; ips_voie_gt: string | null }>;
+  return rows.map((r) => ({
+    uai: r.uai,
+    rentree_scolaire: r.rentree_scolaire,
+    ips_voie_gt: r.ips_voie_gt,
+    ecart_type_voie_gt: null,
+  }));
+}
+
 async function fetchNewDataset(): Promise<ApiRow[]> {
   const select = 'uai,rentree_scolaire,ips_voie_gt,ecart_type_voie_gt';
   const where = encodeURIComponent("academie = 'PARIS' AND secteur = 'public' AND ips_voie_gt is not null");
@@ -62,15 +79,16 @@ async function fetchNewDataset(): Promise<ApiRow[]> {
 async function fetchAllParis(): Promise<ApiRow[]> {
   if (cache) return cache;
 
-  // Merge old (2016-2022) and new (2023+) datasets, dedup by uai+year
-  const [oldRows, newRows] = await Promise.all([
+  // Merge old (2016-2021), 2022, and new (2023+) datasets, dedup by uai+year
+  const [oldRows, rows2022, newRows] = await Promise.all([
     fetchOldDataset(),
+    fetch2022Dataset(),
     fetchNewDataset(),
   ]);
   const seen = new Set<string>();
   cache = [];
-  // New dataset takes precedence for overlapping years
-  for (const r of [...newRows, ...oldRows]) {
+  // Newer datasets take precedence for overlapping years
+  for (const r of [...newRows, ...rows2022, ...oldRows]) {
     const key = `${r.uai}_${r.rentree_scolaire}`;
     if (!seen.has(key)) {
       seen.add(key);

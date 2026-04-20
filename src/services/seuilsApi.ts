@@ -1,6 +1,9 @@
 const DATASET_URL =
   'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-seuils-admission-lycees&config=default&split=train&offset=0&length=100';
 
+const BOURSIERS_DATASET_URL =
+  'https://datasets-server.huggingface.co/first-rows?dataset=fgaume/affelnet-paris-seuils-admission-lycees-boursiers&config=default&split=train';
+
 const SEUIL_START_YEAR = 2021;
 
 /** Derived dynamically after first fetch — default until then. */
@@ -30,6 +33,7 @@ import { fetchWithHfCache } from './hfCache';
 
 let cache: Map<string, number> | null = null;
 let historyCache: readonly LyceeAdmissionHistory[] | null = null;
+let boursiersHistoryCache: readonly LyceeAdmissionHistory[] | null = null;
 
 function deriveYears(rows: DatasetRow[]): void {
   const length = rows[0]?.row.seuils.length ?? 0;
@@ -92,6 +96,28 @@ export async function fetchAllSeuils(): Promise<readonly LyceeAdmissionHistory[]
 }
 
 /**
+ * Fetch full historical admission thresholds for boursiers.
+ * Same structure as fetchAllSeuils but from the boursiers dataset.
+ * Cached after first call.
+ */
+export async function fetchAllSeuilsBoursiers(): Promise<readonly LyceeAdmissionHistory[]> {
+  if (boursiersHistoryCache) return boursiersHistoryCache;
+
+  const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(BOURSIERS_DATASET_URL);
+  const rows: DatasetRow[] = data.rows;
+
+  boursiersHistoryCache = rows
+    .map(({ row }) => ({
+      code: row.code,
+      nom: row.nom,
+      seuils: row.seuils,
+    }))
+    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+  return boursiersHistoryCache;
+}
+
+/**
  * Determine admission difficulty from a seuil value.
  */
 export function getAdmissionDifficulty(seuil: number): AdmissionDifficulty {
@@ -102,7 +128,7 @@ export function getAdmissionDifficulty(seuil: number): AdmissionDifficulty {
     return { color: '#dc2626', label: 'Difficilement accessible', seuil, level: 'hard' };
   }
   if (seuil > 40250) {
-    return { color: '#f97316', label: 'Moyennement accessible', seuil, level: 'medium' };
+    return { color: '#d97706', label: 'Moyennement accessible', seuil, level: 'medium' };
   }
   if (seuil > 38000) {
     return { color: '#2563eb', label: 'Facilement accessible (secteur 1)', seuil, level: 'easy' };

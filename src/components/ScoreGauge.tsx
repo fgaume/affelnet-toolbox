@@ -22,7 +22,7 @@ function scoreToPercent(score: number, min: number, max: number): number {
 /** Difficulty thresholds mapped to gradient color stops */
 const DIFFICULTY_STOPS = [
   { threshold: 38000, color: '#2563eb' },
-  { threshold: 40250, color: '#f97316' },
+  { threshold: 40250, color: '#d97706' },
   { threshold: 40600, color: '#dc2626' },
   { threshold: 40731, color: '#1a1a1a' },
 ];

@@ -5,14 +5,25 @@
 }
 
 .admission-history h2 {
-  margin: 0 0 4px;
+  margin: 0 0 12px;
   font-size: 20px;
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
+.admission-history-section {
+  margin-bottom: 24px;
+}
+
+.admission-history-section h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
 .admission-history-subtitle {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   font-size: 14px;
   color: var(--color-text-muted);
 }
@@ -34,6 +45,8 @@
 }
 
 .admission-history-table-wrapper {
+  display: inline-block;
+  max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border-radius: 10px;
@@ -42,7 +55,7 @@
 }
 
 .admission-history-table {
-  width: 100%;
+  width: auto;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -133,7 +146,7 @@
 }
 
 .admission-history-table .col-year-empty {
-  text-align: center;
+  text-align: right;
   color: var(--color-text-muted);
 }
 
@@ -183,7 +196,7 @@
 
 .admission-history-table .difficulty-extreme { color: #1a1a1a; }
 .admission-history-table .difficulty-hard { color: #dc2626; }
-.admission-history-table .difficulty-medium { color: #ea580c; }
+.admission-history-table .difficulty-medium { color: #d97706; }
 .admission-history-table .difficulty-easy { color: #2563eb; }
 .admission-history-table .difficulty-very-easy { color: #16a34a; }
 
@@ -233,8 +246,8 @@
 .legend-item.difficulty-very-easy::before { background: #16a34a; }
 .legend-item.difficulty-easy { color: #2563eb; }
 .legend-item.difficulty-easy::before { background: #2563eb; }
-.legend-item.difficulty-medium { color: #ea580c; }
-.legend-item.difficulty-medium::before { background: #ea580c; }
+.legend-item.difficulty-medium { color: #d97706; }
+.legend-item.difficulty-medium::before { background: #d97706; }
 .legend-item.difficulty-hard { color: #dc2626; }
 .legend-item.difficulty-hard::before { background: #dc2626; }
 .legend-item.difficulty-extreme { color: #1a1a1a; }
@@ -264,5 +277,72 @@
 
   .admission-history h2 {
     font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admission-history {
+    max-width: 100%;
+  }
+
+  .admission-history-table-wrapper {
+    margin-left: -16px;
+    margin-right: -16px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .admission-history-filter {
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+
+  .admission-history-table {
+    font-size: 12px;
+  }
+
+  .admission-history-table th {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .admission-history-table td {
+    padding: 6px;
+  }
+
+  .admission-history-table .col-name {
+    min-width: 100px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+  }
+
+  .admission-history-table .col-year {
+    min-width: 50px;
+    font-size: 12px;
+  }
+
+  .admission-history-table .col-graph {
+    min-width: 40px;
+  }
+
+  .sparkline-toggle {
+    width: 28px;
+    height: 28px;
+  }
+
+  .admission-history-legend {
+    font-size: 11px;
+    padding: 8px 10px;
+    gap: 6px 10px;
+  }
+
+  .admission-history-section h3 {
+    font-size: 14px;
+  }
+
+  .admission-history-subtitle {
+    font-size: 12px;
   }
 }

@@ -7,6 +7,7 @@ import "./AdmissionHistoryTable.css";
 
 interface AdmissionHistoryTableProps {
   readonly data: readonly LyceeAdmissionHistory[];
+  readonly boursiers: readonly LyceeAdmissionHistory[];
 }
 
 const MOBILE_BREAKPOINT = 768;
@@ -41,20 +42,33 @@ function SortIcon({ active, direction }: { readonly active: boolean; readonly di
   );
 }
 
-function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
+interface SeuilsSectionProps {
+  readonly title: string;
+  readonly subtitle: string;
+  readonly data: readonly LyceeAdmissionHistory[];
+  readonly filter: string;
+  readonly showSparklines?: boolean;
+  readonly startYear?: number;
+}
+
+function SeuilsSection({ title, subtitle, data, filter, showSparklines = true, startYear }: SeuilsSectionProps) {
   const [expandedRows, setExpandedRows] = useState<ReadonlySet<string>>(
     new Set(),
   );
-  const [filter, setFilter] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const isMobile = useIsMobile();
 
   const seuilYears = getSeuilYears();
 
+  const sectionYears = useMemo(
+    () => startYear ? seuilYears.filter(y => y >= startYear) : [...seuilYears],
+    [seuilYears, startYear],
+  );
+
   const visibleYears = useMemo(
-    () => (isMobile ? seuilYears.slice(-2) : [...seuilYears]),
-    [isMobile, seuilYears],
+    () => (isMobile ? sectionYears.slice(-2) : sectionYears),
+    [isMobile, sectionYears],
   );
 
   const visibleYearIndices = useMemo(
@@ -101,20 +115,9 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
   };
 
   return (
-    <div className="admission-history">
-      <h2>Historique des seuils d'admission</h2>
-      <p className="admission-history-subtitle">
-        Seuils d'admission par lycée sur les {seuilYears.length} dernières
-        années
-      </p>
-
-      <input
-        type="text"
-        className="admission-history-filter"
-        placeholder="Filtrer par nom de lycée…"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-      />
+    <div className="admission-history-section">
+      <h3>{title}</h3>
+      <p className="admission-history-subtitle">{subtitle}</p>
 
       <div className="admission-history-table-wrapper">
         <table className="admission-history-table">
@@ -131,14 +134,13 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
                   </th>
                 );
               })}
-              <th className="col-graph">Évolution</th>
+              {showSparklines && <th className="col-graph">Évolution</th>}
             </tr>
           </thead>
           <tbody>
             {filteredData.map((lycee) => {
               const isExpanded = expandedRows.has(lycee.code);
-              // On vérifie si la ligne contient de vraies données pour tracer un graphique
-              const hasGraphData = hasValidSparklineData(lycee.seuils);
+              const hasGraphData = showSparklines && hasValidSparklineData(lycee.seuils);
 
               return (
                 <tr key={lycee.code} className={isExpanded ? "expanded" : ""}>
@@ -165,43 +167,44 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
                       </td>
                     );
                   })}
-                  <td className="col-graph">
-                    {/* On n'affiche le bouton et le conteneur que s'il y a des données valides */}
-                    {hasGraphData && (
-                      <>
-                        <button
-                          className={`sparkline-toggle${isExpanded ? " active" : ""}`}
-                          onClick={() => toggleRow(lycee.code)}
-                          title={
-                            isExpanded
-                              ? "Masquer le graphique"
-                              : "Afficher le graphique"
-                          }
-                          aria-label={
-                            isExpanded
-                              ? "Masquer le graphique"
-                              : "Afficher le graphique"
-                          }
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            width="20"
-                            height="20"
+                  {showSparklines && (
+                    <td className="col-graph">
+                      {hasGraphData && (
+                        <>
+                          <button
+                            className={`sparkline-toggle${isExpanded ? " active" : ""}`}
+                            onClick={() => toggleRow(lycee.code)}
+                            title={
+                              isExpanded
+                                ? "Masquer le graphique"
+                                : "Afficher le graphique"
+                            }
+                            aria-label={
+                              isExpanded
+                                ? "Masquer le graphique"
+                                : "Afficher le graphique"
+                            }
                           >
-                            <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
-                          </svg>
-                        </button>
-                        {isExpanded && (
-                          <div className="sparkline-container">
-                            <AdmissionSparkline seuils={lycee.seuils} />
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </td>
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              width="20"
+                              height="20"
+                            >
+                              <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
+                            </svg>
+                          </button>
+                          {isExpanded && (
+                            <div className="sparkline-container">
+                              <AdmissionSparkline seuils={lycee.seuils} />
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -211,6 +214,43 @@ function AdmissionHistoryTable({ data }: AdmissionHistoryTableProps) {
 
       {filteredData.length === 0 && (
         <p className="admission-history-empty">Aucun lycée trouvé</p>
+      )}
+    </div>
+  );
+}
+
+function AdmissionHistoryTable({ data, boursiers }: AdmissionHistoryTableProps) {
+  const [filter, setFilter] = useState("");
+  const seuilYears = getSeuilYears();
+
+  return (
+    <div className="admission-history">
+      <h2>Historique des seuils d'admission</h2>
+
+      <input
+        type="text"
+        className="admission-history-filter"
+        placeholder="Filtrer par nom de lycée…"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
+
+      <SeuilsSection
+        title="Non-boursiers"
+        subtitle={`Seuils d'admission (non-boursiers) par lycée sur les ${seuilYears.length} dernières années`}
+        data={data}
+        filter={filter}
+      />
+
+      {boursiers.length > 0 && (
+        <SeuilsSection
+          title="Boursiers"
+          subtitle="Seuils d'admission pour les élèves boursiers (session séparée)"
+          data={boursiers}
+          filter={filter}
+          showSparklines={false}
+          startYear={2025}
+        />
       )}
 
       <div className="admission-history-legend">

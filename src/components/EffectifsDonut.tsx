@@ -137,7 +137,7 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
   const total = effectifs.reduce((sum, e) => sum + e.effectif, 0);
   if (total === 0) return null;
 
-  const annee = effectifs[0]?.annee ?? '';
+  const annee = effectifs[0]?.annee?.slice(0, 4) ?? '';
 
   const colorOf = (e: EffectifLycee) => difficulties.get(e.uai)?.color ?? DEFAULT_COLOR;
 

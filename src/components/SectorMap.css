@@ -102,7 +102,7 @@
 .legend-dot.home { background-color: #1e40af; }
 .legend-dot.college { background-color: #16a34a; }
 .legend-dot.lycee { background-color: #9333ea; }
-.legend-dot.tous { background-color: #ea580c; }
+.legend-dot.tous { background-color: #d97706; }
 
 /* Override Leaflet default divIcon styles (white bg + border) */
 .custom-marker-icon {

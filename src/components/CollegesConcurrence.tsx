@@ -25,7 +25,7 @@ interface CollegesConcurrenceProps {
 
 const BONUS_COLORS: Record<number, string> = {
   0: "#dc2626", // red — no bonus = most advantaged socially
-  400: "#f97316", // orange
+  400: "#d97706", // orange
   800: "#3b82f6", // blue
   1200: "#16a34a", // green — highest bonus = most disadvantaged
 };
