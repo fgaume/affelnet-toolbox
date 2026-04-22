@@ -177,44 +177,6 @@ export async function findCollegeCoordinates(uai: string): Promise<[number, numb
   }
 }
 
-// ----- TEMPORARY: Rabelais closure workaround (remove when Rectorat API is updated) -----
-const RABELAIS_UAI = '0750688R';
-const RABELAIS_REPLACEMENT: Record<string, LyceeSecteur> = {
-  // COYSEVOX, BERLIOZ → DECOUR
-  '0752319N': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1, isNew: true, coordinates: [2.3426829, 48.8817204] },
-  '0752252R': { uai: '0750668U', nom: 'JACQUES DECOUR', secteur: 1, isNew: true, coordinates: [2.3426829, 48.8817204] },
-  // MALLARMÉ, DORGELÈS, BALZAC → QUINET
-  '0752554U': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true, coordinates: [2.3274218, 48.8824345] },
-  '0750429J': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true, coordinates: [2.3274218, 48.8824345] },
-  '0752553T': { uai: '0750671X', nom: 'EDGAR QUINET', secteur: 1, isNew: true, coordinates: [2.3274218, 48.8824345] },
-  // BORIS VIAN → FERRY
-  '0752958H': { uai: '0750669V', nom: 'JULES FERRY', secteur: 1, isNew: true, coordinates: [2.3308332, 48.8841496] },
-  // UTRILLO, FERRY, CLEMENCEAU → COLBERT
-  '0751793S': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true, coordinates: [2.3683884, 48.8770514] },
-  '0752533W': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true, coordinates: [2.3683884, 48.8770514] },
-  '0750546L': { uai: '0750673Z', nom: 'COLBERT', secteur: 1, isNew: true, coordinates: [2.3683884, 48.8770514] },
-  // Gérard PHILIPE, Marie CURIE → BALZAC
-  '0752195D': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1, isNew: true, coordinates: [2.3134106, 48.8920405] },
-  '0754706H': { uai: '0750705J', nom: 'HONORE DE BALZAC', secteur: 1, isNew: true, coordinates: [2.3134106, 48.8920405] },
-};
-
-function applyRabelaisClosure(lycees: LyceeSecteur[], uaiCollege: string): LyceeSecteur[] {
-  if (!lycees.some((l) => l.uai === RABELAIS_UAI)) return lycees;
-  const filtered = lycees.filter((l) => l.uai !== RABELAIS_UAI);
-  const replacement = RABELAIS_REPLACEMENT[uaiCollege];
-  if (replacement) {
-    const existing = filtered.find((l) => l.uai === replacement.uai && l.secteur === 1);
-    if (existing) {
-      // Lycée already in sector 1 — just mark it as new
-      existing.isNew = true;
-    } else {
-      filtered.push(replacement);
-    }
-  }
-  return filtered;
-}
-// ----- END TEMPORARY -----
-
 export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSecteur[]> {
   try {
     const params = new URLSearchParams({
@@ -243,20 +205,18 @@ export async function findLyceesDeSecteur(uaiCollege: string): Promise<LyceeSect
       })
     );
 
-    return applyRabelaisClosure(lycees, uaiCollege);
+    return lycees;
   } catch {
     // Fallback: Hugging Face dataset + Annuaire coordinates
     const [records, coordsMap] = await Promise.all([loadHfSecteurs(), loadCoordinates()]);
     const matches = records.filter((r) => r.uai_college === uaiCollege);
     if (!matches.length) throw new Error('Aucun lycée de secteur trouvé');
 
-    const lycees: LyceeSecteur[] = matches.map((r) => ({
+    return matches.map((r) => ({
       uai: r.uai_lycee,
       nom: r.nom_lycee,
       secteur: r.secteur,
       coordinates: coordsMap.get(r.uai_lycee),
     }));
-
-    return applyRabelaisClosure(lycees, uaiCollege);
   }
 }

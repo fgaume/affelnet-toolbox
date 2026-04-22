@@ -53,7 +53,6 @@ export function LyceeListSection({
   const availableSectors = [1, 0, 2, 3].filter((s) => s === 0 || lyceesBySector[s]?.length);
   const sectorLabel = (s: number) => (s === 0 ? 'Tous secteurs' : `Secteur ${s}`);
   const activeLycees = activeSector === 0 ? TOUS_SECTEURS_LYCEES : lyceesBySector[activeSector] ?? [];
-  const newLyceeUais = new Set(lycees.filter((l) => l.isNew).map((l) => l.uai));
 
   const lyceesIndicateursData = useMemo(
     () =>
@@ -86,7 +85,6 @@ export function LyceeListSection({
           effectifs={effectifs}
           difficulties={difficulties}
           requestedCount={requestedCount}
-          newLyceeUais={newLyceeUais}
         />
       )}
 
@@ -135,7 +133,6 @@ export function LyceeListSection({
                 >
                   {lycee.nom}
                 </a>
-                {newLyceeUais.has(lycee.uai) && <span className="new-sector-badge">Nouveau</span>}
                 {diff && <span className="difficulty-label">{diff.label}</span>}
               </li>
             );

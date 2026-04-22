@@ -42,7 +42,6 @@ export interface LyceeSecteur {
   uai: string;
   nom: string;
   secteur: number;
-  isNew?: boolean;
   coordinates?: [number, number]; // [longitude, latitude]
 }
 

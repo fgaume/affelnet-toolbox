@@ -55,15 +55,15 @@ function buildChartData(colleges: CollegeConcurrent[]): BarDataPoint[] {
     .map(([bonus, cols]) => ({
       bonusLabel: BONUS_LABELS[bonus] ?? `Bonus ${bonus}`,
       bonusIps: bonus,
-      total: cols.reduce((sum, c) => sum + c.nbAdmis, 0),
-      colleges: cols.sort((a, b) => b.nbAdmis - a.nbAdmis),
+      total: cols.reduce((sum, c) => sum + c.effectif3eme, 0),
+      colleges: cols.sort((a, b) => b.effectif3eme - a.effectif3eme),
     }));
 }
 
 type State =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "success"; colleges: CollegeConcurrent[]; dnbSession: number | null };
+  | { status: "success"; colleges: CollegeConcurrent[] };
 
 type Action =
   | { type: "FETCH_START" }
@@ -75,7 +75,7 @@ function reducer(_state: State, action: Action): State {
     case "FETCH_START":
       return { status: "loading" };
     case "FETCH_SUCCESS":
-      return { status: "success", colleges: action.result.colleges, dnbSession: action.result.dnbSession };
+      return { status: "success", colleges: action.result.colleges };
     case "FETCH_ERROR":
       return { status: "error", message: action.message };
   }
@@ -127,12 +127,12 @@ export function CollegesConcurrence({
     );
   }
 
-  const { colleges, dnbSession } = state;
+  const { colleges } = state;
 
   if (colleges.length === 0) return null;
 
   const chartData = buildChartData(colleges);
-  const xAxisLabel = dnbSession ? `Admis DNB ${dnbSession}` : 'Admis DNB';
+  const xAxisLabel = 'Élèves de 3ème (2025)';
 
   // Transform data for stacked bars: each dataKey is a college UAI
   const stackedData = chartData.map((group) => {
@@ -143,7 +143,7 @@ export function CollegesConcurrence({
       total: group.total,
     };
     for (const c of group.colleges) {
-      point[c.uai] = c.nbAdmis;
+      point[c.uai] = c.effectif3eme;
     }
     return point;
   });
@@ -168,7 +168,7 @@ export function CollegesConcurrence({
       <p className="concurrence-subtitle">
         Poids des collèges ayant {nomLycee} en secteur 1
         <br />
-        <span className="concurrence-subtitle-detail">(effectif estimé via nombre d'admis au DNB{dnbSession ? ` ${dnbSession}` : ''})</span>
+        <span className="concurrence-subtitle-detail">(effectifs de 3ème, rentrée 2025)</span>
       </p>
       <ResponsiveContainer
         width="100%"

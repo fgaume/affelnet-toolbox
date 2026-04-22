@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { SectorResult, LyceeSecteur, Address, College } from '../types';
 import { fetchSeuils, getAdmissionDifficulty, type AdmissionDifficulty } from '../services/seuilsApi';
 import { useEffectifs } from '../hooks/useEffectifs';
+import { useCollegeEffectifs } from '../hooks/useCollegeEffectifs';
 import { SectorMap } from './SectorMap';
 import type { ScolarisationStatus } from '../types';
 import { ScolarisationSection } from './ScolarisationSection';
@@ -38,6 +39,7 @@ export function CollegeCard({ result, address, onClose, scolarisation, onScolari
   const { college, lycees, lyceeError } = result;
   const [difficulties, setDifficulties] = useState<Map<string, AdmissionDifficulty>>(new Map());
   const { effectifs, isLoading: effectifsLoading, requestedCount } = useEffectifs(lycees ?? undefined);
+  const { effectif: collegeEffectif } = useCollegeEffectifs(college.uai);
   const [activeSector, setActiveSector] = useState(1);
 
   // Filter lycees for the map based on active sector
@@ -93,6 +95,9 @@ export function CollegeCard({ result, address, onClose, scolarisation, onScolari
               {college.nom}
             </a>
           </h2>
+          {collegeEffectif && (
+            <span className="college-effectif">{collegeEffectif.effectif} élèves en 3ème</span>
+          )}
         </div>
         {onClose && (
           <button className="college-close-btn" onClick={onClose} aria-label="Fermer">

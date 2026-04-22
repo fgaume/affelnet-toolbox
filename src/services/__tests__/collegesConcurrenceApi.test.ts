@@ -83,44 +83,8 @@ describe('collegesConcurrenceApi', () => {
     });
   });
 
-  describe('fetchDnbAdmisColleges', () => {
-    it('returns a Map of UAI to nb admis (candidats * taux / 100)', async () => {
-      const mockData = [
-        { uai: '0752536Z', nb_candidats_g: 100, taux_de_reussite_g: 92.0 },
-        { uai: '0752319N', nb_candidats_g: 80, taux_de_reussite_g: 95.0 },
-      ];
-
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockData),
-      }));
-
-      const { fetchDnbAdmisColleges } = await import('../collegesConcurrenceApi');
-      const result = await fetchDnbAdmisColleges();
-
-      expect(result.admisMap.get('0752536Z')).toBe(92); // Math.round(100 * 92 / 100)
-      expect(result.admisMap.get('0752319N')).toBe(76); // Math.round(80 * 95 / 100)
-    });
-
-    it('caches results across calls', async () => {
-      const mockFn = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve([
-          { uai: '0752536Z', nb_candidats_g: 100, taux_de_reussite_g: 90.0 },
-        ]),
-      });
-      vi.stubGlobal('fetch', mockFn);
-
-      const { fetchDnbAdmisColleges } = await import('../collegesConcurrenceApi');
-      await fetchDnbAdmisColleges();
-      await fetchDnbAdmisColleges();
-
-      expect(mockFn).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('fetchCollegesConcurrents', () => {
-    it('joins ArcGIS + IPS + DNB data into CollegeConcurrent[]', async () => {
+    it('joins ArcGIS + IPS + effectifs 3eme data into CollegeConcurrent[]', async () => {
       let callIndex = 0;
       vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
         callIndex++;
@@ -146,13 +110,15 @@ describe('collegesConcurrenceApi', () => {
             ]),
           });
         }
-        // OpenData DNB
+        // HuggingFace effectifs 3eme
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve([
-            { uai: '0752536Z', nb_candidats_g: 100, taux_de_reussite_g: 92.0 },
-            { uai: '0752319N', nb_candidats_g: 80, taux_de_reussite_g: 95.0 },
-          ]),
+          json: () => Promise.resolve({
+            rows: [
+              { row: { UAI: '0752536Z', Nom: 'VOLTAIRE', Effectif_3eme_RS25: 104 } },
+              { row: { UAI: '0752319N', Nom: 'COYSEVOX', Effectif_3eme_RS25: 89 } },
+            ],
+          }),
         });
       }));
 
@@ -164,17 +130,17 @@ describe('collegesConcurrenceApi', () => {
         uai: '0752536Z',
         nom: 'VOLTAIRE',
         bonusIps: 800,
-        nbAdmis: 92,
+        effectif3eme: 104,
       });
       expect(result.colleges).toContainEqual({
         uai: '0752319N',
         nom: 'COYSEVOX',
         bonusIps: 1200,
-        nbAdmis: 76,
+        effectif3eme: 89,
       });
     });
 
-    it('handles missing IPS/DNB data gracefully', async () => {
+    it('handles missing IPS/effectifs data gracefully', async () => {
       let callIndex = 0;
       vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
         callIndex++;
@@ -195,10 +161,10 @@ describe('collegesConcurrenceApi', () => {
             json: () => Promise.resolve([]),
           });
         }
-        // DNB — no data either
+        // Effectifs — no data either
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve([]),
+          json: () => Promise.resolve({ rows: [] }),
         });
       }));
 
@@ -210,7 +176,7 @@ describe('collegesConcurrenceApi', () => {
         uai: '0752536Z',
         nom: 'VOLTAIRE',
         bonusIps: -1,
-        nbAdmis: 0,
+        effectif3eme: 0,
       });
     });
   });
