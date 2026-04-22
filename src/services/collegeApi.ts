@@ -54,6 +54,33 @@ async function loadIpsData(): Promise<IpsRawEntry[]> {
   return ipsCache;
 }
 
+/** Fetch list of private Paris colleges from the IPS dataset. */
+export async function fetchPrivateColleges(): Promise<College[]> {
+  const data = await loadIpsData();
+  return data
+    .filter((e) => e.Secteur === 'Privé')
+    .map((e) => ({
+      uai: e.Identifiant,
+      nom: String(e.Nom ?? '').replace(/^CLG\s+/, ''),
+    }));
+}
+
+/** Fetch all Paris colleges (public + private). */
+export async function fetchAllColleges(): Promise<College[]> {
+  const [publicColleges, privateColleges] = await Promise.all([
+    fetchCollegeList(),
+    fetchPrivateColleges(),
+  ]);
+  const seen = new Set(publicColleges.map((c) => c.uai));
+  const merged = [...publicColleges];
+  for (const c of privateColleges) {
+    if (!seen.has(c.uai)) {
+      merged.push(c);
+    }
+  }
+  return merged.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+}
+
 /** Fetch IPS + bonus for a given college UAI. Returns null if not found. */
 export async function fetchCollegeIps(uai: string): Promise<IpsInfo | null> {
   const data = await loadIpsData();

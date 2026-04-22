@@ -86,6 +86,7 @@ export function ScolarisationSection({
           <CollegeAutocomplete
             onSelect={onCollegeScolarisationChange}
             placeholder="Nom de votre collège de scolarisation..."
+            includePrivate
           />
           {collegeScolarisation && (
             <div className="scolarisation-result" style={{ marginTop: 8 }}>

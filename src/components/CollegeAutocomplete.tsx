@@ -7,13 +7,14 @@ interface CollegeAutocompleteProps {
   onSelect: (college: College) => void;
   placeholder?: string;
   disabled?: boolean;
+  includePrivate?: boolean;
 }
 
-export function CollegeAutocomplete({ onSelect, placeholder, disabled }: CollegeAutocompleteProps) {
+export function CollegeAutocomplete({ onSelect, placeholder, disabled, includePrivate }: CollegeAutocompleteProps) {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const { suggestions, isLoading, error, search, clearSuggestions } = useCollegeSearch();
+  const { suggestions, isLoading, error, search, clearSuggestions } = useCollegeSearch({ includePrivate });
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 

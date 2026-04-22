@@ -1,8 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { College } from '../types';
-import { fetchCollegeList } from '../services/collegeApi';
+import { fetchCollegeList, fetchAllColleges } from '../services/collegeApi';
 
-export function useCollegeSearch() {
+interface UseCollegeSearchOptions {
+  includePrivate?: boolean;
+}
+
+export function useCollegeSearch({ includePrivate = false }: UseCollegeSearchOptions = {}) {
   const [allColleges, setAllColleges] = useState<College[]>([]);
   const [suggestions, setSuggestions] = useState<College[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -14,11 +18,12 @@ export function useCollegeSearch() {
     if (loadedRef.current) return;
     loadedRef.current = true;
     setIsLoading(true);
-    fetchCollegeList()
+    const loader = includePrivate ? fetchAllColleges : fetchCollegeList;
+    loader()
       .then(setAllColleges)
       .catch(() => setError('Impossible de charger la liste des collèges'))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [includePrivate]);
 
   const search = useCallback(
     (query: string) => {
