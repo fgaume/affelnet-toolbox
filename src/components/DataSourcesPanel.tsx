@@ -31,11 +31,6 @@ const SOURCES = [
     category: 'Statistiques scolaires',
     items: [
       {
-        name: 'Effectifs des lycées',
-        url: 'https://data.education.gouv.fr/explore/dataset/fr-en-lycee_gt-effectifs-niveau-sexe-lv/',
-        description: "Nombre d'élèves en 2nde par lycée",
-      },
-      {
         name: 'IPS des lycées',
         url: 'https://data.education.gouv.fr/explore/dataset/fr-en-ips-lycees-ap2023/',
         description: 'Indice de Position Sociale et écart-type',
@@ -44,11 +39,6 @@ const SOURCES = [
         name: 'Résultats des lycées',
         url: 'https://data.education.gouv.fr/explore/dataset/fr-en-indicateurs-de-resultat-des-lycees-gt_v2/',
         description: "Taux de mentions TB et taux d'accès en terminale",
-      },
-      {
-        name: 'Résultats des collèges (DNB)',
-        url: 'https://data.education.gouv.fr/explore/dataset/fr-en-indicateurs-valeur-ajoutee-colleges/',
-        description: 'Candidats et taux de réussite au brevet',
       },
       {
         name: 'Liste des collèges',
@@ -69,6 +59,16 @@ const SOURCES = [
         name: "Seuils d'admission",
         url: 'https://huggingface.co/datasets/fgaume/affelnet-paris-seuils-admission-lycees',
         description: "Barres d'admission par lycée et par année",
+      },
+      {
+        name: 'Effectifs de 2nde des lycées',
+        url: 'https://huggingface.co/datasets/fgaume/affelnet-paris-lycees-effectifs-2nde',
+        description: "Nombre d'élèves en 2nde GT par lycée (rentrée 2025)",
+      },
+      {
+        name: 'Effectifs de 3ème des collèges',
+        url: 'https://huggingface.co/datasets/fgaume/affelnet-paris-colleges-effectifs-3eme',
+        description: "Nombre d'élèves en 3ème par collège (rentrée 2025)",
       },
       {
         name: 'Secteurs année précédente',

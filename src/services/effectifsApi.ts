@@ -1,62 +1,55 @@
 import type { EffectifLycee, LyceeSecteur } from '../types';
+import { fetchWithHfCache } from './hfCache';
 
-const API_URL =
-  'https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-lycee_gt-effectifs-niveau-sexe-lv/records';
+const DATASET_URL =
+  'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-lycees-effectifs-2nde&config=default&split=train&offset=0&length=100';
 
-interface ApiResult {
-  rentree_scolaire: string;
-  '2ndes_gt': number;
-  patronyme: string;
+interface DatasetRow {
+  row: {
+    UAI: string;
+    Nom: string;
+    Effectif_2nde_GT_RS25: number;
+  };
 }
 
-const cache = new Map<string, EffectifLycee[]>();
+let allEffectifs: Map<string, EffectifLycee> | null = null;
+
+async function fetchAllEffectifs(): Promise<Map<string, EffectifLycee>> {
+  if (allEffectifs) return allEffectifs;
+
+  const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(DATASET_URL);
+
+  allEffectifs = new Map();
+  for (const { row } of data.rows) {
+    allEffectifs.set(row.UAI, {
+      uai: row.UAI,
+      nom: row.Nom,
+      effectif: row.Effectif_2nde_GT_RS25,
+      annee: '2025',
+    });
+  }
+
+  return allEffectifs;
+}
 
 export async function fetchEffectif2nde(uai: string): Promise<EffectifLycee | null> {
-  try {
-    const query =
-      `where=numero_lycee='${uai}'` +
-      `&order_by=rentree_scolaire+desc` +
-      `&select=rentree_scolaire,%602ndes_gt%60,patronyme` +
-      `&limit=1`;
-
-    const response = await fetch(`${API_URL}?${query}`);
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    const result: ApiResult | undefined = data.results?.[0];
-    if (!result) return null;
-
-    return {
-      uai,
-      nom: result.patronyme,
-      effectif: result['2ndes_gt'],
-      annee: result.rentree_scolaire,
-    };
-  } catch {
-    return null;
-  }
+  const map = await fetchAllEffectifs();
+  return map.get(uai) ?? null;
 }
 
 export async function fetchEffectifsSecteur1(
   lycees: LyceeSecteur[],
 ): Promise<EffectifLycee[]> {
+  const map = await fetchAllEffectifs();
   const secteur1 = lycees.filter((l) => l.secteur === 1);
-  const cacheKey = secteur1.map((l) => l.uai).sort().join(',');
-
-  const cached = cache.get(cacheKey);
-  if (cached) return cached;
-
-  const settled = await Promise.allSettled(
-    secteur1.map((l) => fetchEffectif2nde(l.uai)),
-  );
 
   const results: EffectifLycee[] = [];
-  for (const entry of settled) {
-    if (entry.status === 'fulfilled' && entry.value) {
-      results.push(entry.value);
+  for (const lycee of secteur1) {
+    const effectif = map.get(lycee.uai);
+    if (effectif) {
+      results.push(effectif);
     }
   }
 
-  cache.set(cacheKey, results);
   return results;
 }

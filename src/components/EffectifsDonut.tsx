@@ -27,7 +27,6 @@ interface EffectifsDonutProps {
   effectifs: EffectifLycee[];
   difficulties: Map<string, AdmissionDifficulty>;
   requestedCount?: number;
-  newLyceeUais?: Set<string>;
 }
 
 interface CenterLabelProps {
@@ -133,7 +132,7 @@ function separateColors<T>(entries: T[], colorOf: (e: T) => string): T[] {
   return result;
 }
 
-export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyceeUais }: EffectifsDonutProps) {
+export function EffectifsDonut({ effectifs, difficulties, requestedCount }: EffectifsDonutProps) {
   const total = effectifs.reduce((sum, e) => sum + e.effectif, 0);
   if (total === 0) return null;
 
@@ -151,10 +150,6 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
     color: colorOf(e),
     difficultyLabel: difficulties.get(e.uai)?.label,
   }));
-
-  const newLyceeNames = newLyceeUais
-    ? effectifs.filter((e) => newLyceeUais.has(e.uai)).map((e) => e.nom)
-    : [];
 
   return (
     <div
@@ -189,12 +184,6 @@ export function EffectifsDonut({ effectifs, difficulties, requestedCount, newLyc
           </PieChart>
         </ResponsiveContainer>
       </div>
-      {newLyceeNames.length > 0 && (
-        <p className="effectifs-new-lycees">
-          <span className="new-sector-badge">Nouveau</span>
-          {' '}{newLyceeNames.join(', ')} — remplace Rabelais (fermé)
-        </p>
-      )}
       {requestedCount != null && requestedCount > effectifs.length && (
         <p className="effectifs-note">
           Données indisponibles pour {requestedCount - effectifs.length} lycée{requestedCount - effectifs.length > 1 ? 's' : ''}

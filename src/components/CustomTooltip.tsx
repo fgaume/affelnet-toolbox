@@ -31,10 +31,10 @@ export function CustomTooltip({
       {segments.map((p) => (
         <div key={p.name} className="concurrence-tooltip-row">
           <span>{uaiToName.get(p.name) ?? p.name}</span>
-          <span className="concurrence-tooltip-value">~ {p.value} élèves</span>
+          <span className="concurrence-tooltip-value">{p.value} élèves</span>
         </div>
       ))}
-      <div className="concurrence-tooltip-total">Total : ~ {total} élèves</div>
+      <div className="concurrence-tooltip-total">Total : {total} élèves</div>
     </div>
   );
 }
