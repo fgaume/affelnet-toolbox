@@ -13,10 +13,25 @@ from services.seuils_store import consolidate_seuils
 
 app = FastAPI(title="Affelnet Upload", version="0.1.0")
 
+# Origines autorisées :
+# - production Vercel : https://affelnet-paris.vercel.app
+# - previews Vercel (branches de feature) :
+#   https://affelnet-paris-<hash>-frederic-gaumes-projects.vercel.app
+# - dev local : http://localhost:5173, http://127.0.0.1:5173
+ALLOWED_ORIGINS = [
+    "https://affelnet-paris.vercel.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+ALLOWED_ORIGIN_REGEX = (
+    r"^https://affelnet-paris-[a-z0-9]+-frederic-gaumes-projects\.vercel\.app$"
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["POST"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
+    allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
