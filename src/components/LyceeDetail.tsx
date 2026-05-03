@@ -4,6 +4,8 @@ import {
 } from 'recharts';
 import { fetchNiveauScolaire, fetchMedianTBByYear, fetchMedianAccesByYear, type NiveauScolaireResult } from '../services/niveauScolaireApi';
 import { fetchIps, fetchMedianIpsByYear, type IpsResult } from '../services/ipsApi';
+import { fetchIhs, fetchMedianIhsByYear } from '../services/heterogeneiteApi';
+import type { HeterogeneiteResult } from '../types';
 import { useTheme } from '../hooks/useTheme';
 import './LyceeDetail.css';
 
@@ -20,6 +22,7 @@ interface LyceesIndicateursProps {
 interface LyceeData {
   niveau: NiveauScolaireResult | null;
   ips: IpsResult | null;
+  ihs: HeterogeneiteResult | null;
 }
 
 const SHORT_NAME_LIMIT = 14;
@@ -41,11 +44,12 @@ interface FetchState {
   medianTB: Map<string, number>;
   medianAcces: Map<string, number>;
   medianIPS: Map<string, number>;
+  medianIHS: Map<string, number>;
 }
 
 type FetchAction =
   | { type: 'FETCH_START' }
-  | { type: 'FETCH_SUCCESS'; data: Map<string, LyceeData>; medianTB: Map<string, number>; medianAcces: Map<string, number>; medianIPS: Map<string, number> };
+  | { type: 'FETCH_SUCCESS'; data: Map<string, LyceeData>; medianTB: Map<string, number>; medianAcces: Map<string, number>; medianIPS: Map<string, number>; medianIHS: Map<string, number> };
 
 function fetchReducer(state: FetchState, action: FetchAction): FetchState {
   switch (action.type) {
@@ -58,6 +62,7 @@ function fetchReducer(state: FetchState, action: FetchAction): FetchState {
         medianTB: action.medianTB,
         medianAcces: action.medianAcces,
         medianIPS: action.medianIPS,
+        medianIHS: action.medianIHS,
       };
   }
 }
@@ -68,6 +73,7 @@ const INITIAL_STATE: FetchState = {
   medianTB: new Map(),
   medianAcces: new Map(),
   medianIPS: new Map(),
+  medianIHS: new Map(),
 };
 
 export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
@@ -90,14 +96,16 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
       // Fetch per-lycée data
       Promise.allSettled(
         lycees.map(async (l) => {
-          const [niveau, ips] = await Promise.allSettled([
+          const [niveau, ips, ihs] = await Promise.allSettled([
             fetchNiveauScolaire(l.uai),
             fetchIps(l.uai),
+            fetchIhs(l.uai),
           ]);
           return {
             uai: l.uai,
             niveau: niveau.status === 'fulfilled' ? niveau.value : null,
             ips: ips.status === 'fulfilled' ? ips.value : null,
+            ihs: ihs.status === 'fulfilled' ? ihs.value : null,
           };
         }),
       ),
@@ -105,12 +113,13 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
       fetchMedianTBByYear(),
       fetchMedianAccesByYear(),
       fetchMedianIpsByYear(),
-    ]).then(([results, tbMedians, accesMedians, ipsMedians]) => {
+      fetchMedianIhsByYear(),
+    ]).then(([results, tbMedians, accesMedians, ipsMedians, ihsMedians]) => {
       if (cancelled) return;
       const map = new Map<string, LyceeData>();
       for (const r of results) {
         if (r.status === 'fulfilled') {
-          map.set(r.value.uai, { niveau: r.value.niveau, ips: r.value.ips });
+          map.set(r.value.uai, { niveau: r.value.niveau, ips: r.value.ips, ihs: r.value.ihs });
         }
       }
       dispatch({
@@ -119,13 +128,14 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
         medianTB: tbMedians,
         medianAcces: accesMedians,
         medianIPS: ipsMedians,
+        medianIHS: ihsMedians,
       });
     });
 
     return () => { cancelled = true; };
   }, [lycees]);
 
-  const { loading, data, medianTB, medianAcces, medianIPS } = state;
+  const { loading, data, medianTB, medianAcces, medianIPS, medianIHS } = state;
 
   if (loading) {
     return (
@@ -192,6 +202,25 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
     return point;
   });
 
+  // Build merged chart data for IHS
+  const allYearsIHS = new Set<string>();
+  for (const [, d] of data) {
+    d.ihs?.history.forEach((p) => allYearsIHS.add(p.annee));
+  }
+  for (const annee of medianIHS.keys()) allYearsIHS.add(annee);
+
+  const ihsChartData = [...allYearsIHS].sort().map((annee) => {
+    const point: Record<string, unknown> = { annee };
+    for (const l of lycees) {
+      const d = data.get(l.uai);
+      const p = d?.ihs?.history.find((h) => h.annee === annee);
+      if (p) point[l.uai] = p.ihs;
+    }
+    const med = medianIHS.get(annee);
+    if (med != null) point[MEDIAN_KEY] = med;
+    return point;
+  });
+
   // Compute sort rank based on last year value (descending), median always last
   function lastYearRank(chartData: Record<string, unknown>[]): Map<string, number> {
     const lastPoint = chartData[chartData.length - 1];
@@ -210,12 +239,14 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   const tbRank = lastYearRank(tbChartData);
   const accesRank = lastYearRank(accesChartData);
   const ipsRank = lastYearRank(ipsChartData);
+  const ihsRank = lastYearRank(ihsChartData);
 
   const hasTB = tbChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.niveau);
   const hasAcces = accesChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.niveau?.history.some(h => h.tauxAcces != null));
   const hasIPS = ipsChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.ips);
+  const hasIHS = ihsChartData.length > 0 && lycees.some((l) => data.get(l.uai)?.ihs);
 
-  if (!hasTB && !hasIPS && !hasAcces) return null;
+  if (!hasTB && !hasIPS && !hasAcces && !hasIHS) return null;
 
   const formatName = (key: string) => {
     if (key === MEDIAN_KEY) return 'Médiane Paris';
@@ -359,6 +390,53 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 formatter={(key: string) => formatName(key)}
               />
               {[...themeLycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
+                <Line
+                  key={l.uai}
+                  type="monotone"
+                  dataKey={l.uai}
+                  stroke={l.color}
+                  strokeWidth={2}
+                  dot={{ r: 2.5 }}
+                  connectNulls
+                />
+              ))}
+              <Line
+                key={MEDIAN_KEY}
+                type="monotone"
+                dataKey={MEDIAN_KEY}
+                stroke={MEDIAN_COLOR}
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                connectNulls
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {hasIHS && (
+        <div className="lycee-detail-chart">
+          <h5>Mixité sociale (IHS)</h5>
+          <p className="lycee-detail-chart-subtitle">Indice d'Hétérogénéité Sociale Relative — de 0 (homogène) à 1 (mixité maximale)</p>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={ihsChartData}>
+              <CartesianGrid {...chartThemeProps.cartesianGrid} />
+              <XAxis dataKey="annee" {...chartThemeProps.xAxis} />
+              <YAxis domain={['auto', 'auto']} {...chartThemeProps.yAxis} />
+              <Tooltip
+                {...chartThemeProps.tooltip}
+                formatter={(v: unknown, name: unknown) => [
+                  Number(v).toFixed(3),
+                  formatName(String(name ?? '')),
+                ]}
+                itemSorter={(item) => ihsRank.get(String(item.dataKey ?? '')) ?? 9999}
+              />
+              <Legend
+                {...chartThemeProps.legend}
+                formatter={(key: string) => formatName(key)}
+              />
+              {[...themeLycees].sort((a, b) => (ihsRank.get(a.uai) ?? 99) - (ihsRank.get(b.uai) ?? 99)).map((l) => (
                 <Line
                   key={l.uai}
                   type="monotone"

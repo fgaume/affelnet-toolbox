@@ -76,6 +76,11 @@ const SOURCES = [
         description: 'Affectations secteur 1 de 2025 (détection des changements)',
       },
       {
+        name: 'Hétérogénéité sociale des lycées',
+        url: 'https://huggingface.co/datasets/fgaume/affelnet-paris-lycees-heterogeneite-sociale',
+        description: 'Indice d\'Hétérogénéité Sociale Relative (IHS) par lycée et par année',
+      },
+      {
         name: 'Statistiques par champ disciplinaire (2025)',
         url: 'https://huggingface.co/datasets/fgaume/affelnet-paris-statistiques-champs-disciplinaires',
         description: 'Moyennes et écarts-types historiques par année',

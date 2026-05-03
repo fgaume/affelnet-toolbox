@@ -164,5 +164,16 @@ export interface LyceeAdmissionHistory {
   readonly seuils: readonly number[];
 }
 
+export interface HeterogeneitePoint {
+  annee: string;
+  ipsMoyen: number;
+  ipsEcartType: number;
+  ihs: number;
+}
+
+export interface HeterogeneiteResult {
+  history: HeterogeneitePoint[];
+}
+
 export type TopTab = 'search' | 'score' | 'history' | 'contribute';
 export type SearchMode = 'address' | 'college';
