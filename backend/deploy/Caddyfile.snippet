@@ -1,0 +1,9 @@
+# Caddyfile complet pour la VM Freebox — à installer dans /etc/caddy/Caddyfile.
+# L'API Affelnet est désormais le seul service exposé sur fge.freeboxos.fr.
+#
+# Recharger sans downtime :
+#   doas caddy reload --config /etc/caddy/Caddyfile
+
+fge.freeboxos.fr {
+    reverse_proxy 127.0.0.1:5000
+}

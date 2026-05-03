@@ -1,0 +1,32 @@
+#!/sbin/openrc-run
+# OpenRC init script for the Affelnet FastAPI backend on the Freebox VM.
+# Installed at /etc/init.d/affelnet-api on the VM.
+
+name="affelnet-api"
+description="Affelnet Paris upload API (FastAPI/Uvicorn)"
+
+: "${AFFELNET_HOME:=/home/freebox/affelnet-api}"
+: "${AFFELNET_PORT:=5000}"
+: "${AFFELNET_HOST:=127.0.0.1}"
+: "${AFFELNET_USER:=freebox}"
+: "${AFFELNET_GROUP:=freebox}"
+
+command="${AFFELNET_HOME}/.venv/bin/uvicorn"
+command_args="main:app --host ${AFFELNET_HOST} --port ${AFFELNET_PORT}"
+command_user="${AFFELNET_USER}:${AFFELNET_GROUP}"
+command_background=true
+directory="${AFFELNET_HOME}"
+pidfile="/run/${RC_SVCNAME}.pid"
+
+output_log="/var/log/${RC_SVCNAME}.log"
+error_log="/var/log/${RC_SVCNAME}.err"
+
+depend() {
+    need net
+    after firewall
+}
+
+start_pre() {
+    checkpath --directory --owner "${AFFELNET_USER}:${AFFELNET_GROUP}" --mode 0755 "${AFFELNET_HOME}/uploads"
+    checkpath --file --owner "${AFFELNET_USER}:${AFFELNET_GROUP}" --mode 0644 "${output_log}" "${error_log}"
+}
