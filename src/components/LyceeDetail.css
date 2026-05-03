@@ -61,6 +61,12 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--color-text-secondary);
+  margin: 0 0 4px 0;
+}
+
+.lycee-detail-chart-subtitle {
+  font-size: 11px;
+  color: var(--color-text-muted);
   margin: 0 0 8px 0;
 }
 
