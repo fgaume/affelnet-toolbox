@@ -1,9 +1,22 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { LyceeSecteur, EffectifLycee } from '../types';
-import type { AdmissionDifficulty } from '../services/seuilsApi';
+import { type AdmissionDifficulty, fetchTauxCibleBoursiers } from '../services/seuilsApi';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
 import { LyceesIndicateurs } from './LyceeDetail';
 import { CollegesConcurrence } from './CollegesConcurrence';
+
+function TauxCibleBadge({ taux }: { taux: number | undefined }) {
+  if (taux == null) return null;
+  const pct = Math.round(taux * 100);
+  return (
+    <span
+      className="taux-cible-badge"
+      title={`Cible réglementaire d'élèves boursiers fixée par l'académie : ${pct}%`}
+    >
+      Cible boursiers&nbsp;: {pct}%
+    </span>
+  );
+}
 
 const FICHE_RECTORAT_URL =
   'https://data.education.gouv.fr/pages/fiche-etablissement/?code_etab=';
@@ -34,6 +47,15 @@ export function LyceeListSection({
   onSectorChange,
 }: LyceeListSectionProps) {
   const [activeSector, setActiveSector] = useState(1);
+  const [tauxCible, setTauxCible] = useState<ReadonlyMap<string, number>>(new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchTauxCibleBoursiers()
+      .then((map) => { if (!cancelled) setTauxCible(map); })
+      .catch(() => { /* non-bloquant */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSectorChange = (sector: number) => {
     setActiveSector(sector);
@@ -133,6 +155,7 @@ export function LyceeListSection({
                 >
                   {lycee.nom}
                 </a>
+                <TauxCibleBadge taux={tauxCible.get(lycee.uai)} />
                 {diff && <span className="difficulty-label">{diff.label}</span>}
               </li>
             );
@@ -180,6 +203,7 @@ export function LyceeListSection({
                       />
                     )}
                     <span className="concurrence-lycee-name">{e.nom}</span>
+                    <TauxCibleBadge taux={tauxCible.get(e.uai)} />
                     <svg className="concurrence-chevron" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
                     </svg>

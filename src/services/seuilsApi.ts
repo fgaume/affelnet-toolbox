@@ -28,12 +28,22 @@ interface DatasetRow {
   };
 }
 
+interface BoursiersDatasetRow {
+  row: {
+    code: string;
+    nom: string;
+    seuils: number[];
+    taux_cible_boursiers: number | null;
+  };
+}
+
 import type { LyceeAdmissionHistory } from '../types';
 import { fetchWithHfCache } from './hfCache';
 
 let cache: Map<string, number> | null = null;
 let historyCache: readonly LyceeAdmissionHistory[] | null = null;
 let boursiersHistoryCache: readonly LyceeAdmissionHistory[] | null = null;
+let tauxCibleBoursiersCache: ReadonlyMap<string, number> | null = null;
 
 function deriveYears(rows: DatasetRow[]): void {
   const length = rows[0]?.row.seuils.length ?? 0;
@@ -115,6 +125,25 @@ export async function fetchAllSeuilsBoursiers(): Promise<readonly LyceeAdmission
     .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
 
   return boursiersHistoryCache;
+}
+
+/**
+ * Fetch target rate of scholarship students per lycée (taux cible boursiers).
+ * Returns a Map: UAI code → rate (decimal, e.g. 0.25 for 25%).
+ * Cached after first call.
+ */
+export async function fetchTauxCibleBoursiers(): Promise<ReadonlyMap<string, number>> {
+  if (tauxCibleBoursiersCache) return tauxCibleBoursiersCache;
+
+  const data = await fetchWithHfCache<{ rows: BoursiersDatasetRow[] }>(BOURSIERS_DATASET_URL);
+  const map = new Map<string, number>();
+  for (const { row } of data.rows) {
+    if (row.taux_cible_boursiers != null) {
+      map.set(row.code, row.taux_cible_boursiers);
+    }
+  }
+  tauxCibleBoursiersCache = map;
+  return tauxCibleBoursiersCache;
 }
 
 /**
