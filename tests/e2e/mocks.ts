@@ -4,14 +4,16 @@ export interface MockOverrides {
   academicStats?: unknown;
   seuils?: unknown;
   address?: unknown;
-  sectorCollege?: unknown;
-  collegeUai?: unknown;
-  sectorLycees?: unknown;
+  arcgisCollegeUai?: unknown;
+  arcgisLycees?: unknown;
   effectifs?: unknown;
   statsModels?: unknown;
   niveauScolaire?: unknown;
   ipsLycees?: unknown;
   seuilsBoursiers?: unknown;
+  bonusIpsColleges?: unknown;
+  capgeoSector?: unknown;
+  hfSecteurs?: unknown;
 }
 
 const thisYear = new Date().getFullYear();
@@ -50,19 +52,47 @@ const DEFAULTS = {
       },
     ],
   },
-  sectorCollege: { features: [{ attributes: { NOM_COLLEG: 'VOLTAIRE' } }] },
-  collegeUai: {
-    features: [{ attributes: { UAI: '0750247L', NOM: 'VOLTAIRE' }, geometry: { x: 2.38, y: 48.85 } }],
-  },
-  sectorLycees: {
+  arcgisCollegeUai: {
     features: [
-      { attributes: { UAI: '0750680G', NOM_ETAB: 'ARAGO', SECTEUR: 1 }, geometry: { x: 2.39, y: 48.84 } },
+      {
+        attributes: { UAI: '0750247L', Nom: 'COLLEGE VOLTAIRE', secteur: 'Tête' },
+        geometry: { x: 2.38, y: 48.85 },
+      },
+    ],
+  },
+  arcgisLycees: {
+    features: [
+      {
+        attributes: { UAI: '0750680G', Nom: 'ARAGO', secteur: '1' },
+        geometry: { x: 2.39, y: 48.84 },
+      },
+      {
+        attributes: { UAI: '0750712T', Nom: 'VOLTAIRE', secteur: '1' },
+        geometry: { x: 2.40, y: 48.86 },
+      },
     ],
   },
   effectifs: {
-    results: [{ uai: '0750680G', nom: 'ARAGO', effectifs: 100 }],
+    rows: [
+      { row: { UAI: '0750680G', Nom: 'ARAGO', Effectif_2nde_GT_RS25: 280 } },
+      { row: { UAI: '0750712T', Nom: 'VOLTAIRE', Effectif_2nde_GT_RS25: 320 } },
+    ],
   },
   statsModels: { rows: [], num_rows_total: 0 },
+  bonusIpsColleges: [
+    {
+      Identifiant: '0750247L',
+      Nom: 'VOLTAIRE',
+      IPS_2025: 110.5,
+      Bonus_IPS_2025: 0,
+    },
+  ],
+  capgeoSector: {
+    features: [
+      { attributes: { type_etabl: 'COL', libelle: 'VOLTAIRE' } },
+    ],
+  },
+  hfSecteurs: [],
   niveauScolaire: { rows: [] },
   ipsLycees: { rows: [] },
 };
@@ -86,20 +116,15 @@ export async function setupApiMocks(page: Page, overrides: MockOverrides = {}): 
     (route) => json(route, m.seuilsBoursiers),
   );
   await page.route('https://api-adresse.data.gouv.fr/search/**', (route) => json(route, m.address));
+  // Single ArcGIS endpoint shared by 3 query types — branch on `where` param
+  await page.route(/services9\.arcgis\.com\/.*\/FeatureServer\/0\/query/, (route) => {
+    const url = new URL(route.request().url());
+    const where = url.searchParams.get('where') ?? '';
+    if (where.includes("secteur<>'Tête'")) return json(route, m.arcgisLycees);
+    return json(route, m.arcgisCollegeUai);
+  });
   await page.route(
-    '**/services9.arcgis.com/**/Sector_College/FeatureServer/0/query**',
-    (route) => json(route, m.sectorCollege),
-  );
-  await page.route(
-    '**/services9.arcgis.com/**/COLLEGES_PARIS_UAI/FeatureServer/0/query**',
-    (route) => json(route, m.collegeUai),
-  );
-  await page.route(
-    '**/services9.arcgis.com/**/Sector_Lycees/FeatureServer/0/query**',
-    (route) => json(route, m.sectorLycees),
-  );
-  await page.route(
-    '**/data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-etablissements-publics-et-prives-d-ile-de-france/records**',
+    /datasets-server\.huggingface\.co\/rows\?dataset=fgaume(\/|%2F)affelnet-paris-lycees-effectifs-2nde/,
     (route) => json(route, m.effectifs),
   );
   await page.route(
@@ -113,5 +138,14 @@ export async function setupApiMocks(page: Page, overrides: MockOverrides = {}): 
   await page.route(
     /datasets-server\.huggingface\.co\/rows\?dataset=fgaume(\/|%2F)affelnet-paris-ips-lycees/,
     (route) => json(route, m.ipsLycees),
+  );
+  await page.route(
+    /huggingface\.co\/datasets\/fgaume\/affelnet-paris-bonus-ips-colleges\/raw\/main/,
+    (route) => json(route, m.bonusIpsColleges),
+  );
+  await page.route(/capgeo2\.paris\.fr\//, (route) => json(route, m.capgeoSector));
+  await page.route(
+    /huggingface\.co\/datasets\/fgaume\/affelnet-paris-secteurs\/resolve\/main/,
+    (route) => json(route, m.hfSecteurs),
   );
 }
