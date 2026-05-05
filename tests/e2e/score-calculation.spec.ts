@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('Score Calculation & Admission Chances Integration', () => {
   test.beforeEach(async ({ page }) => {
@@ -99,6 +99,15 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
       });
     });
 
+    // Mock Stats Models API (V1/V2)
+    await page.route('**/datasets-server.huggingface.co/rows?dataset=fgaume%2Faffelnet-paris-stats-models**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ rows: [], num_rows_total: 0 }),
+      });
+    });
+
     // Mock Niveau Scolaire & IPS for Charts
     await page.route('**/datasets-server.huggingface.co/rows?dataset=fgaume%2Faffelnet-paris-niveaux-scolaires-lycees**', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ rows: [] }) });
@@ -111,14 +120,14 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
   });
 
   test('should navigate to Score tab and display components', async ({ page }) => {
-    await page.click('button:has-text("Simuler son barème")');
+    await page.click('button:has-text("Simuler")');
     await expect(page.locator('.grade-input-form')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('.score-display')).toBeVisible({ timeout: 15000 });
   });
 
   test('should calculate score and persist it when switching tabs', async ({ page }) => {
     // 1. Calculate score
-    await page.click('button:has-text("Simuler son barème")');
+    await page.click('button:has-text("Simuler")');
     const francaisInput = page.getByLabel('Moyenne annuelle de Français').first();
     await francaisInput.fill('16');
     
@@ -128,16 +137,16 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
 
     // 2. Switch to Search tab
     await page.click('button:has-text("Lycées de secteur")');
-    await expect(page.locator('input[placeholder="Saisissez votre adresse..."]')).toBeVisible();
+    await expect(page.locator(`input[placeholder="Saisissez l'adresse de votre domicile"]`)).toBeVisible();
 
     // 3. Switch back to Score tab
-    await page.click('button:has-text("Simuler son barème")');
+    await page.click('button:has-text("Simuler")');
     await expect(page.locator('.secteur-1 .score-value')).toContainText(initialScoreText);
   });
 
   test('should show results summary after score is calculated', async ({ page }) => {
     // 1. Calculate a score
-    await page.click('button:has-text("Simuler son barème")');
+    await page.click('button:has-text("Simuler")');
     
     // Fill some subjects to get a high score
     const francaisInput = page.getByLabel('Moyenne annuelle de Français').first();
@@ -148,7 +157,7 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
     await expect(page.locator('.secteur-1 .score-value')).toBeVisible();
 
     // 2. Verify summary breakdown exists
-    await expect(page.locator('.score-summary-breakdown')).toBeVisible();
-    await expect(page.locator('.summary-item:has-text("Total champs disciplinaires")')).toBeVisible();
+    await expect(page.locator('.score-summary-breakdown').first()).toBeVisible();
+    await expect(page.locator('.summary-item:has-text("Barème scolaire total")')).toBeVisible();
   });
 });

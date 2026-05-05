@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from './fixtures';
 
 const CARTE_SCOLAIRE_URL =
   'https://experience.arcgis.com/experience/5b6803bc7f634620a85da29dd8a113fe';
@@ -10,6 +10,8 @@ test.use({ locale: 'fr-FR', viewport: { width: 1440, height: 900 } });
 
 async function searchOnOurApp(page: Page, address: string): Promise<string> {
   await page.goto('/');
+  await page.evaluate(() => localStorage.setItem('disclaimer_seen', 'true'));
+  await page.reload();
   const input = page.locator('input[type="text"]');
   await input.fill(address);
   await page.waitForTimeout(500);

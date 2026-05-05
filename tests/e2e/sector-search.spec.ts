@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 // Test data valid for 2025-2026 school year — update each year
 const TEST_CASES = [
@@ -24,7 +24,7 @@ const TEST_CASES = [
     address: '8 avenue de Suffren',
     college: 'GUILLAUME APOLLINAIRE',
     uai: '0752190Y',
-    lyceesSecteur1: ['J. DE SAILLY', 'J. DE LA FONTAINE', 'J. SAY', 'BUFFON', 'V. DURUY'],
+    lyceesSecteur1: ['J. DE SAILLY', 'J. DE LA FONTAINE', 'J.B. SAY', 'BUFFON', 'V. DURUY'],
   },
   {
     address: '120 boulevard de Menilmontant',
@@ -52,15 +52,15 @@ for (const tc of TEST_CASES) {
     const collegeName = page.locator('.college-title h2');
     await expect(collegeName).toContainText(tc.college, { timeout: 15000 });
 
-    // Verify UAI
-    await expect(page.locator('.college-card')).toContainText(tc.uai);
+    // Verify UAI is in the rectorat link
+    await expect(page.locator(`.etablissement-link[href*="${tc.uai}"]`)).toBeVisible();
 
-    // Verify lycees secteur 1
-    const lyceeSection = page.locator('.lycees-section');
-    await expect(lyceeSection).toBeVisible({ timeout: 15000 });
+    // Verify lycees secteur 1 are in the card (donut chart labels or concurrence section)
+    const collegeCard = page.locator('.college-card');
+    await expect(collegeCard).toBeVisible({ timeout: 15000 });
 
     for (const lyceeName of tc.lyceesSecteur1) {
-      await expect(lyceeSection).toContainText(lyceeName);
+      await expect(collegeCard).toContainText(lyceeName);
     }
   });
 }
