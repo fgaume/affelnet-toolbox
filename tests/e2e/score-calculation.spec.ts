@@ -2,20 +2,21 @@ import { test, expect } from './fixtures';
 
 test.describe('Score Calculation & Admission Chances Integration', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock Academic Stats API
+    // Mock Academic Stats API — use current year to match dynamic filter in scoreApi.ts
+    const thisYear = new Date().getFullYear();
     await page.route('**/datasets-server.huggingface.co/rows?dataset=fgaume%2Faffelnet-paris-statistiques-champs-disciplinaires**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
           rows: [
-            { row: { annee: 2024, champ: 'FRANCAIS', moyenne: 14, 'ecart-type': 3 } },
-            { row: { annee: 2024, champ: 'MATHEMATIQUES', moyenne: 13, 'ecart-type': 4 } },
-            { row: { annee: 2024, champ: 'HISTOIRE-GEO', moyenne: 15, 'ecart-type': 2 } },
-            { row: { annee: 2024, champ: 'LANGUES VIVANTES', moyenne: 14, 'ecart-type': 3 } },
-            { row: { annee: 2024, champ: 'SCIENCES-TECHNO-DP', moyenne: 12, 'ecart-type': 5 } },
-            { row: { annee: 2024, champ: 'ARTS', moyenne: 16, 'ecart-type': 2 } },
-            { row: { annee: 2024, champ: 'EPS', moyenne: 14, 'ecart-type': 3 } },
+            { row: { annee: thisYear, champ: 'FRANCAIS', moyenne: 14, 'ecart-type': 3 } },
+            { row: { annee: thisYear, champ: 'MATHEMATIQUES', moyenne: 13, 'ecart-type': 4 } },
+            { row: { annee: thisYear, champ: 'HISTOIRE-GEO', moyenne: 15, 'ecart-type': 2 } },
+            { row: { annee: thisYear, champ: 'LANGUES VIVANTES', moyenne: 14, 'ecart-type': 3 } },
+            { row: { annee: thisYear, champ: 'SCIENCES-TECHNO-DP', moyenne: 12, 'ecart-type': 5 } },
+            { row: { annee: thisYear, champ: 'ARTS', moyenne: 16, 'ecart-type': 2 } },
+            { row: { annee: thisYear, champ: 'EPS', moyenne: 14, 'ecart-type': 3 } },
           ],
           num_rows_total: 7,
         }),

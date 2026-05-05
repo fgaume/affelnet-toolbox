@@ -37,34 +37,66 @@ async function dismissPopup(page: Page): Promise<void> {
 }
 
 async function activateCollegeOnly(page: Page): Promise<void> {
-  const college = page.locator('input[aria-label="Collège"]');
-  if (!(await college.isChecked())) {
-    await college.click({ force: true });
-  }
-  for (const label of ['Ecole maternelle', 'Ecole élémentaire']) {
-    const cb = page.locator(`input[aria-label="${label}"]`);
-    if (await cb.isChecked()) {
-      await cb.click({ force: true });
+  // Handle both old checkboxes and new toggle switches
+  const collegeCheckbox = page.locator('input[aria-label="Collège"]');
+  const hasOldUi = (await collegeCheckbox.count()) > 0;
+
+  if (hasOldUi) {
+    if (!(await collegeCheckbox.isChecked())) {
+      await collegeCheckbox.click({ force: true });
+    }
+    for (const label of ['Ecole maternelle', 'Ecole élémentaire']) {
+      const cb = page.locator(`input[aria-label="${label}"]`);
+      if ((await cb.count()) > 0 && (await cb.isChecked())) {
+        await cb.click({ force: true });
+      }
+    }
+  } else {
+    // New ArcGIS UI with toggle switches
+    const collegeSwitch = page.locator('switch "Collège"');
+    if ((await collegeSwitch.count()) > 0) {
+      const isChecked = await collegeSwitch.getAttribute('checked');
+      if (isChecked === null) {
+        await collegeSwitch.click();
+      }
+    }
+    for (const label of ['Ecole maternelle', 'Ecole élémentaire']) {
+      const sw = page.locator(`switch "${label}"`);
+      if ((await sw.count()) > 0 && (await sw.getAttribute('checked')) !== null) {
+        await sw.click();
+      }
     }
   }
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
 }
 
 async function searchOnOfficialSite(page: Page, address: string): Promise<string> {
+  // Try both French and English placeholder
   const searchInput = page.locator(
-    'input[placeholder="Rechercher une adresse ou un lieu"]'
-  );
+    'input[placeholder="Rechercher une adresse ou un lieu"], input[placeholder="Find address or place"]'
+  ).first();
   await searchInput.waitFor({ timeout: 15000 });
   await searchInput.click();
   await searchInput.fill(address);
+  await page.waitForTimeout(3000);
+
+  // Try old suggestion format, then generic
+  const oldSuggestion = page.locator('button.d-flex.align-items-center.py-2').first();
+  if ((await oldSuggestion.count()) > 0) {
+    await oldSuggestion.waitFor({ timeout: 10000 });
+    await oldSuggestion.click();
+  } else {
+    // Look for any suggestion containing the address
+    const suggestion = page.locator('button:has-text("Paris")').first();
+    await suggestion.waitFor({ timeout: 10000 });
+    await suggestion.click();
+  }
+
   await page.waitForTimeout(2000);
 
-  const suggestion = page.locator('button.d-flex.align-items-center.py-2').first();
-  await suggestion.waitFor({ timeout: 10000 });
-  await suggestion.click();
-
+  // Wait for college result with longer timeout
   const collegeStrong = page.locator('strong', { hasText: /^Collège / });
-  await collegeStrong.waitFor({ timeout: 15000 });
+  await collegeStrong.waitFor({ timeout: 30000 });
 
   const text = await collegeStrong.innerText();
   return text.replace(/^Collège\s+/i, '').trim().toUpperCase();
