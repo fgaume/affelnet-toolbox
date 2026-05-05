@@ -1,7 +1,7 @@
 import { fetchWithHfCache } from './hfCache';
 
 const DATASET_BASE =
-  'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-colleges-effectifs-3eme&config=default&split=train';
+  'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-colleges-effectifs-3eme&config=default&split=effectifs';
 
 // HuggingFace rows API has a max of 100 rows per request.
 // The dataset has 114 colleges, so we need two pages.

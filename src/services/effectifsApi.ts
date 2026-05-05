@@ -2,7 +2,7 @@ import type { EffectifLycee, LyceeSecteur } from '../types';
 import { fetchWithHfCache } from './hfCache';
 
 const DATASET_URL =
-  'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-lycees-effectifs-2nde&config=default&split=train&offset=0&length=100';
+  'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-lycees-effectifs-2nde&config=default&split=effectifs&offset=0&length=100';
 
 interface DatasetRow {
   row: {
