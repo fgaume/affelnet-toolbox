@@ -2,7 +2,7 @@ import type { LyceeSecteur } from '../types';
 import { fetchWithHfCache } from './hfCache';
 
 const DATASET_BASE =
-  'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-secteurs-2025&config=default&split=train';
+  'https://datasets-server.huggingface.co/rows?dataset=fgaume/affelnet-paris-secteurs-2025&config=default&split=secteur';
 
 const PAGE_SIZE = 100;
 
