@@ -14,6 +14,7 @@ export interface MockOverrides {
   bonusIpsColleges?: unknown;
   capgeoSector?: unknown;
   hfSecteurs?: unknown;
+  collegeList?: unknown;
 }
 
 const thisYear = new Date().getFullYear();
@@ -86,6 +87,17 @@ const DEFAULTS = {
       IPS_2025: 110.5,
       Bonus_IPS_2025: 0,
     },
+    {
+      Identifiant: '0750678E',
+      Nom: 'CESARIA EVORA',
+      IPS_2025: 78.3,
+      Bonus_IPS_2025: 600,
+    },
+  ],
+  collegeList: [
+    { uai: '0750247L', nom: 'COLLEGE VOLTAIRE' },
+    { uai: '0750678E', nom: 'COLLEGE CESARIA EVORA' },
+    { uai: '0751234F', nom: 'COLLEGE BEAUMARCHAIS' },
   ],
   capgeoSector: {
     features: [
@@ -147,5 +159,9 @@ export async function setupApiMocks(page: Page, overrides: MockOverrides = {}): 
   await page.route(
     /huggingface\.co\/datasets\/fgaume\/affelnet-paris-secteurs\/resolve\/main/,
     (route) => json(route, m.hfSecteurs),
+  );
+  await page.route(
+    /data\.education\.gouv\.fr\/api\/explore\/v2\.1\/catalog\/datasets\/fr-en-college-effectifs-niveau-sexe-lv\/exports\/json/,
+    (route) => json(route, m.collegeList),
   );
 }
