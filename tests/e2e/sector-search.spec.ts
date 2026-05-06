@@ -1,6 +1,12 @@
 import { test, expect } from './fixtures';
 
-// Test data valid for 2025-2026 school year — update each year
+// These tests hit real upstream APIs (CapGeo, ArcGIS).
+// Retry transient failures from rate-limits or upstream slowness.
+test.describe.configure({ retries: 2 });
+
+// Single representative case: validates the full real pipeline end-to-end.
+// Keep narrow to limit upstream API load and flakiness.
+// Test data valid for 2025-2026 school year — update each year.
 const TEST_CASES = [
   {
     address: '12 passage Saint-Ambroise',
@@ -8,34 +14,10 @@ const TEST_CASES = [
     uai: '0752536Z',
     lyceesSecteur1: ['DORIAN', 'CHARLEMAGNE', 'COLBERT', 'TURGOT', 'VOLTAIRE'],
   },
-  {
-    address: '15 rue de Rivoli',
-    college: 'FRANCOIS COUPERIN',
-    uai: '0752693V',
-    lyceesSecteur1: ['LAVOISIER', 'CHARLEMAGNE', 'S. WEIL', 'S. GERMAIN', 'VOLTAIRE'],
-  },
-  {
-    address: '45 rue de Belleville',
-    college: 'CHARLES PEGUY',
-    uai: '0751706X',
-    lyceesSecteur1: ['DIDEROT', 'BOUCHER', 'BERGSON', 'S. GERMAIN', 'LAMARTINE'],
-  },
-  {
-    address: '8 avenue de Suffren',
-    college: 'GUILLAUME APOLLINAIRE',
-    uai: '0752190Y',
-    lyceesSecteur1: ['J. DE SAILLY', 'J. DE LA FONTAINE', 'J.B. SAY', 'BUFFON', 'V. DURUY'],
-  },
-  {
-    address: '120 boulevard de Menilmontant',
-    college: 'COLETTE BESSON',
-    uai: '0755241P',
-    lyceesSecteur1: ['CHARLEMAGNE', 'COLBERT', 'BOUCHER', 'V. HUGO', 'VOLTAIRE'],
-  },
 ];
 
 for (const tc of TEST_CASES) {
-  test(`finds sector schools for ${tc.address}`, async ({ page }) => {
+  test(`finds sector schools for ${tc.address} @external`, async ({ page }) => {
     await page.goto('/');
 
     // Type address and wait for suggestions
@@ -65,7 +47,7 @@ for (const tc of TEST_CASES) {
   });
 }
 
-test('displays error for search failure', async ({ page }) => {
+test('displays error for search failure @external', async ({ page }) => {
   await page.goto('/');
 
   // Mock API to return empty
@@ -85,7 +67,7 @@ test('displays error for search failure', async ({ page }) => {
   await expect(page.locator('.error-message')).toBeVisible({ timeout: 15000 });
 });
 
-test('history displays and restores results', async ({ page }) => {
+test('history displays and restores results @external', async ({ page }) => {
   await page.goto('/');
 
   // Search for an address

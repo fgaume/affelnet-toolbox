@@ -121,11 +121,11 @@ const ADDRESSES = [
 
 // --- Cross-validation tests ---
 
-test.describe('Cross-validation: notre app vs carte scolaire officielle', () => {
+test.describe('Cross-validation: notre app vs carte scolaire officielle @cross-check', () => {
   test.setTimeout(120_000);
 
   for (const address of ADDRESSES) {
-    test(`${address}`, async ({ browser }) => {
+    test(`${address} @cross-check`, async ({ browser }) => {
       // Page 1: search on our app (localhost)
       const appContext = await browser.newContext({ locale: 'fr-FR' });
       const appPage = await appContext.newPage();
