@@ -12,24 +12,29 @@ interface DatasetRow {
   };
 }
 
-let allEffectifs: Map<string, EffectifLycee> | null = null;
+let inflight: Promise<Map<string, EffectifLycee>> | null = null;
 
-async function fetchAllEffectifs(): Promise<Map<string, EffectifLycee>> {
-  if (allEffectifs) return allEffectifs;
+function fetchAllEffectifs(): Promise<Map<string, EffectifLycee>> {
+  if (inflight) return inflight;
 
-  const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(DATASET_URL);
+  inflight = (async () => {
+    const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(DATASET_URL);
+    const map = new Map<string, EffectifLycee>();
+    for (const { row } of data.rows) {
+      map.set(row.UAI, {
+        uai: row.UAI,
+        nom: row.Nom,
+        effectif: row.Effectif_2nde_GT_RS25,
+        annee: '2025',
+      });
+    }
+    return map;
+  })().catch((err) => {
+    inflight = null;
+    throw err;
+  });
 
-  allEffectifs = new Map();
-  for (const { row } of data.rows) {
-    allEffectifs.set(row.UAI, {
-      uai: row.UAI,
-      nom: row.Nom,
-      effectif: row.Effectif_2nde_GT_RS25,
-      annee: '2025',
-    });
-  }
-
-  return allEffectifs;
+  return inflight;
 }
 
 export async function fetchEffectif2nde(uai: string): Promise<EffectifLycee | null> {

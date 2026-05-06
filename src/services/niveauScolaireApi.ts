@@ -24,15 +24,15 @@ export interface NiveauScolaireResult {
   decile: number;
 }
 
-let cache: ApiRow[] | null = null;
+let inflight: Promise<ApiRow[]> | null = null;
 
 export function computeTauxTB(sansF: number | null, avecF: number | null, presents: number): number {
   if (presents === 0) return 0;
   return (((sansF ?? 0) + (avecF ?? 0)) / presents) * 100;
 }
 
-async function fetchAllParis(): Promise<ApiRow[]> {
-  if (cache) return cache;
+function fetchAllParis(): Promise<ApiRow[]> {
+  if (inflight) return inflight;
 
   const select = 'annee,uai,nb_mentions_tb_sansf_g,nb_mentions_tb_avecf_g,presents_gnle,taux_acces_2nde';
   const where = encodeURIComponent(
@@ -40,11 +40,16 @@ async function fetchAllParis(): Promise<ApiRow[]> {
   );
   const url = `${API_URL}?select=${select}&where=${where}&order_by=annee&limit=-1`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Erreur chargement niveau scolaire: ${response.status}`);
+  inflight = (async () => {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Erreur chargement niveau scolaire: ${response.status}`);
+    return (await response.json()) as ApiRow[];
+  })().catch((err) => {
+    inflight = null;
+    throw err;
+  });
 
-  cache = (await response.json()) as ApiRow[];
-  return cache;
+  return inflight;
 }
 
 function median(values: number[]): number {

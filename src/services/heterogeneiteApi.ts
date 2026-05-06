@@ -21,33 +21,40 @@ interface DatasetResponse {
 }
 
 const PAGE_SIZE = 100;
-let allRows: DatasetRow[] | null = null;
+let inflight: Promise<DatasetRow[]> | null = null;
 
-async function fetchAllRows(): Promise<DatasetRow[]> {
-  if (allRows) return allRows;
+function fetchAllRows(): Promise<DatasetRow[]> {
+  if (inflight) return inflight;
 
-  // Fetch first page to get total count
-  const firstPage = await fetchWithHfCache<DatasetResponse>(`${DATASET_BASE}&offset=0&length=${PAGE_SIZE}`);
-  allRows = firstPage.rows;
+  inflight = (async () => {
+    // Fetch first page to get total count
+    const firstPage = await fetchWithHfCache<DatasetResponse>(`${DATASET_BASE}&offset=0&length=${PAGE_SIZE}`);
+    let rows = firstPage.rows;
 
-  // Fetch remaining pages if needed
-  const total = firstPage.num_rows_total;
-  if (total > PAGE_SIZE) {
-    const remainingPages = Math.ceil((total - PAGE_SIZE) / PAGE_SIZE);
-    const promises: Promise<DatasetResponse>[] = [];
-    for (let i = 1; i <= remainingPages; i++) {
-      const offset = i * PAGE_SIZE;
-      promises.push(
-        fetchWithHfCache<DatasetResponse>(`${DATASET_BASE}&offset=${offset}&length=${PAGE_SIZE}`)
-      );
+    // Fetch remaining pages if needed
+    const total = firstPage.num_rows_total;
+    if (total > PAGE_SIZE) {
+      const remainingPages = Math.ceil((total - PAGE_SIZE) / PAGE_SIZE);
+      const promises: Promise<DatasetResponse>[] = [];
+      for (let i = 1; i <= remainingPages; i++) {
+        const offset = i * PAGE_SIZE;
+        promises.push(
+          fetchWithHfCache<DatasetResponse>(`${DATASET_BASE}&offset=${offset}&length=${PAGE_SIZE}`)
+        );
+      }
+      const results = await Promise.all(promises);
+      for (const page of results) {
+        rows = rows.concat(page.rows);
+      }
     }
-    const results = await Promise.all(promises);
-    for (const page of results) {
-      allRows = allRows.concat(page.rows);
-    }
-  }
 
-  return allRows;
+    return rows;
+  })().catch((err) => {
+    inflight = null;
+    throw err;
+  });
+
+  return inflight;
 }
 
 function median(values: number[]): number {

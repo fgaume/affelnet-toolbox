@@ -25,7 +25,7 @@ export interface IpsResult {
   decile: number;
 }
 
-let cache: ApiRow[] | null = null;
+let inflight: Promise<ApiRow[]> | null = null;
 
 interface OldApiRow {
   uai: string;
@@ -76,27 +76,34 @@ async function fetchNewDataset(): Promise<ApiRow[]> {
   return (await response.json()) as ApiRow[];
 }
 
-async function fetchAllParis(): Promise<ApiRow[]> {
-  if (cache) return cache;
+function fetchAllParis(): Promise<ApiRow[]> {
+  if (inflight) return inflight;
 
-  // Merge old (2016-2021), 2022, and new (2023+) datasets, dedup by uai+year
-  const [oldRows, rows2022, newRows] = await Promise.all([
-    fetchOldDataset(),
-    fetch2022Dataset(),
-    fetchNewDataset(),
-  ]);
-  const seen = new Set<string>();
-  cache = [];
-  // Newer datasets take precedence for overlapping years
-  for (const r of [...newRows, ...rows2022, ...oldRows]) {
-    const key = `${r.uai}_${r.rentree_scolaire}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      cache.push(r);
+  inflight = (async () => {
+    // Merge old (2016-2021), 2022, and new (2023+) datasets, dedup by uai+year
+    const [oldRows, rows2022, newRows] = await Promise.all([
+      fetchOldDataset(),
+      fetch2022Dataset(),
+      fetchNewDataset(),
+    ]);
+    const seen = new Set<string>();
+    const merged: ApiRow[] = [];
+    // Newer datasets take precedence for overlapping years
+    for (const r of [...newRows, ...rows2022, ...oldRows]) {
+      const key = `${r.uai}_${r.rentree_scolaire}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(r);
+      }
     }
-  }
-  cache.sort((a, b) => a.rentree_scolaire.localeCompare(b.rentree_scolaire));
-  return cache;
+    merged.sort((a, b) => a.rentree_scolaire.localeCompare(b.rentree_scolaire));
+    return merged;
+  })().catch((err) => {
+    inflight = null;
+    throw err;
+  });
+
+  return inflight;
 }
 
 function median(values: number[]): number {

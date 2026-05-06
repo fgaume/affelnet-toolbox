@@ -40,10 +40,37 @@ interface BoursiersDatasetRow {
 import type { LyceeAdmissionHistory } from '../types';
 import { fetchWithHfCache } from './hfCache';
 
-let cache: Map<string, number> | null = null;
-let historyCache: readonly LyceeAdmissionHistory[] | null = null;
-let boursiersHistoryCache: readonly LyceeAdmissionHistory[] | null = null;
-let tauxCibleBoursiersCache: ReadonlyMap<string, number> | null = null;
+// One inflight per remote URL — shared by all view-functions below.
+let admissionRowsInflight: Promise<DatasetRow[]> | null = null;
+let boursiersRowsInflight: Promise<BoursiersDatasetRow[]> | null = null;
+
+function fetchAdmissionRows(): Promise<DatasetRow[]> {
+  if (admissionRowsInflight) return admissionRowsInflight;
+  admissionRowsInflight = fetchWithHfCache<{ rows: DatasetRow[] }>(DATASET_URL)
+    .then((d) => d.rows)
+    .catch((err) => {
+      admissionRowsInflight = null;
+      throw err;
+    });
+  return admissionRowsInflight;
+}
+
+function fetchBoursiersRows(): Promise<BoursiersDatasetRow[]> {
+  if (boursiersRowsInflight) return boursiersRowsInflight;
+  boursiersRowsInflight = fetchWithHfCache<{ rows: BoursiersDatasetRow[] }>(BOURSIERS_DATASET_URL)
+    .then((d) => d.rows)
+    .catch((err) => {
+      boursiersRowsInflight = null;
+      throw err;
+    });
+  return boursiersRowsInflight;
+}
+
+// View-level memoization (stable references for React consumers).
+let seuilsInflight: Promise<Map<string, number>> | null = null;
+let historyInflight: Promise<readonly LyceeAdmissionHistory[]> | null = null;
+let boursiersHistoryInflight: Promise<readonly LyceeAdmissionHistory[]> | null = null;
+let tauxCibleBoursiersInflight: Promise<ReadonlyMap<string, number>> | null = null;
 
 function deriveYears(rows: DatasetRow[]): void {
   const length = rows[0]?.row.seuils.length ?? 0;
@@ -61,24 +88,23 @@ function deriveYears(rows: DatasetRow[]): void {
  * Returns a Map: UAI code → latest seuil.
  * Cached after first call.
  */
-export async function fetchSeuils(): Promise<Map<string, number>> {
-  if (cache) return cache;
-
-  const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(DATASET_URL);
-  const rows: DatasetRow[] = data.rows;
-
-  if (seuilYears.length === 0) deriveYears(rows);
-  const latestIndex = seuilYears.length - 1;
-
-  cache = new Map();
-  for (const { row } of rows) {
-    const seuil = row.seuils[latestIndex];
-    if (seuil != null) {
-      cache.set(row.code, seuil);
+export function fetchSeuils(): Promise<Map<string, number>> {
+  if (seuilsInflight) return seuilsInflight;
+  seuilsInflight = (async () => {
+    const rows = await fetchAdmissionRows();
+    if (seuilYears.length === 0) deriveYears(rows);
+    const latestIndex = seuilYears.length - 1;
+    const map = new Map<string, number>();
+    for (const { row } of rows) {
+      const seuil = row.seuils[latestIndex];
+      if (seuil != null) map.set(row.code, seuil);
     }
-  }
-
-  return cache;
+    return map;
+  })().catch((err) => {
+    seuilsInflight = null;
+    throw err;
+  });
+  return seuilsInflight;
 }
 
 /**
@@ -86,23 +112,23 @@ export async function fetchSeuils(): Promise<Map<string, number>> {
  * Returns the complete seuils array per lycée.
  * Cached after first call.
  */
-export async function fetchAllSeuils(): Promise<readonly LyceeAdmissionHistory[]> {
-  if (historyCache) return historyCache;
-
-  const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(DATASET_URL);
-  const rows: DatasetRow[] = data.rows;
-
-  if (seuilYears.length === 0) deriveYears(rows);
-
-  historyCache = rows
-    .map(({ row }) => ({
-      code: row.code,
-      nom: row.nom,
-      seuils: row.seuils,
-    }))
-    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
-
-  return historyCache;
+export function fetchAllSeuils(): Promise<readonly LyceeAdmissionHistory[]> {
+  if (historyInflight) return historyInflight;
+  historyInflight = (async () => {
+    const rows = await fetchAdmissionRows();
+    if (seuilYears.length === 0) deriveYears(rows);
+    return rows
+      .map(({ row }) => ({
+        code: row.code,
+        nom: row.nom,
+        seuils: row.seuils,
+      }))
+      .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  })().catch((err) => {
+    historyInflight = null;
+    throw err;
+  });
+  return historyInflight;
 }
 
 /**
@@ -110,21 +136,22 @@ export async function fetchAllSeuils(): Promise<readonly LyceeAdmissionHistory[]
  * Same structure as fetchAllSeuils but from the boursiers dataset.
  * Cached after first call.
  */
-export async function fetchAllSeuilsBoursiers(): Promise<readonly LyceeAdmissionHistory[]> {
-  if (boursiersHistoryCache) return boursiersHistoryCache;
-
-  const data = await fetchWithHfCache<{ rows: DatasetRow[] }>(BOURSIERS_DATASET_URL);
-  const rows: DatasetRow[] = data.rows;
-
-  boursiersHistoryCache = rows
-    .map(({ row }) => ({
-      code: row.code,
-      nom: row.nom,
-      seuils: row.seuils,
-    }))
-    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
-
-  return boursiersHistoryCache;
+export function fetchAllSeuilsBoursiers(): Promise<readonly LyceeAdmissionHistory[]> {
+  if (boursiersHistoryInflight) return boursiersHistoryInflight;
+  boursiersHistoryInflight = (async () => {
+    const rows = await fetchBoursiersRows();
+    return rows
+      .map(({ row }) => ({
+        code: row.code,
+        nom: row.nom,
+        seuils: row.seuils,
+      }))
+      .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  })().catch((err) => {
+    boursiersHistoryInflight = null;
+    throw err;
+  });
+  return boursiersHistoryInflight;
 }
 
 /**
@@ -132,18 +159,22 @@ export async function fetchAllSeuilsBoursiers(): Promise<readonly LyceeAdmission
  * Returns a Map: UAI code → rate (decimal, e.g. 0.25 for 25%).
  * Cached after first call.
  */
-export async function fetchTauxCibleBoursiers(): Promise<ReadonlyMap<string, number>> {
-  if (tauxCibleBoursiersCache) return tauxCibleBoursiersCache;
-
-  const data = await fetchWithHfCache<{ rows: BoursiersDatasetRow[] }>(BOURSIERS_DATASET_URL);
-  const map = new Map<string, number>();
-  for (const { row } of data.rows) {
-    if (row.taux_cible_boursiers != null) {
-      map.set(row.code, row.taux_cible_boursiers);
+export function fetchTauxCibleBoursiers(): Promise<ReadonlyMap<string, number>> {
+  if (tauxCibleBoursiersInflight) return tauxCibleBoursiersInflight;
+  tauxCibleBoursiersInflight = (async () => {
+    const rows = await fetchBoursiersRows();
+    const map = new Map<string, number>();
+    for (const { row } of rows) {
+      if (row.taux_cible_boursiers != null) {
+        map.set(row.code, row.taux_cible_boursiers);
+      }
     }
-  }
-  tauxCibleBoursiersCache = map;
-  return tauxCibleBoursiersCache;
+    return map;
+  })().catch((err) => {
+    tauxCibleBoursiersInflight = null;
+    throw err;
+  });
+  return tauxCibleBoursiersInflight;
 }
 
 /**
