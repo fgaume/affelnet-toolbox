@@ -1,5 +1,9 @@
 import { test, expect } from './fixtures';
 
+// These tests hit real upstream APIs (CapGeo, ArcGIS) which rate-limit under
+// parallel load. Run serially and retry transient failures.
+test.describe.configure({ mode: 'serial', retries: 2 });
+
 // Test data valid for 2025-2026 school year — update each year
 const TEST_CASES = [
   {
@@ -35,7 +39,7 @@ const TEST_CASES = [
 ];
 
 for (const tc of TEST_CASES) {
-  test(`finds sector schools for ${tc.address}`, async ({ page }) => {
+  test(`finds sector schools for ${tc.address} @external`, async ({ page }) => {
     await page.goto('/');
 
     // Type address and wait for suggestions
@@ -65,7 +69,7 @@ for (const tc of TEST_CASES) {
   });
 }
 
-test('displays error for search failure', async ({ page }) => {
+test('displays error for search failure @external', async ({ page }) => {
   await page.goto('/');
 
   // Mock API to return empty
@@ -85,7 +89,7 @@ test('displays error for search failure', async ({ page }) => {
   await expect(page.locator('.error-message')).toBeVisible({ timeout: 15000 });
 });
 
-test('history displays and restores results', async ({ page }) => {
+test('history displays and restores results @external', async ({ page }) => {
   await page.goto('/');
 
   // Search for an address

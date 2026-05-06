@@ -12,7 +12,9 @@
     "deploy": "npm run build && firebase deploy --only hosting",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --grep-invert @cross-check",
+    "test:e2e:fast": "playwright test --grep-invert \"@cross-check|@external\"",
+    "test:e2e:cross-check": "playwright test --grep @cross-check"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.21",
