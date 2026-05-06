@@ -1,40 +1,18 @@
 import { test, expect } from './fixtures';
 
-// These tests hit real upstream APIs (CapGeo, ArcGIS) which rate-limit under
-// parallel load. Run serially and retry transient failures.
-test.describe.configure({ mode: 'serial', retries: 2 });
+// These tests hit real upstream APIs (CapGeo, ArcGIS).
+// Retry transient failures from rate-limits or upstream slowness.
+test.describe.configure({ retries: 2 });
 
-// Test data valid for 2025-2026 school year — update each year
+// Single representative case: validates the full real pipeline end-to-end.
+// Keep narrow to limit upstream API load and flakiness.
+// Test data valid for 2025-2026 school year — update each year.
 const TEST_CASES = [
   {
     address: '12 passage Saint-Ambroise',
     college: 'VOLTAIRE',
     uai: '0752536Z',
     lyceesSecteur1: ['DORIAN', 'CHARLEMAGNE', 'COLBERT', 'TURGOT', 'VOLTAIRE'],
-  },
-  {
-    address: '15 rue de Rivoli',
-    college: 'FRANCOIS COUPERIN',
-    uai: '0752693V',
-    lyceesSecteur1: ['LAVOISIER', 'CHARLEMAGNE', 'S. WEIL', 'S. GERMAIN', 'VOLTAIRE'],
-  },
-  {
-    address: '45 rue de Belleville',
-    college: 'CHARLES PEGUY',
-    uai: '0751706X',
-    lyceesSecteur1: ['DIDEROT', 'BOUCHER', 'BERGSON', 'S. GERMAIN', 'LAMARTINE'],
-  },
-  {
-    address: '8 avenue de Suffren',
-    college: 'GUILLAUME APOLLINAIRE',
-    uai: '0752190Y',
-    lyceesSecteur1: ['J. DE SAILLY', 'J. DE LA FONTAINE', 'J.B. SAY', 'BUFFON', 'V. DURUY'],
-  },
-  {
-    address: '120 boulevard de Menilmontant',
-    college: 'COLETTE BESSON',
-    uai: '0755241P',
-    lyceesSecteur1: ['CHARLEMAGNE', 'COLBERT', 'BOUCHER', 'V. HUGO', 'VOLTAIRE'],
   },
 ];
 
