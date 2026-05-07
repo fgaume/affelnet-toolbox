@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import './DisclaimerModal.css';
+import { useState, useEffect, useCallback } from "react";
+import "./DisclaimerModal.css";
 
-const DISCLAIMER_KEY = 'disclaimer_seen';
+const DISCLAIMER_KEY = "disclaimer_seen";
 
 export function DisclaimerModal() {
   const [visible, setVisible] = useState(false);
@@ -14,7 +14,7 @@ export function DisclaimerModal() {
   }, []);
 
   const handleClose = useCallback(() => {
-    localStorage.setItem(DISCLAIMER_KEY, 'true');
+    localStorage.setItem(DISCLAIMER_KEY, "true");
     setVisible(false);
   }, []);
 
@@ -22,28 +22,42 @@ export function DisclaimerModal() {
 
   return (
     <div className="disclaimer-overlay" onClick={handleClose}>
-      <div className="disclaimer-modal" onClick={e => e.stopPropagation()}>
+      <div className="disclaimer-modal" onClick={(e) => e.stopPropagation()}>
         <h2 className="disclaimer-title">IMPORTANT !</h2>
         <ul className="disclaimer-list">
           <li>
-            Cette application est encore expérimentale et incomplète, elle ne peut pas prétendre à estimer votre futur score / barème Affelnet 2026.
+            Cette application est encore expérimentale et incomplète, elle ne
+            peut pas prétendre à estimer votre futur score / barème Affelnet
+            2026.
           </li>
           <li>
-            Quelques IPS hors SEGPA restent inconnus, ce qui impacte certains collèges à qui l'application affecte en l'état un bonus 1200 alors que la circulaire officielle ne leur donnera que 800 (les candidats pressentis pour être dans cette situation seraient : Rose Blanche, Pailleron, Bergson et peut-être un ou deux autres).
+            Les statistiques académiques ne sont évidemment pas connues, mais
+            pour se faire une idée j'en ai modélisé 2, en plus de celles de l'an
+            dernier (qui n'ont que peu de sens car elles s'appliquaient à des
+            notes « tranchées » qui ne le sont plus). Les 3 sont sélectionnables
+            pour comparer.
           </li>
           <li>
-            Les statistiques académiques ne sont évidemment pas connues, mais pour se faire une idée j'en ai modélisé 2, en plus de celles de l'an dernier (qui n'ont que peu de sens car elles s'appliquaient à des notes « tranchées » qui ne le sont plus). Les 3 sont sélectionnables pour comparer.
+            Le coefficient de pondération scolaire ne sera que très tardivement
+            connu (c'est-à-dire courant juin) donc l'application propose de le
+            faire varier à loisirs pour se rendre compte de l'impact.
           </li>
           <li>
-            Le coefficient de pondération scolaire ne sera que très tardivement connu (c'est-à-dire courant juin) donc l'application propose de le faire varier à loisirs pour se rendre compte de l'impact.
-          </li>
-          <li>
-            N'hésitez pas à formuler vos remarques/critiques tant sur le fond que sur la forme via le chat{' '}
-            <a href="https://substack.com/chat/7785356" target="_blank" rel="noopener noreferrer">
+            N'hésitez pas à formuler vos remarques/critiques tant sur le fond
+            que sur la forme via le chat{" "}
+            <a
+              href="https://substack.com/chat/7785356"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               substack.com/chat
-            </a>{' '}
-            (cela nécessite de s'abonner gratuitement sur{' '}
-            <a href="https://fgaume.substack.com" target="_blank" rel="noopener noreferrer">
+            </a>{" "}
+            (cela nécessite de s'abonner gratuitement sur{" "}
+            <a
+              href="https://fgaume.substack.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               fgaume.substack.com
             </a>
             ).
