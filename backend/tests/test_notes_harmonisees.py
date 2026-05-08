@@ -58,6 +58,38 @@ class TestExtractNotes:
         notes = extract_notes(fiche)
         assert notes == []
 
+    def test_comma_decimal_separator(self) -> None:
+        """French users may use ',' as decimal separator."""
+        text = "ARTS 14,00 97,169\n"
+        notes = extract_notes(text)
+        assert len(notes) == 1
+        assert notes[0].note_brute == 14.0
+        assert notes[0].note_harmonisee == 97.169
+
+    def test_nine_decimals_dot(self) -> None:
+        """Up to 9 decimals must be preserved with '.' separator."""
+        text = "FRANCAIS 12.123456789 98.987654321\n"
+        notes = extract_notes(text)
+        assert len(notes) == 1
+        assert notes[0].note_brute == pytest.approx(12.123456789)
+        assert notes[0].note_harmonisee == pytest.approx(98.987654321)
+
+    def test_nine_decimals_comma(self) -> None:
+        """Up to 9 decimals must be preserved with ',' separator."""
+        text = "FRANCAIS 12,123456789 98,987654321\n"
+        notes = extract_notes(text)
+        assert len(notes) == 1
+        assert notes[0].note_brute == pytest.approx(12.123456789)
+        assert notes[0].note_harmonisee == pytest.approx(98.987654321)
+
+    def test_mixed_separators(self) -> None:
+        """A line with mixed '.' and ',' separators is supported."""
+        text = "EPS 15,5 102.069\n"
+        notes = extract_notes(text)
+        assert len(notes) == 1
+        assert notes[0].note_brute == 15.5
+        assert notes[0].note_harmonisee == 102.069
+
 
 @pytest.fixture()
 def _csv_sandbox(tmp_path: Path):

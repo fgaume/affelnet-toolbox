@@ -179,12 +179,12 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
               return (
                 <tr key={field}>
                   <td>{FIELD_NAMES[field]}</td>
-                  <td className="numeric">{detail.rawAverage.toFixed(2)}</td>
+                  <td className="numeric">{detail.rawAverage.toFixed(9)}</td>
                   <td className="numeric">
                     <span className="weight-prefix">
                       {FIELD_WEIGHTS[field]}x
                     </span>{" "}
-                    {harmonizedValue.toFixed(3)}
+                    {harmonizedValue.toFixed(9)}
                   </td>
                 </tr>
               );
