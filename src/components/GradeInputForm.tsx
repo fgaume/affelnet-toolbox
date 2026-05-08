@@ -69,7 +69,8 @@ function computeEpsDispenseGrade(grades: UserGrades): number | null {
     .map((s) => grades[s])
     .filter((v): v is number => v !== null);
   if (values.length === 0) return null;
-  return Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100;
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  return Math.round(avg * 1e9) / 1e9;
 }
 
 const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
@@ -100,9 +101,16 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
 
   const handleGradeChange = (subject: Subject, value: string) => {
     if (subject === 'EPS' && epsDispense) return;
+
+    if (value !== '') {
+      const dotIndex = value.indexOf('.');
+      if (dotIndex >= 0 && value.length - dotIndex - 1 > 9) {
+        return;
+      }
+    }
+
     const numValue = value === '' ? null : parseFloat(value);
 
-    // Validation: only block values outside [0, 20] if not null
     if (numValue !== null && (isNaN(numValue) || numValue < 0 || numValue > 20)) {
       return;
     }
@@ -127,10 +135,9 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
     if (francaisValue === null) return;
     const newGrades = { ...grades };
     for (const key of Object.keys(newGrades) as Subject[]) {
+      if (key === 'FRANCAIS') continue;
       if (key === 'EPS' && epsDispense) continue;
-      if (newGrades[key] === null) {
-        newGrades[key] = francaisValue;
-      }
+      newGrades[key] = francaisValue;
     }
     updateGrades(newGrades);
   };
@@ -164,7 +171,7 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
                     <input
                       id={`grade-${subject}`}
                       type="number"
-                      step="0.01"
+                      step="any"
                       min="0"
                       max="20"
                       inputMode="decimal"
@@ -179,8 +186,8 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
                         type="button"
                         className="btn-fill-all"
                         onClick={handleFillAll}
-                        title="Appliquer cette note aux matières vides"
-                        aria-label="Appliquer cette note aux matières vides"
+                        title="Appliquer cette note à toutes les matières"
+                        aria-label="Appliquer cette note à toutes les matières"
                       >
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                           <path d="M7 2v11h3v9l7-12h-4l4-8z" />
