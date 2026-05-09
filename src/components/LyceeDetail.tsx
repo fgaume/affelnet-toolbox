@@ -76,8 +76,44 @@ const INITIAL_STATE: FetchState = {
   medianIHS: new Map(),
 };
 
+const LINE_STYLES = [
+  { dash: undefined, dot: 'circle' },
+  { dash: '5 5', dot: 'square' },
+  { dash: '3 3', dot: 'triangle' },
+  { dash: '10 5', dot: 'diamond' },
+  { dash: '8 4 2 4', dot: 'star' },
+] as const;
+
+function CustomDot(props: any) {
+  const { cx, cy, stroke, fill, r, dotType } = props;
+  if (cx === null || cy === null) return null;
+
+  switch (dotType) {
+    case 'square':
+      return <rect x={cx - r} y={cy - r} width={r * 2} height={r * 2} fill={fill} stroke={stroke} strokeWidth={1} />;
+    case 'triangle':
+      return <path d={`M${cx},${cy - r} L${cx + r},${cy + r} L${cx - r},${cy + r} Z`} fill={fill} stroke={stroke} strokeWidth={1} />;
+    case 'diamond':
+      return <path d={`M${cx},${cy - r} L${cx + r},${cy} L${cx},${cy + r} L${cx - r},${cy} Z`} fill={fill} stroke={stroke} strokeWidth={1} />;
+    case 'star':
+      return <path d={`M${cx},${cy - r * 1.2} L${cx + r * 0.4},${cy - r * 0.3} L${cx + r * 1.2},${cy - r * 0.2} L${cx + r * 0.6},${cy + r * 0.5} L${cx + r * 0.8},${cy + r * 1.2} L${cx},${cy + r * 0.8} L${cx - r * 0.8},${cy + r * 1.2} L${cx - r * 0.6},${cy + r * 0.5} L${cx - r * 1.2},${cy - r * 0.2} L${cx - r * 0.4},${cy - r * 0.3} Z`} fill={fill} stroke={stroke} strokeWidth={1} />;
+    default:
+      return <circle cx={cx} cy={cy} r={r} fill={fill} stroke={stroke} strokeWidth={1} />;
+  }
+}
+
+function TooltipIcon({ color, dotType, dash }: { color: string; dotType: string; dash?: string }) {
+  return (
+    <svg width="24" height="12" style={{ marginRight: 8, verticalAlign: 'middle' }}>
+      <line x1="0" y1="6" x2="24" y2="6" stroke={color} strokeWidth={2} strokeDasharray={dash} />
+      <CustomDot cx={12} cy={6} r={3} fill={color} stroke={color} dotType={dotType} />
+    </svg>
+  );
+}
+
 export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   const [state, dispatch] = useReducer(fetchReducer, INITIAL_STATE);
+  const [hoveredUai, setHoveredUai] = useReducer((_: string | null, action: string | null) => action, null);
   const { resolvedTheme } = useTheme();
 
   const themeLycees = useMemo(() => {
@@ -257,6 +293,49 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
     return lycee ? shortName(lycee.nom) : key;
   };
 
+  const ChartTooltip = ({ active, payload, label, unit = "", precision = 1 }: any) => {
+    if (!active || !payload) return null;
+
+    return (
+      <div className="lycee-chart-tooltip" style={chartThemeProps.tooltip.contentStyle}>
+        <div style={{ marginBottom: 6, fontWeight: 'bold', borderBottom: '1px solid var(--color-border)', paddingBottom: 4 }}>
+          Année {label}
+        </div>
+        {payload.map((item: any) => {
+          const lIndex = themeLycees.findIndex(l => l.uai === item.dataKey);
+          const style = lIndex !== -1 ? LINE_STYLES[lIndex % LINE_STYLES.length] : null;
+          const name = formatName(item.name);
+          const isHovered = hoveredUai === item.dataKey;
+          const hasFocus = hoveredUai !== null;
+          
+          return (
+            <div key={item.dataKey} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              margin: '3px 0', 
+              opacity: !hasFocus || isHovered ? 1 : 0.4,
+              transform: isHovered ? 'scale(1.02)' : 'none',
+              transition: 'all 0.1s ease',
+              fontWeight: isHovered ? 'bold' : 'normal'
+            }}>
+              {item.dataKey === MEDIAN_KEY ? (
+                <svg width="24" height="12" style={{ marginRight: 8, verticalAlign: 'middle' }}>
+                   <line x1="0" y1="6" x2="24" y2="6" stroke={MEDIAN_COLOR} strokeWidth={1.5} strokeDasharray="6 3" />
+                </svg>
+              ) : style ? (
+                <TooltipIcon color={item.color} dotType={style.dot} dash={style.dash} />
+              ) : null}
+              <span style={{ flex: 1, marginRight: 12 }}>{name}</span>
+              <span style={{ fontFamily: 'monospace' }}>
+                {Number(item.value).toFixed(precision)}{unit}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const chartThemeProps = {
     cartesianGrid: { strokeDasharray: '3 3', stroke: 'var(--color-border)' },
     xAxis: { tick: { fontSize: 11, fill: 'var(--color-text-muted)' }, stroke: 'var(--color-border)' },
@@ -290,36 +369,49 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
               <YAxis unit="%" {...chartThemeProps.yAxis} />
               <Tooltip
                 {...chartThemeProps.tooltip}
-                formatter={(v: unknown, name: unknown) => [
-                  `${Number(v).toFixed(1)}%`,
-                  formatName(String(name ?? '')),
-                ]}
+                content={<ChartTooltip unit="%" precision={1} />}
                 itemSorter={(item) => tbRank.get(String(item.dataKey ?? '')) ?? 9999}
               />
               <Legend
                 {...chartThemeProps.legend}
                 formatter={(key: string) => formatName(key)}
+                onMouseEnter={(data) => setHoveredUai(String(data.dataKey))}
+                onMouseLeave={() => setHoveredUai(null)}
               />
-              {[...themeLycees].sort((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l) => (
-                <Line
-                  key={l.uai}
-                  type="monotone"
-                  dataKey={l.uai}
-                  stroke={l.color}
-                  strokeWidth={2}
-                  dot={{ r: 2.5 }}
-                  connectNulls
-                />
-              ))}
+              {themeLycees.toSorted((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l, i) => {
+                const style = LINE_STYLES[i % LINE_STYLES.length];
+                const isHovered = hoveredUai === l.uai;
+                const hasFocus = hoveredUai !== null;
+                return (
+                  <Line
+                    key={l.uai}
+                    type="monotone"
+                    dataKey={l.uai}
+                    stroke={l.color}
+                    strokeWidth={isHovered ? 3 : 2}
+                    strokeOpacity={!hasFocus || isHovered ? 1 : 0.3}
+                    strokeDasharray={style.dash}
+                    legendType={style.dot}
+                    dot={<CustomDot dotType={style.dot} r={isHovered ? 4 : 2.5} fill={l.color} stroke={l.color} />}
+                    activeDot={{ r: 6 }}
+                    connectNulls
+                    onMouseEnter={() => setHoveredUai(l.uai)}
+                    onMouseLeave={() => setHoveredUai(null)}
+                  />
+                );
+              })}
               <Line
                 key={MEDIAN_KEY}
                 type="monotone"
                 dataKey={MEDIAN_KEY}
                 stroke={MEDIAN_COLOR}
                 strokeWidth={1.5}
+                strokeOpacity={hoveredUai === null || hoveredUai === MEDIAN_KEY ? 1 : 0.3}
                 strokeDasharray="6 3"
                 dot={false}
                 connectNulls
+                onMouseEnter={() => setHoveredUai(MEDIAN_KEY)}
+                onMouseLeave={() => setHoveredUai(null)}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -336,36 +428,49 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
               <YAxis unit="%" domain={['auto', 100]} {...chartThemeProps.yAxis} />
               <Tooltip
                 {...chartThemeProps.tooltip}
-                formatter={(v: unknown, name: unknown) => [
-                  `${Number(v).toFixed(1)}%`,
-                  formatName(String(name ?? '')),
-                ]}
+                content={<ChartTooltip unit="%" precision={1} />}
                 itemSorter={(item) => accesRank.get(String(item.dataKey ?? '')) ?? 9999}
               />
               <Legend
                 {...chartThemeProps.legend}
                 formatter={(key: string) => formatName(key)}
+                onMouseEnter={(data) => setHoveredUai(String(data.dataKey))}
+                onMouseLeave={() => setHoveredUai(null)}
               />
-              {[...themeLycees].sort((a, b) => (accesRank.get(a.uai) ?? 99) - (accesRank.get(b.uai) ?? 99)).map((l) => (
-                <Line
-                  key={l.uai}
-                  type="monotone"
-                  dataKey={l.uai}
-                  stroke={l.color}
-                  strokeWidth={2}
-                  dot={{ r: 2.5 }}
-                  connectNulls
-                />
-              ))}
+              {themeLycees.toSorted((a, b) => (accesRank.get(a.uai) ?? 99) - (accesRank.get(b.uai) ?? 99)).map((l, i) => {
+                const style = LINE_STYLES[i % LINE_STYLES.length];
+                const isHovered = hoveredUai === l.uai;
+                const hasFocus = hoveredUai !== null;
+                return (
+                  <Line
+                    key={l.uai}
+                    type="monotone"
+                    dataKey={l.uai}
+                    stroke={l.color}
+                    strokeWidth={isHovered ? 3 : 2}
+                    strokeOpacity={!hasFocus || isHovered ? 1 : 0.3}
+                    strokeDasharray={style.dash}
+                    legendType={style.dot}
+                    dot={<CustomDot dotType={style.dot} r={isHovered ? 4 : 2.5} fill={l.color} stroke={l.color} />}
+                    activeDot={{ r: 6 }}
+                    connectNulls
+                    onMouseEnter={() => setHoveredUai(l.uai)}
+                    onMouseLeave={() => setHoveredUai(null)}
+                  />
+                );
+              })}
               <Line
                 key={MEDIAN_KEY}
                 type="monotone"
                 dataKey={MEDIAN_KEY}
                 stroke={MEDIAN_COLOR}
                 strokeWidth={1.5}
+                strokeOpacity={hoveredUai === null || hoveredUai === MEDIAN_KEY ? 1 : 0.3}
                 strokeDasharray="6 3"
                 dot={false}
                 connectNulls
+                onMouseEnter={() => setHoveredUai(MEDIAN_KEY)}
+                onMouseLeave={() => setHoveredUai(null)}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -382,36 +487,49 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
               <YAxis domain={['auto', 'auto']} {...chartThemeProps.yAxis} />
               <Tooltip
                 {...chartThemeProps.tooltip}
-                formatter={(v: unknown, name: unknown) => [
-                  Number(v).toFixed(1),
-                  formatName(String(name ?? '')),
-                ]}
+                content={<ChartTooltip precision={1} />}
                 itemSorter={(item) => ipsRank.get(String(item.dataKey ?? '')) ?? 9999}
               />
               <Legend
                 {...chartThemeProps.legend}
                 formatter={(key: string) => formatName(key)}
+                onMouseEnter={(data) => setHoveredUai(String(data.dataKey))}
+                onMouseLeave={() => setHoveredUai(null)}
               />
-              {[...themeLycees].sort((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l) => (
-                <Line
-                  key={l.uai}
-                  type="monotone"
-                  dataKey={l.uai}
-                  stroke={l.color}
-                  strokeWidth={2}
-                  dot={{ r: 2.5 }}
-                  connectNulls
-                />
-              ))}
+              {themeLycees.toSorted((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l, i) => {
+                const style = LINE_STYLES[i % LINE_STYLES.length];
+                const isHovered = hoveredUai === l.uai;
+                const hasFocus = hoveredUai !== null;
+                return (
+                  <Line
+                    key={l.uai}
+                    type="monotone"
+                    dataKey={l.uai}
+                    stroke={l.color}
+                    strokeWidth={isHovered ? 3 : 2}
+                    strokeOpacity={!hasFocus || isHovered ? 1 : 0.3}
+                    strokeDasharray={style.dash}
+                    legendType={style.dot}
+                    dot={<CustomDot dotType={style.dot} r={isHovered ? 4 : 2.5} fill={l.color} stroke={l.color} />}
+                    activeDot={{ r: 6 }}
+                    connectNulls
+                    onMouseEnter={() => setHoveredUai(l.uai)}
+                    onMouseLeave={() => setHoveredUai(null)}
+                  />
+                );
+              })}
               <Line
                 key={MEDIAN_KEY}
                 type="monotone"
                 dataKey={MEDIAN_KEY}
                 stroke={MEDIAN_COLOR}
                 strokeWidth={1.5}
+                strokeOpacity={hoveredUai === null || hoveredUai === MEDIAN_KEY ? 1 : 0.3}
                 strokeDasharray="6 3"
                 dot={false}
                 connectNulls
+                onMouseEnter={() => setHoveredUai(MEDIAN_KEY)}
+                onMouseLeave={() => setHoveredUai(null)}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -429,36 +547,49 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
               <YAxis domain={['auto', 'auto']} {...chartThemeProps.yAxis} />
               <Tooltip
                 {...chartThemeProps.tooltip}
-                formatter={(v: unknown, name: unknown) => [
-                  Number(v).toFixed(3),
-                  formatName(String(name ?? '')),
-                ]}
+                content={<ChartTooltip precision={3} />}
                 itemSorter={(item) => ihsRank.get(String(item.dataKey ?? '')) ?? 9999}
               />
               <Legend
                 {...chartThemeProps.legend}
                 formatter={(key: string) => formatName(key)}
+                onMouseEnter={(data) => setHoveredUai(String(data.dataKey))}
+                onMouseLeave={() => setHoveredUai(null)}
               />
-              {[...themeLycees].sort((a, b) => (ihsRank.get(a.uai) ?? 99) - (ihsRank.get(b.uai) ?? 99)).map((l) => (
-                <Line
-                  key={l.uai}
-                  type="monotone"
-                  dataKey={l.uai}
-                  stroke={l.color}
-                  strokeWidth={2}
-                  dot={{ r: 2.5 }}
-                  connectNulls
-                />
-              ))}
+              {themeLycees.toSorted((a, b) => (ihsRank.get(a.uai) ?? 99) - (ihsRank.get(b.uai) ?? 99)).map((l, i) => {
+                const style = LINE_STYLES[i % LINE_STYLES.length];
+                const isHovered = hoveredUai === l.uai;
+                const hasFocus = hoveredUai !== null;
+                return (
+                  <Line
+                    key={l.uai}
+                    type="monotone"
+                    dataKey={l.uai}
+                    stroke={l.color}
+                    strokeWidth={isHovered ? 3 : 2}
+                    strokeOpacity={!hasFocus || isHovered ? 1 : 0.3}
+                    strokeDasharray={style.dash}
+                    legendType={style.dot}
+                    dot={<CustomDot dotType={style.dot} r={isHovered ? 4 : 2.5} fill={l.color} stroke={l.color} />}
+                    activeDot={{ r: 6 }}
+                    connectNulls
+                    onMouseEnter={() => setHoveredUai(l.uai)}
+                    onMouseLeave={() => setHoveredUai(null)}
+                  />
+                );
+              })}
               <Line
                 key={MEDIAN_KEY}
                 type="monotone"
                 dataKey={MEDIAN_KEY}
                 stroke={MEDIAN_COLOR}
                 strokeWidth={1.5}
+                strokeOpacity={hoveredUai === null || hoveredUai === MEDIAN_KEY ? 1 : 0.3}
                 strokeDasharray="6 3"
                 dot={false}
                 connectNulls
+                onMouseEnter={() => setHoveredUai(MEDIAN_KEY)}
+                onMouseLeave={() => setHoveredUai(null)}
               />
             </LineChart>
           </ResponsiveContainer>
