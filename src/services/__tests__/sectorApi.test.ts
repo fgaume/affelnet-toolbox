@@ -75,6 +75,11 @@ describe('findCollegeUAI', () => {
       ok: true,
       json: async () => ({ features: [] }),
     });
+    // HuggingFace fallback also returns empty
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ([]),
+    });
 
     await expect(findCollegeUAI('COLLEGE INCONNU')).rejects.toThrow(
       'Collège non référencé dans l\'annuaire Affelnet'

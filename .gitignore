@@ -31,3 +31,4 @@ test-results/.last-run.json
 scripts/__pycache__/
 scripts/tests/
 .claude/*
+test-results/

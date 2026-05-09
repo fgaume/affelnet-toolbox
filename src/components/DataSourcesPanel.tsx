@@ -126,8 +126,8 @@ export function DataSourcesPanel() {
       </button>
 
       {open && (
-        <div className="data-sources-overlay" onClick={() => setOpen(false)}>
-          <div className="data-sources-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="data-sources-overlay" role="button" tabIndex={0} onClick={() => setOpen(false)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(false); } }}>
+          <div className="data-sources-modal" role="button" tabIndex={-1} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
             <div className="data-sources-modal-header">
               <h3>Sources de données</h3>
               <button className="data-sources-close" onClick={() => setOpen(false)} aria-label="Fermer">
@@ -146,7 +146,7 @@ export function DataSourcesPanel() {
                         <a href={item.url} target="_blank" rel="noopener noreferrer">
                           {item.name}
                         </a>
-                        <span className="data-source-desc"> — {item.description}</span>
+                        <span className="data-source-desc">, {item.description}</span>
                       </li>
                     ))}
                   </ul>

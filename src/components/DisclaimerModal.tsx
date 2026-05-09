@@ -21,8 +21,8 @@ export function DisclaimerModal() {
   if (!visible) return null;
 
   return (
-    <div className="disclaimer-overlay" onClick={handleClose}>
-      <div className="disclaimer-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="disclaimer-overlay" role="button" tabIndex={0} onClick={handleClose} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClose(); } }}>
+      <div className="disclaimer-modal" role="button" tabIndex={-1} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
         <h2 className="disclaimer-title">IMPORTANT !</h2>
         <ul className="disclaimer-list">
           <li>

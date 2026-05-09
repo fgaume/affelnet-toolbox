@@ -1,5 +1,6 @@
 import {
   useState,
+  useEffect,
   useCallback,
   useRef,
   type ClipboardEvent,
@@ -27,7 +28,12 @@ export const ContributePanel = () => {
   });
   const [isDragOver, setIsDragOver] = useState(false);
   const [pasteText, setPasteText] = useState("");
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   const doUpload = useCallback(async (file: File) => {
     setUploadState({ status: "uploading" });
@@ -107,7 +113,7 @@ export const ContributePanel = () => {
     <div className="contribute-panel">
       {/* Titre avec l'année courante dynamique */}
       <h2 className="contribute-title">
-        Contribuer aux données Affelnet {new Date().getFullYear()}
+        Contribuer aux données Affelnet {currentYear}
       </h2>
 
       <div className="contribute-description">
@@ -283,10 +289,13 @@ export const ContributePanel = () => {
               </h3>
               <div
                 className={`contribute-dropzone${isDragOver ? " contribute-dropzone--active" : ""}`}
+                role="button"
+                tabIndex={0}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -298,7 +307,7 @@ export const ContributePanel = () => {
                 </svg>
                 <span>Glissez un fichier ici ou cliquez pour choisir</span>
                 <span className="contribute-dropzone-hint">
-                  PDF, PNG, JPG, WEBP — max 10 Mo
+                  PDF, PNG, JPG, WEBP, max 10 Mo
                 </span>
                 <input
                   ref={fileInputRef}
@@ -326,8 +335,10 @@ export const ContributePanel = () => {
               </h3>
               <div
                 className="contribute-paste-zone"
+                role="button"
                 tabIndex={0}
                 onPaste={handlePasteImage}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}
               >
                 <svg
                   viewBox="0 0 24 24"

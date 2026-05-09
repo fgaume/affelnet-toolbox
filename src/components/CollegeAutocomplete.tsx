@@ -29,14 +29,10 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled, includePr
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Reset highlight when suggestions change
-  useEffect(() => {
-    setHighlightedIndex(-1);
-  }, [suggestions]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
+    setHighlightedIndex(-1);
     search(value);
     setShowSuggestions(true);
   };
@@ -100,7 +96,7 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled, includePr
         <input
           type="text"
           className="college-input"
-          placeholder={placeholder ?? 'Nom de votre collège...'}
+          placeholder={placeholder ?? 'Nom de votre collège…'}
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
@@ -110,6 +106,7 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled, includePr
           role="combobox"
           aria-expanded={showSuggestions && suggestions.length > 0}
           aria-activedescendant={highlightedIndex >= 0 ? `college-option-${highlightedIndex}` : undefined}
+          aria-controls="college-suggestions"
         />
         {inputValue && (
           <button className="clear-button" onClick={handleClear} type="button" aria-label="Effacer">
@@ -133,7 +130,7 @@ export function CollegeAutocomplete({ onSelect, placeholder, disabled, includePr
       )}
 
       {showSuggestions && suggestions.length > 0 && (
-        <ul className="suggestions-list" ref={listRef} role="listbox">
+        <ul className="suggestions-list" ref={listRef} role="listbox" id="college-suggestions">
           {suggestions.map((college, index) => (
             <li key={college.uai} role="option" id={`college-option-${index}`} aria-selected={index === highlightedIndex}>
               <button

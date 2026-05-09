@@ -152,7 +152,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   }
   for (const annee of medianTB.keys()) allYearsTB.add(annee);
 
-  const tbChartData = [...allYearsTB].sort().map((annee) => {
+  const tbChartData = Array.from(allYearsTB).toSorted().map((annee) => {
     const point: Record<string, unknown> = { annee };
     for (const l of lycees) {
       const d = data.get(l.uai);
@@ -171,7 +171,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   }
   for (const annee of medianAcces.keys()) allYearsAcces.add(annee);
 
-  const accesChartData = [...allYearsAcces].sort().map((annee) => {
+  const accesChartData = Array.from(allYearsAcces).toSorted().map((annee) => {
     const point: Record<string, unknown> = { annee };
     for (const l of lycees) {
       const d = data.get(l.uai);
@@ -190,17 +190,20 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   }
   for (const annee of medianIPS.keys()) allYearsIPS.add(annee);
 
-  const ipsChartData = [...allYearsIPS].sort().filter((a) => a >= '2022').map((annee) => {
-    const point: Record<string, unknown> = { annee };
-    for (const l of lycees) {
-      const d = data.get(l.uai);
-      const p = d?.ips?.history.find((h) => h.annee === annee);
-      if (p) point[l.uai] = p.ips;
+  const ipsChartData = Array.from(allYearsIPS).toSorted().reduce<Record<string, unknown>[]>((acc, annee) => {
+    if (annee >= '2022') {
+      const point: Record<string, unknown> = { annee };
+      for (const l of lycees) {
+        const d = data.get(l.uai);
+        const p = d?.ips?.history.find((h) => h.annee === annee);
+        if (p) point[l.uai] = p.ips;
+      }
+      const med = medianIPS.get(annee);
+      if (med != null) point[MEDIAN_KEY] = med;
+      acc.push(point);
     }
-    const med = medianIPS.get(annee);
-    if (med != null) point[MEDIAN_KEY] = med;
-    return point;
-  });
+    return acc;
+  }, []);
 
   // Build merged chart data for IHS
   const allYearsIHS = new Set<string>();
@@ -209,7 +212,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   }
   for (const annee of medianIHS.keys()) allYearsIHS.add(annee);
 
-  const ihsChartData = [...allYearsIHS].sort().map((annee) => {
+  const ihsChartData = Array.from(allYearsIHS).toSorted().map((annee) => {
     const point: Record<string, unknown> = { annee };
     for (const l of lycees) {
       const d = data.get(l.uai);
@@ -418,7 +421,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
       {hasIHS && (
         <div className="lycee-detail-chart">
           <h5>Mixité sociale (IHS)</h5>
-          <p className="lycee-detail-chart-subtitle">Indice d'Hétérogénéité Sociale Relative — de 0 (homogène) à 1 (mixité maximale)</p>
+          <p className="lycee-detail-chart-subtitle">Indice d'Hétérogénéité Sociale Relative, de 0 (homogène) à 1 (mixité maximale)</p>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={ihsChartData}>
               <CartesianGrid {...chartThemeProps.cartesianGrid} />

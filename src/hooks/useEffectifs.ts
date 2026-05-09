@@ -8,7 +8,7 @@ export function useEffectifs(lycees: LyceeSecteur[] | undefined) {
 
   // Stable dependency: only re-run when the set of UAIs actually changes
   const lyceesKey = useMemo(
-    () => lycees?.map((l) => l.uai).sort().join(',') ?? '',
+    () => lycees?.map((l) => l.uai).toSorted().join(',') ?? '',
     [lycees],
   );
 

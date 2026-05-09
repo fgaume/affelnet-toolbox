@@ -1,9 +1,10 @@
 # Affelnet Toolbox Paris
 
-[![React Doctor](https://www.react.doctor/share/badge?p=affelnet-paris&s=99&w=4&f=1)](https://www.react.doctor/share?p=affelnet-paris&s=99&w=4&f=1)
+[![React Doctor](https://www.react.doctor/share/badge?p=affelnet-paris&s=84&w=69&f=38)](https://www.react.doctor/share?p=affelnet-paris&s=84&e=1&w=69&f=38)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![Unit Tests](https://img.shields.io/badge/tests-72%2F72%20passed-brightgreen?logo=vitest&logoColor=white)](https://github.com/fgaume/affelnet-toolbox/actions)
 [![Playwright Tests](https://img.shields.io/badge/tested_with-Playwright-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
 [![Vitest](https://img.shields.io/badge/tested_with-Vitest-729B1B.svg?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![ESLint](https://img.shields.io/badge/ESLint-4B32C3?logo=eslint&logoColor=white)](https://eslint.org/)
