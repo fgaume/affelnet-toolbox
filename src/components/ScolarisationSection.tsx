@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useReducer, useEffect } from 'react';
 import { CollegeAutocomplete } from './CollegeAutocomplete';
 import { IpsGauge } from './IpsGauge';
 import { fetchCollegeIps } from '../services/collegeApi';
@@ -12,6 +12,33 @@ interface ScolarisationSectionProps {
   onCollegeScolarisationChange: (college: College | null) => void;
 }
 
+type IpsState = {
+  ipsInfo: IpsInfo | null;
+  ipsLoading: boolean;
+  ipsError: string | null;
+};
+
+type IpsAction =
+  | { type: 'FETCH_START' }
+  | { type: 'FETCH_SUCCESS'; info: IpsInfo | null }
+  | { type: 'FETCH_ERROR'; error: string }
+  | { type: 'RESET' };
+
+function ipsReducer(state: IpsState, action: IpsAction): IpsState {
+  switch (action.type) {
+    case 'FETCH_START':
+      return { ipsInfo: null, ipsLoading: true, ipsError: null };
+    case 'FETCH_SUCCESS':
+      return { ipsInfo: action.info, ipsLoading: false, ipsError: action.info ? null : 'Données IPS non disponibles pour ce collège' };
+    case 'FETCH_ERROR':
+      return { ipsInfo: null, ipsLoading: false, ipsError: action.error };
+    case 'RESET':
+      return { ipsInfo: null, ipsLoading: false, ipsError: null };
+    default:
+      return state;
+  }
+}
+
 export function ScolarisationSection({
   collegeUai,
   scolarisation,
@@ -19,9 +46,11 @@ export function ScolarisationSection({
   collegeScolarisation,
   onCollegeScolarisationChange,
 }: ScolarisationSectionProps) {
-  const [ipsInfo, setIpsInfo] = useState<IpsInfo | null>(null);
-  const [ipsLoading, setIpsLoading] = useState(false);
-  const [ipsError, setIpsError] = useState<string | null>(null);
+  const [ipsState, dispatch] = useReducer(ipsReducer, {
+    ipsInfo: null,
+    ipsLoading: false,
+    ipsError: null,
+  });
 
   useEffect(() => {
     const targetUai =
@@ -30,19 +59,14 @@ export function ScolarisationSection({
       : null;
 
     if (!targetUai) {
-      setIpsInfo(null);
+      dispatch({ type: 'RESET' });
       return;
     }
 
-    setIpsLoading(true);
-    setIpsError(null);
+    dispatch({ type: 'FETCH_START' });
     fetchCollegeIps(targetUai)
-      .then((info) => {
-        setIpsInfo(info);
-        if (!info) setIpsError('Données IPS non disponibles pour ce collège');
-      })
-      .catch(() => setIpsError('Erreur lors du chargement des données IPS'))
-      .finally(() => setIpsLoading(false));
+      .then((info) => dispatch({ type: 'FETCH_SUCCESS', info }))
+      .catch(() => dispatch({ type: 'FETCH_ERROR', error: 'Erreur lors du chargement des données IPS' }));
   }, [scolarisation, collegeScolarisation, collegeUai]);
 
   const handleScolarisationSame = () => {
@@ -52,7 +76,7 @@ export function ScolarisationSection({
 
   const handleScolarisationOther = () => {
     onScolarisationChange('other');
-    setIpsInfo(null);
+    dispatch({ type: 'RESET' });
   };
 
   return (
@@ -99,21 +123,21 @@ export function ScolarisationSection({
         </div>
       )}
 
-      {ipsLoading && <p className="ips-loading">Chargement des données IPS...</p>}
-      {ipsError && <p className="ips-error">{ipsError}</p>}
-      {ipsInfo && (
+      {ipsState.ipsLoading && <p className="ips-loading">Chargement des données IPS...</p>}
+      {ipsState.ipsError && <p className="ips-error">{ipsState.ipsError}</p>}
+      {ipsState.ipsInfo && (
         <div className="ips-block">
           <div className="ips-summary">
             <div className="ips-value-block">
               <span className="ips-label">IPS du collège</span>
-              <span className="ips-number">{ipsInfo.ips.toFixed(1).replace('.', ',')}</span>
+              <span className="ips-number">{ipsState.ipsInfo.ips.toFixed(1).replace('.', ',')}</span>
             </div>
             <div className="ips-value-block">
               <span className="ips-label">Bonus IPS Affelnet</span>
-              <span className="ips-number">{ipsInfo.bonus} pts</span>
+              <span className="ips-number">{ipsState.ipsInfo.bonus} pts</span>
             </div>
           </div>
-          <IpsGauge ips={ipsInfo.ips} />
+          <IpsGauge ips={ipsState.ipsInfo.ips} />
         </div>
       )}
     </div>

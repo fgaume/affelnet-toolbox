@@ -41,9 +41,9 @@ for (const tc of TEST_CASES) {
     const collegeCard = page.locator('.college-card');
     await expect(collegeCard).toBeVisible({ timeout: 15000 });
 
-    for (const lyceeName of tc.lyceesSecteur1) {
-      await expect(collegeCard).toContainText(lyceeName);
-    }
+    await Promise.all(tc.lyceesSecteur1.map(lyceeName =>
+      expect(collegeCard).toContainText(lyceeName)
+    ));
   });
 }
 

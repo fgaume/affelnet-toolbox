@@ -96,13 +96,14 @@ function LyceeMarker({ lycee, icon, children }: {
 function MapInvalidator({ expanded, coords }: { expanded: boolean; coords: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       map.invalidateSize();
       if (coords.length > 0) {
         const bounds = L.latLngBounds(coords.map(c => [c[1], c[0]]));
         map.fitBounds(bounds, { padding: expanded ? [80, 80] : [50, 50] });
       }
     }, 200);
+    return () => clearTimeout(timer);
   }, [expanded, map, coords]);
   return null;
 }
@@ -133,8 +134,8 @@ export function SectorMap({ homeCoords, college, lyceesActifs, lyceesTousSecteur
   const allCoords: [number, number][] = [
     ...(homeCoords ? [homeCoords] : []),
     ...(college.coordinates ? [college.coordinates] : []),
-    ...lyceesActifs.map(l => l.coordinates).filter((c): c is [number, number] => !!c),
-    ...lyceesTousSecteurs.map(l => l.coordinates).filter((c): c is [number, number] => !!c)
+    ...lyceesActifs.reduce<[number, number][]>((acc, l) => { if (l.coordinates) acc.push(l.coordinates); return acc; }, []),
+    ...lyceesTousSecteurs.reduce<[number, number][]>((acc, l) => { if (l.coordinates) acc.push(l.coordinates); return acc; }, [])
   ];
 
   // Close on Escape

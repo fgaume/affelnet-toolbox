@@ -55,7 +55,7 @@ async function loadIpsData(): Promise<IpsRawEntry[]> {
 }
 
 /** Fetch list of private Paris colleges from the IPS dataset. */
-export async function fetchPrivateColleges(): Promise<College[]> {
+async function fetchPrivateColleges(): Promise<College[]> {
   const data = await loadIpsData();
   return data
     .filter((e) => e.Secteur === 'Privé')

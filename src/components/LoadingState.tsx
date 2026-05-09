@@ -15,7 +15,7 @@ export function LoadingState() {
           <span></span>
         </div>
       </div>
-      <p>Recherche de votre collège de secteur...</p>
+      <p>Recherche de votre collège de secteur…</p>
     </div>
   );
 }

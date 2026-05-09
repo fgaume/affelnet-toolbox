@@ -97,7 +97,7 @@ export async function fetchAllAcademicStats(): Promise<AllStatsResult> {
   }
 
   // Parse all experimental models from models dataset
-  const modelNames = [...new Set((modelsData.rows ?? []).map((r) => r.row.model))].sort();
+  const modelNames = Array.from(new Set((modelsData.rows ?? []).map((r) => r.row.model))).toSorted();
   for (const model of modelNames) {
     const modelRows = modelsData.rows.filter((r) => r.row.model === model);
     statsByKey.set(model, parseRows(modelRows));

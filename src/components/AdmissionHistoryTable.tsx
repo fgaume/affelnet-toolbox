@@ -157,9 +157,10 @@ function SeuilsSection({ title, subtitle, data, filter, showSparklines = true, s
                       : isNoScore
                         ? "N/A"
                         : "–";
+                    const yearKey = sectionYears[idx];
                     return (
                       <td
-                        key={idx}
+                        key={yearKey}
                         className={`col-year${!hasValue ? " col-year-empty" : ""}${difficulty ? ` difficulty-${difficulty.level}` : ""}`}
                         title={difficulty?.label}
                       >

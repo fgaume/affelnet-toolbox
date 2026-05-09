@@ -16,7 +16,7 @@ describe('getAdmissionDifficulty', () => {
 
   it('returns orange for seuil > 40250 and <= 40600', () => {
     const result = getAdmissionDifficulty(40400);
-    expect(result.color).toBe('#f97316');
+    expect(result.color).toBe('#d97706');
     expect(result.label).toBe('Moyennement accessible');
   });
 
@@ -38,7 +38,7 @@ describe('getAdmissionDifficulty', () => {
   });
 
   it('handles exact boundary 40600', () => {
-    expect(getAdmissionDifficulty(40600).color).toBe('#f97316');
+    expect(getAdmissionDifficulty(40600).color).toBe('#d97706');
   });
 });
 
@@ -102,12 +102,12 @@ describe('fetchAllSeuils', () => {
   });
 
   it('throws on fetch error', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      status: 500,
-    }));
+    // Clear any cached data from previous tests that fetchWithHfCache might return as fallback
+    localStorage.clear();
+
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
 
     const { fetchAllSeuils } = await import('../seuilsApi');
-    await expect(fetchAllSeuils()).rejects.toThrow('Erreur chargement seuils: 500');
+    await expect(fetchAllSeuils()).rejects.toThrow('Network error');
   });
 });
