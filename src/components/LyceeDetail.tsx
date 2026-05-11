@@ -116,6 +116,8 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
   const [hoveredUai, setHoveredUai] = useReducer((_: string | null, action: string | null) => action, null);
   const { resolvedTheme } = useTheme();
 
+  lycees.sort((a, b) => a.uai.localeCompare(b.uai));
+
   const themeLycees = useMemo(() => {
     if (resolvedTheme !== 'dark') return lycees;
     return lycees.map(l => ({
@@ -378,7 +380,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 onMouseEnter={(data) => setHoveredUai(String(data.dataKey))}
                 onMouseLeave={() => setHoveredUai(null)}
               />
-              {themeLycees.toSorted((a, b) => (tbRank.get(a.uai) ?? 99) - (tbRank.get(b.uai) ?? 99)).map((l, i) => {
+              {themeLycees.map((l, i) => {
                 const style = LINE_STYLES[i % LINE_STYLES.length];
                 const isHovered = hoveredUai === l.uai;
                 const hasFocus = hoveredUai !== null;
@@ -437,7 +439,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 onMouseEnter={(data) => setHoveredUai(String(data.dataKey))}
                 onMouseLeave={() => setHoveredUai(null)}
               />
-              {themeLycees.toSorted((a, b) => (accesRank.get(a.uai) ?? 99) - (accesRank.get(b.uai) ?? 99)).map((l, i) => {
+              {themeLycees.map((l, i) => {
                 const style = LINE_STYLES[i % LINE_STYLES.length];
                 const isHovered = hoveredUai === l.uai;
                 const hasFocus = hoveredUai !== null;
@@ -496,7 +498,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 onMouseEnter={(data) => setHoveredUai(String(data.dataKey))}
                 onMouseLeave={() => setHoveredUai(null)}
               />
-              {themeLycees.toSorted((a, b) => (ipsRank.get(a.uai) ?? 99) - (ipsRank.get(b.uai) ?? 99)).map((l, i) => {
+              {themeLycees.map((l, i) => {
                 const style = LINE_STYLES[i % LINE_STYLES.length];
                 const isHovered = hoveredUai === l.uai;
                 const hasFocus = hoveredUai !== null;
@@ -556,7 +558,7 @@ export function LyceesIndicateurs({ lycees }: LyceesIndicateursProps) {
                 onMouseEnter={(data) => setHoveredUai(String(data.dataKey))}
                 onMouseLeave={() => setHoveredUai(null)}
               />
-              {themeLycees.toSorted((a, b) => (ihsRank.get(a.uai) ?? 99) - (ihsRank.get(b.uai) ?? 99)).map((l, i) => {
+              {themeLycees.map((l, i) => {
                 const style = LINE_STYLES[i % LINE_STYLES.length];
                 const isHovered = hoveredUai === l.uai;
                 const hasFocus = hoveredUai !== null;
