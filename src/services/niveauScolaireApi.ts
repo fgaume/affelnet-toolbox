@@ -36,7 +36,7 @@ function fetchAllParis(): Promise<ApiRow[]> {
 
   const select = 'annee,uai,nb_mentions_tb_sansf_g,nb_mentions_tb_avecf_g,presents_gnle,taux_acces_2nde';
   const where = encodeURIComponent(
-    "(code_departement = '75') AND (secteur = 'public') AND (nb_mentions_tb_sansf_g is not null) AND (presents_gnle > 0)"
+    "(code_departement = '75') AND (secteur = 'public') AND ((nb_mentions_tb_sansf_g is not null) OR (nb_mentions_b_g is not null) OR (nb_mentions_ab_g is not null)) AND (presents_gnle > 0)"
   );
   const url = `${API_URL}?select=${select}&where=${where}&order_by=annee&limit=-1`;
 
