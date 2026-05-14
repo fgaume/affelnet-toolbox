@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type {
   Address,
   College,
@@ -49,13 +50,38 @@ import {
 } from './services/customModelsStorage';
 import './App.css';
 
+const ROUTE_TO_TAB: Record<string, TopTab> = {
+  '/lycees': 'search',
+  '/simuler': 'score',
+  '/contribuer': 'contribute',
+  '/algorithme': 'affectation',
+  '/seuils': 'history',
+};
+
+const TAB_TO_ROUTE: Record<TopTab, string> = {
+  'search': '/lycees',
+  'score': '/simuler',
+  'contribute': '/contribuer',
+  'affectation': '/algorithme',
+  'history': '/seuils',
+};
+
 function App() {
   const { result, searchedAddress, isLoading, error, searchSector, searchByCollege, showResult, reset } =
     useSectorSearch();
   const { history, refresh, clearHistory, removeEntry } = useSearchHistory();
   const { mode, setMode } = useTheme();
-  const [topTab, setTopTab] = useState<TopTab>('search');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const topTab = useMemo(() => ROUTE_TO_TAB[location.pathname] ?? 'search', [location.pathname]);
   const [searchMode, setSearchMode] = useState<SearchMode>('address');
+
+  // Sync state with URL
+  useEffect(() => {
+    if (!ROUTE_TO_TAB[location.pathname]) {
+      navigate('/lycees', { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   // Focus the correct input when search mode changes
   useEffect(() => {
@@ -185,10 +211,10 @@ function App() {
       setScolarisation(entry.scolarisation ?? 'pending');
       setCollegeScolarisation(entry.collegeScolarisation ?? null);
       refresh();
-      setTopTab('search');
+      navigate(TAB_TO_ROUTE['search']);
       setSearchMode('address');
     },
-    [showResult, refresh]
+    [showResult, refresh, navigate]
   );
 
   const handleNewSearch = useCallback(() => {
@@ -272,7 +298,7 @@ function App() {
   }, [statsKey, availableStatsKeys]);
 
   const handleTopTabChange = (tab: TopTab) => {
-    setTopTab(tab);
+    navigate(TAB_TO_ROUTE[tab]);
   };
 
   return (
