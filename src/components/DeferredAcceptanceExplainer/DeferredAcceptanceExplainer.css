@@ -1,0 +1,862 @@
+/*
+ * DeferredAcceptanceExplainer.css
+ * Tous les sélecteurs sont préfixés `da-` pour éviter les collisions.
+ * Les tokens de thème (couleurs, rayons) sont des custom properties que
+ * l'application hôte peut overrider via `.da-explainer { --da-...: ... }`.
+ */
+
+.da-explainer {
+  --da-bg-card: #ffffff;
+  --da-bg-muted: #f6f5f1;
+  --da-border: rgba(0, 0, 0, 0.12);
+  --da-border-strong: rgba(0, 0, 0, 0.25);
+  --da-text-primary: #1a1a1a;
+  --da-text-secondary: #555555;
+  --da-text-tertiary: #8a8a8a;
+
+  --da-success-bg: #eaf3de;
+  --da-success-border: #639922;
+  --da-success-text: #27500a;
+  --da-warning-bg: #faeeda;
+  --da-warning-border: #ba7517;
+  --da-warning-text: #633806;
+  --da-danger-bg: #fcebeb;
+  --da-danger-border: #a32d2d;
+  --da-danger-text: #791f1f;
+  --da-accent: #d97706;
+
+  /* Bouton d'action vibrant (Proposer) */
+  --da-action-bg: #f97316;
+  --da-action-bg-hover: #ea580c;
+  --da-action-border: #ea580c;
+  --da-action-text: #ffffff;
+
+  /* Identités "camps" : collégiens (cool/bleu) vs lycées (mauve/prune). */
+  --da-cool-bg: #eef4fb;
+  --da-cool-icon: #4a6fa5;
+  --da-warm-bg: #f5edf6;
+  --da-warm-icon: #7a4f7d;
+
+  --da-radius-md: 8px;
+  --da-radius-lg: 12px;
+
+  color: var(--da-text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+[data-theme='dark'] .da-explainer {
+  --da-bg-card: #1f2937;
+  --da-bg-muted: #111827;
+  --da-border: rgba(255, 255, 255, 0.1);
+  --da-border-strong: rgba(255, 255, 255, 0.2);
+  --da-text-primary: #f9fafb;
+  --da-text-secondary: #d1d5db;
+  --da-text-tertiary: #9ca3af;
+
+  --da-success-bg: rgba(52, 211, 153, 0.15);
+  --da-success-border: #34d399;
+  --da-success-text: #6ee7b7;
+  --da-warning-bg: rgba(245, 158, 11, 0.15);
+  --da-warning-border: #fbbf24;
+  --da-warning-text: #fcd34d;
+  --da-danger-bg: rgba(239, 68, 68, 0.15);
+  --da-danger-border: #f87171;
+  --da-danger-text: #fca5a5;
+  --da-accent: #fbbf24;
+
+  /* Bouton d'action vibrant (Proposer) */
+  --da-action-bg: #ea580c;
+  --da-action-bg-hover: #f97316;
+  --da-action-border: #c2410c;
+  --da-action-text: #ffffff;
+
+  --da-cool-bg: rgba(96, 165, 250, 0.08);
+  --da-cool-icon: #93c5fd;
+  --da-warm-bg: rgba(192, 132, 252, 0.10);
+  --da-warm-icon: #d8b4fe;
+}
+
+.da-intro {
+  margin-bottom: 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--da-bg-muted);
+  border-radius: var(--da-radius-lg);
+  border: 1px solid var(--da-border);
+}
+
+.da-intro-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 0.5rem;
+  color: var(--da-text-primary);
+}
+
+.da-intro-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--da-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.da-intro-text .da-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--da-accent);
+}
+
+.da-intro-text + .da-intro-text {
+  margin-top: 0.8rem;
+}
+
+.da-sr-only {
+/* ... */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Grille principale : élèves (gauche) | lycées (droite) ---- */
+.da-board {
+  position: relative; /* Pour positionner l'SVG des flèches */
+  display: grid;
+  /* Réduction agressive des colonnes de contenu */
+  grid-template-columns: minmax(220px, 300px) 1fr minmax(220px, 300px);
+  gap: 20px; 
+  margin-bottom: 1rem;
+}
+
+.da-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+
+/* La deuxième colonne de la grille est vide visuellement, 
+   mais elle repousse les deux colonnes de contenu. */
+
+.da-column-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  margin-bottom: 6px;
+  min-height: 42px;
+}
+
+.da-column-header--center {
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.da-round-indicator {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--da-text-secondary);
+  background: var(--da-bg-muted);
+  border: 1px solid var(--da-border);
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: da-round-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes da-round-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.da-column-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--da-text-tertiary);
+}
+
+.da-candidates-toggle {
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--da-text-tertiary);
+  background: transparent;
+  border: 0.5px solid var(--da-border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease,
+    background-color 120ms ease;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.da-candidates-toggle:hover {
+  color: var(--da-text-primary);
+  border-color: var(--da-border-strong);
+}
+
+.da-candidates-toggle[aria-pressed='true'] {
+  background: var(--da-bg-muted);
+  color: var(--da-text-secondary);
+}
+
+.da-board--candidates-hidden {
+  grid-template-columns: minmax(220px, 300px) 1fr auto;
+}
+
+.da-board--candidates-hidden .da-candidates {
+  display: none;
+}
+
+.da-board--candidates-hidden .da-lycee-row {
+  grid-template-columns: 125px;
+}
+
+/* ---- Ligne élève : [voeux | carte élève] ---- */
+.da-student-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px;
+  gap: 8px;
+  align-items: stretch;
+  min-height: 150px;
+}
+
+.da-voeux {
+  background: var(--da-cool-bg);
+  border: 0.5px solid var(--da-border);
+  border-radius: var(--da-radius-md);
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 110px;
+  max-width: 180px; /* Réduction drastique */
+  transition: opacity 350ms ease;
+}
+
+.da-voeux-title {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--da-text-tertiary);
+}
+
+.da-voeux-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.da-voeu {
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+}
+
+.da-voeu-rank {
+  color: var(--da-text-tertiary);
+  font-size: 10.5px;
+  width: 14px;
+}
+
+.da-voeu-label {
+  padding: 1px 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.da-voeu--pending .da-voeu-label {
+  color: var(--da-text-primary);
+}
+
+.da-voeu--rejected .da-voeu-label {
+  color: var(--da-text-tertiary);
+  text-decoration: line-through;
+  text-decoration-color: var(--da-danger-border);
+  text-decoration-thickness: 1.5px;
+}
+
+.da-voeu--accepted .da-voeu-label {
+  color: var(--da-success-text);
+  font-weight: 500;
+}
+
+.da-voeu-check {
+  color: var(--da-success-border);
+  font-weight: 700;
+}
+
+.da-voeu-cross {
+  color: var(--da-danger-border);
+  font-weight: 700;
+}
+
+.da-voeu-btn {
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--da-radius-md);
+  border: 1px solid var(--da-action-border);
+  background: var(--da-action-bg);
+  color: var(--da-action-text);
+  cursor: pointer;
+  /* Double animation: pulse ring + wiggle focus */
+  animation: da-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite,
+    da-wiggle 2s ease-in-out infinite;
+  transition: background-color 150ms ease, transform 120ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.da-voeu-btn:hover {
+  background: var(--da-action-bg-hover);
+  animation: none;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
+}
+
+.da-voeu-btn:disabled {
+  cursor: not-allowed;
+  animation: none;
+  box-shadow: none;
+  opacity: 0.5;
+  background: var(--da-warning-bg);
+  color: var(--da-warning-text);
+  border-color: var(--da-warning-border);
+}
+
+.da-voeu-btn .da-icon {
+  color: inherit;
+}
+
+@keyframes da-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+  }
+}
+
+@keyframes da-wiggle {
+  0%,
+  80%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  85% {
+    transform: rotate(-3deg) scale(1.05);
+  }
+  90% {
+    transform: rotate(3deg) scale(1.05);
+  }
+  95% {
+    transform: rotate(-3deg) scale(1.05);
+  }
+}
+
+/* ---- Carte élève ---- */
+.da-student-card {
+  background: var(--da-cool-bg);
+  border: 0.5px solid var(--da-border);
+  border-radius: var(--da-radius-md);
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: opacity 350ms ease, background-color 350ms ease,
+    border-color 350ms ease;
+}
+
+.da-student-card .da-icon,
+.da-slot-filled .da-icon,
+.da-floater .da-icon {
+  color: var(--da-cool-icon);
+}
+
+.da-student-name {
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.da-student-score {
+  font-size: 11.5px;
+  color: var(--da-text-secondary);
+  margin-top: 0.15rem;
+}
+
+.da-student-status {
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+
+.da-status-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 1px 6px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.da-status-tag--accepted {
+  background: var(--da-success-bg);
+  color: var(--da-success-text);
+  border: 0.5px solid var(--da-success-border);
+}
+
+.da-status-tag--pending {
+  background: var(--da-bg-muted);
+  color: var(--da-text-tertiary);
+  border: 0.5px solid var(--da-border);
+}
+
+.da-student-row--accepted .da-voeux,
+.da-student-row--accepted .da-student-card {
+  opacity: 0.35;
+}
+
+.da-student-row--accepted .da-student-card {
+  background: var(--da-success-bg);
+  border-color: var(--da-success-border);
+}
+
+/* ---- Ligne lycée : [carte lycée | liste candidats] ---- */
+.da-lycee-row {
+  display: grid;
+  grid-template-columns: 125px minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+  min-height: 150px;
+}
+
+.da-lycee-card {
+  background: var(--da-warm-bg);
+  border: 0.5px solid var(--da-border);
+  border-radius: var(--da-radius-md);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 110px;
+}
+
+.da-lycee-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.da-lycee-name .da-icon {
+  color: var(--da-warm-icon);
+}
+
+.da-voeu-label .da-icon,
+.da-voeu-btn .da-icon {
+  color: var(--da-warm-icon);
+}
+
+.da-lycee-capacity {
+  font-size: 10.5px;
+  color: var(--da-text-tertiary);
+  margin-top: -2px;
+  margin-bottom: 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.da-lycee-slot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+}
+
+.da-slot-empty {
+  font-size: 11.5px;
+  color: var(--da-text-tertiary);
+  font-style: italic;
+}
+
+.da-slot-filled {
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  background: var(--da-success-bg);
+  border: 0.5px solid var(--da-success-border);
+  border-radius: var(--da-radius-md);
+  color: var(--da-success-text);
+  text-align: center;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.da-slot-filled-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.da-slot-filled--final {
+  font-weight: 600;
+}
+
+.da-slot-check {
+  font-size: 14px;
+  color: var(--da-success-border);
+}
+
+/* ---- Liste candidats potentiels ---- */
+.da-candidates {
+  background: var(--da-warm-bg);
+  border: 0.5px solid var(--da-border);
+  border-radius: var(--da-radius-md);
+  padding: 0.5rem 0.6rem;
+  min-height: 110px;
+  max-width: 180px; /* Aligné sur les vœux */
+}
+
+.da-candidates-title {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--da-text-tertiary);
+  margin-bottom: 4px;
+}
+
+.da-candidates-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.da-candidate {
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.da-candidate--accepted {
+  color: var(--da-success-text);
+  font-weight: 500;
+}
+
+.da-candidate--rejected {
+  color: var(--da-text-tertiary);
+  text-decoration: line-through;
+  text-decoration-color: var(--da-danger-border);
+}
+
+.da-candidate-score {
+  color: var(--da-text-tertiary);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+}
+
+/* ---- Floater (carte du collégien qui se déplace) ---- */
+.da-floater {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--da-radius-md);
+  background: var(--da-bg-card);
+  border: 0.5px solid var(--da-border-strong);
+  color: var(--da-text-primary);
+  font-size: 14px;
+  text-align: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  transform: translate(0, 0);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+}
+
+.da-floater-name {
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.da-floater-score {
+  font-size: 11.5px;
+  margin-top: 0.15rem;
+  opacity: 0.75;
+}
+
+.da-floater--accept {
+  transition: transform 1200ms cubic-bezier(0.34, 1.36, 0.64, 1),
+    background-color 1200ms ease, border-color 1200ms ease, color 1200ms ease;
+}
+
+.da-floater--accept.da-floater--landed {
+  background: var(--da-success-bg);
+  border-color: var(--da-success-border);
+  color: var(--da-success-text);
+}
+
+.da-floater--reject {
+  animation: da-reject 2200ms cubic-bezier(0.3, 0, 0.6, 1) forwards;
+}
+
+@keyframes da-reject {
+  0% {
+    transform: translate(0, 0);
+  }
+  45% {
+    transform: var(--da-target-transform);
+    background: var(--da-danger-bg);
+    border-color: var(--da-danger-border);
+    color: var(--da-danger-text);
+  }
+  55% {
+    transform: var(--da-target-transform) translate(-6px, 0);
+  }
+  62% {
+    transform: var(--da-target-transform) translate(8px, 0);
+  }
+  70% {
+    transform: var(--da-target-transform) translate(-4px, 0);
+  }
+  77% {
+    transform: var(--da-target-transform) translate(2px, 0);
+    background: var(--da-danger-bg);
+    border-color: var(--da-danger-border);
+    color: var(--da-danger-text);
+  }
+  100% {
+    transform: translate(0, 0);
+    background: var(--da-bg-card);
+    border-color: var(--da-border-strong);
+    color: var(--da-text-primary);
+  }
+}
+
+.da-floater--evict {
+  background: var(--da-success-bg);
+  border-color: var(--da-success-border);
+  color: var(--da-success-text);
+  transition: transform 1600ms cubic-bezier(0.4, 0, 0.6, 1),
+    background-color 1600ms ease, border-color 1600ms ease, color 1600ms ease,
+    opacity 1600ms ease;
+}
+
+.da-floater--evict.da-floater--landed {
+  background: var(--da-bg-card);
+  border-color: var(--da-border-strong);
+  color: var(--da-text-secondary);
+  opacity: 0.6;
+}
+
+/* ---- Contrôles ---- */
+.da-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+
+.da-control-btn {
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--da-text-primary);
+  border: 0.5px solid var(--da-text-primary);
+  border-radius: var(--da-radius-md);
+  color: var(--da-bg-card);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.da-control-btn:hover {
+  transform: translateY(-1px);
+}
+
+.da-control-btn--secondary {
+  background: transparent;
+  color: var(--da-text-primary);
+}
+
+/* ---- Tooltip pédagogique (auto-affichée, auto-disparaissante) ---- */
+.da-tooltip {
+  position: fixed;
+  z-index: 1100;
+  background: var(--da-text-primary);
+  color: var(--da-bg-card);
+  padding: 8px 12px;
+  border-radius: var(--da-radius-md);
+  font-size: 12.5px;
+  line-height: 1.45;
+  max-width: 280px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+  /* Le `transform` de base ancre la tooltip par rapport au point (left, top) :
+     - `--above` : bottom-center du tooltip sur le point (donc le tooltip est
+       posé juste au-dessus).
+     - `--below` : top-center sur le point. */
+}
+
+.da-tooltip--above {
+  animation: da-tooltip-in-above 220ms ease-out;
+  transform: translate(-50%, -100%);
+}
+
+.da-tooltip--below {
+  animation: da-tooltip-in-below 220ms ease-out;
+  transform: translate(-50%, 0);
+}
+
+@keyframes da-tooltip-in-above {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% + 6px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+@keyframes da-tooltip-in-below {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.da-tooltip::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+}
+
+.da-tooltip--above::after {
+  bottom: -12px;
+  left: 50%;
+  margin-left: -6px;
+  border-top-color: var(--da-text-primary);
+}
+
+.da-tooltip--below::after {
+  top: -12px;
+  left: 50%;
+  margin-left: -6px;
+  border-bottom-color: var(--da-text-primary);
+}
+
+/* ---- Responsive (mobile, iPhone 14 ≈ 390 px) ---- */
+@media (max-width: 724px) {
+  /* ... */
+}
+
+/* ---- Connexions (flèches) ---- */
+.da-connections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.da-arrow-path {
+  fill: none;
+  stroke: var(--da-success-border);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 4 4; /* Ligne pointillée pour un aspect plus "process" */
+  animation: da-dash-offset 20s linear infinite;
+  transition: opacity 600ms ease;
+}
+
+@keyframes da-dash-offset {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -200;
+  }
+}
+
+.da-arrow-head {
+  fill: var(--da-success-border);
+}
+
+.da-board {
+  position: relative; /* Pour positionner l'SVG des flèches */
+  display: grid;
+  /* ... */
+}
