@@ -175,5 +175,5 @@ export interface HeterogeneiteResult {
   history: HeterogeneitePoint[];
 }
 
-export type TopTab = 'search' | 'score' | 'history' | 'contribute';
+export type TopTab = 'search' | 'score' | 'history' | 'contribute' | 'affectation';
 export type SearchMode = 'address' | 'college';

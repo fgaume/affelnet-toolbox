@@ -28,6 +28,7 @@ import {
   AdmissionHistoryTable,
   DisclaimerModal,
   ContributePanel,
+  DeferredAcceptanceExplainer,
 } from './components';
 import OverflowMenu from './components/OverflowMenu';
 import { updateHistoryScolarisation } from './services/storage';
@@ -319,6 +320,15 @@ function App() {
             </svg>
             Contribuer
           </button>
+          <button
+            className={`input-tab${topTab === 'affectation' ? ' active' : ''}`}
+            onClick={() => handleTopTabChange('affectation')}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 6h13v2H3V6zm0 5h10v2H3v-2zm0 5h13v2H3v-2zm15.5-9L22 10.5 18.5 14 17 12.5 19 10.5 17 8.5 18.5 7zm0 9l3.5 3.5L18.5 23 17 21.5 19 19.5 17 17.5 18.5 16z" />
+            </svg>
+            Algorithme
+          </button>
           {/* Visible inline on desktop, hidden on mobile */}
           <button
             className={`input-tab tab-overflow-item${topTab === 'history' ? ' active' : ''}`}
@@ -453,6 +463,10 @@ function App() {
 
         <div className="tab-panel" style={{ display: topTab === 'contribute' ? undefined : 'none' }}>
           <ContributePanel />
+        </div>
+
+        <div className="tab-panel" style={{ display: topTab === 'affectation' ? undefined : 'none' }}>
+          <DeferredAcceptanceExplainer />
         </div>
       </main>
 
