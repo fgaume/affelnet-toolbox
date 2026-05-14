@@ -78,7 +78,7 @@ function App() {
 
   // Sync state with URL
   useEffect(() => {
-    if (location.pathname === '/' || location.pathname === '') {
+    if (!ROUTE_TO_TAB[location.pathname]) {
       navigate('/lycees', { replace: true });
     }
   }, [location.pathname, navigate]);
