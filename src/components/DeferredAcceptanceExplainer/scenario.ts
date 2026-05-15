@@ -47,7 +47,7 @@ export interface Action {
  * Gale-Shapley est ordre-indépendant côté résultat final ; on choisit ici un
  * ordre pédagogique (Bob → Léa → Théo, puis les rejetés repassent).
  */
-export const actions: readonly Action[] = [
+export const actionsForward: readonly Action[] = [
   {
     student: "Bob",
     lycee: "chopin",
@@ -92,6 +92,59 @@ export const actions: readonly Action[] = [
   },
 ];
 
+/**
+ * Même algorithme, mais en inversant l'ordre des collégiens (Théo → Léa → Bob).
+ * Le résultat final est identique : Bach=Léa, Chopin=Théo, Liszt=Bob — ce qui
+ * illustre que Gale-Shapley est indépendant de l'ordre de traitement.
+ */
+export const actionsReversed: readonly Action[] = [
+  {
+    student: "Théo",
+    lycee: "bach",
+    outcome: { kind: "accept-vacant" },
+    narrative:
+      "Théo propose Bach. Place vacante, il est accepté provisoirement.",
+  },
+  {
+    student: "Léa",
+    lycee: "bach",
+    outcome: { kind: "accept-evict", evicted: "Théo" },
+    narrative:
+      "Léa propose Bach. Le score de Léa (41 000) est supérieur à celui de Théo (40 500). Léa prend donc la place, Théo est éjecté et retourne dans le groupe des non-affectés.",
+  },
+  {
+    student: "Bob",
+    lycee: "chopin",
+    outcome: { kind: "accept-vacant" },
+    narrative:
+      "Bob propose Chopin. Place vacante, il est accepté provisoirement.",
+  },
+  {
+    student: "Théo",
+    lycee: "chopin",
+    outcome: { kind: "accept-evict", evicted: "Bob" },
+    narrative:
+      "Théo propose Chopin. Le score de Théo (40 500) est supérieur à celui de Bob (40 000). Théo prend donc la place, Bob est éjecté et retourne dans le groupe des non-affectés.",
+  },
+  {
+    student: "Bob",
+    lycee: "bach",
+    outcome: { kind: "reject" },
+    narrative:
+      "Bob propose Bach. Léa (41 000) garde sa place puisque son score est supérieur à celui de Bob (40 000). Bob est donc refusé.",
+  },
+  {
+    student: "Bob",
+    lycee: "liszt",
+    outcome: { kind: "accept-vacant" },
+    narrative:
+      "Bob propose Liszt. Place vacante, il est accepté. Tous les collégiens sont affectés : le résultat final est identique à l'ordre précédent — l'algorithme de Gale-Shapley est bien indépendant de l'ordre de traitement.",
+  },
+];
+
+/** Alias rétro-compatible : par défaut on joue l'ordre « forward ». */
+export const actions = actionsForward;
+
 export type VoeuStatus = "pending" | "accepted" | "rejected";
 
 export interface DerivedState {
@@ -109,7 +162,10 @@ export function voeuKey(student: StudentName, lycee: LyceeId): string {
   return `${student}:${lycee}`;
 }
 
-export function deriveState(actionIndex: number): DerivedState {
+export function deriveState(
+  actionIndex: number,
+  currentActions: readonly Action[] = actions,
+): DerivedState {
   const slots: Record<LyceeId, StudentName | null> = {
     bach: null,
     chopin: null,
@@ -122,7 +178,7 @@ export function deriveState(actionIndex: number): DerivedState {
   let lastNarrative =
     "Le 1ᵉʳ collégien va proposer son vœu favori. Cliquez sur les boutons oranges successifs pour faire avancer l'algorithme.";
   for (let i = 0; i < actionIndex; i += 1) {
-    const a = actions[i];
+    const a = currentActions[i];
     lastNarrative = a.narrative;
     if (a.outcome.kind === "reject") {
       voeuStatus[voeuKey(a.student, a.lycee)] = "rejected";
@@ -135,8 +191,8 @@ export function deriveState(actionIndex: number): DerivedState {
     }
   }
   const activeAction =
-    actionIndex < actions.length ? actions[actionIndex] : null;
-  const isComplete = actionIndex === actions.length;
+    actionIndex < currentActions.length ? currentActions[actionIndex] : null;
+  const isComplete = actionIndex === currentActions.length;
 
   // Calcul du tour :
   // - Tour 1 : Bob, Léa, Théo (1er vœu) -> indices 0, 1, 2

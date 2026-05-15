@@ -8,7 +8,8 @@ import {
 } from "react";
 
 import {
-  actions,
+  actionsForward,
+  actionsReversed,
   candidatesFor,
   deriveState,
   lycees,
@@ -142,15 +143,32 @@ export function DeferredAcceptanceExplainer() {
   const [connections, setConnections] = useState<readonly Connection[]>([]);
   const [resizeCount, setResizeCount] = useState(0);
   const [showCandidates, setShowCandidates] = useState(true);
+  const [reversed, setReversed] = useState(false);
+  const [reorderAnimating, setReorderAnimating] = useState(false);
   const tooltipIdRef = useRef(0);
 
-  const derived = useMemo(() => deriveState(actionIndex), [actionIndex]);
+  const currentActions: readonly Action[] = reversed
+    ? actionsReversed
+    : actionsForward;
+  const displayedStudents = useMemo(
+    () => (reversed ? [...students].reverse() : students),
+    [reversed],
+  );
+
+  const derived = useMemo(
+    () => deriveState(actionIndex, currentActions),
+    [actionIndex, currentActions],
+  );
 
   const boardRef = useRef<HTMLDivElement>(null);
   const voeuBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const slotRefs = useRef<Map<LyceeId, HTMLDivElement>>(new Map());
   const studentCardRefs = useRef<Map<StudentName, HTMLDivElement>>(new Map());
+  const studentRowRefs = useRef<Map<StudentName, HTMLDivElement>>(new Map());
   const floaterRef = useRef<HTMLDivElement | null>(null);
+  // FLIP : positions des lignes collégiens AVANT l'inversion, à consommer dans
+  // un useLayoutEffect post-render pour animer le déplacement.
+  const reorderFromRectsRef = useRef<Map<StudentName, DOMRect>>(new Map());
 
   // Mise à jour des flèches
   useLayoutEffect(() => {
@@ -242,6 +260,13 @@ export function DeferredAcceptanceExplainer() {
     (name: StudentName, el: HTMLDivElement | null) => {
       if (el) studentCardRefs.current.set(name, el);
       else studentCardRefs.current.delete(name);
+    },
+    [],
+  );
+  const setStudentRowRef = useCallback(
+    (name: StudentName, el: HTMLDivElement | null) => {
+      if (el) studentRowRefs.current.set(name, el);
+      else studentRowRefs.current.delete(name);
     },
     [],
   );
@@ -349,6 +374,68 @@ export function DeferredAcceptanceExplainer() {
     setActionIndex(0);
   }, []);
 
+  const handleReverseOrder = useCallback(() => {
+    // FLIP step 1 (First) : capturer les positions actuelles des lignes
+    // collégiens AVANT que React ne réordonne le DOM. Le useLayoutEffect
+    // post-render se chargera d'inverser et de jouer la transition.
+    const rects = new Map<StudentName, DOMRect>();
+    studentRowRefs.current.forEach((el, name) => {
+      rects.set(name, el.getBoundingClientRect());
+    });
+    reorderFromRectsRef.current = rects;
+    setAnimation(null);
+    setTooltip(null);
+    setActionIndex(0);
+    setReorderAnimating(true);
+    setReversed((r) => !r);
+  }, []);
+
+  // FLIP steps 2-4 (Last/Invert/Play) : après le réordonnancement du DOM,
+  // on applique aux lignes un transform qui les remet à leur ancienne
+  // position, puis on laisse la transition CSS animer le retour à zéro.
+  useLayoutEffect(() => {
+    const oldRects = reorderFromRectsRef.current;
+    if (oldRects.size === 0) return;
+    reorderFromRectsRef.current = new Map();
+
+    const animated: HTMLDivElement[] = [];
+    studentRowRefs.current.forEach((el, name) => {
+      const oldRect = oldRects.get(name);
+      if (!oldRect) return;
+      const newRect = el.getBoundingClientRect();
+      const dy = oldRect.top - newRect.top;
+      if (dy === 0) return;
+      el.style.transition = "none";
+      el.style.transform = `translateY(${dy}px)`;
+      animated.push(el);
+    });
+
+    if (animated.length === 0) {
+      setReorderAnimating(false);
+      return;
+    }
+
+    const raf = requestAnimationFrame(() => {
+      animated.forEach((el) => {
+        el.style.transition = "transform 650ms cubic-bezier(0.4, 0, 0.2, 1)";
+        el.style.transform = "";
+      });
+    });
+
+    const timeout = window.setTimeout(() => {
+      animated.forEach((el) => {
+        el.style.transition = "";
+        el.style.transform = "";
+      });
+      setReorderAnimating(false);
+    }, 750);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(timeout);
+    };
+  }, [reversed]);
+
   const handlePrevious = useCallback(() => {
     if (animation) return;
     setAnimation(null);
@@ -360,7 +447,7 @@ export function DeferredAcceptanceExplainer() {
   // lycée concerné une fois l'action terminée, ou au-dessus du bouton orange
   // pour l'intro. Affichée seulement quand aucune animation n'est en cours.
   useLayoutEffect(() => {
-    if (animation) {
+    if (animation || reorderAnimating) {
       if (tooltip !== null) {
         setTooltip(null);
       }
@@ -371,12 +458,12 @@ export function DeferredAcceptanceExplainer() {
     let side: TooltipSide = "above";
 
     if (actionIndex === 0) {
-      const first = actions[0];
+      const first = currentActions[0];
       target =
         voeuBtnRefs.current.get(voeuKey(first.student, first.lycee)) ?? null;
       side = "below";
     } else {
-      const lastAction = actions[actionIndex - 1];
+      const lastAction = currentActions[actionIndex - 1];
       target = slotRefs.current.get(lastAction.lycee) ?? null;
       side = "above";
     }
@@ -403,7 +490,7 @@ export function DeferredAcceptanceExplainer() {
         id: tooltipIdRef.current,
       });
     }
-  }, [actionIndex, animation, tooltip, resizeCount]);
+  }, [actionIndex, animation, tooltip, resizeCount, currentActions, reorderAnimating]);
 
   // La tooltip reste affichée jusqu'au prochain clic du user : c'est le
   // démarrage de la nouvelle animation (`setAnimation(...)`) qui la fait
@@ -476,7 +563,7 @@ export function DeferredAcceptanceExplainer() {
           <div className="da-column-header">
             <div className="da-column-title">Collégiens</div>
           </div>
-          {students.map((s) => {
+          {displayedStudents.map((s) => {
             const isAccepted = (Object.keys(derived.slots) as LyceeId[]).some(
               (l) => derived.slots[l] === s.name,
             );
@@ -490,6 +577,7 @@ export function DeferredAcceptanceExplainer() {
             return (
               <div
                 key={s.name}
+                ref={(el) => setStudentRowRef(s.name, el)}
                 className={
                   "da-student-row" +
                   (isAccepted ? " da-student-row--accepted" : "")
@@ -698,6 +786,16 @@ export function DeferredAcceptanceExplainer() {
               onClick={handleReplay}
             >
               ↻ Rejouer l'animation
+            </button>
+          )}
+          {derived.isComplete && (
+            <button
+              type="button"
+              className="da-control-btn da-control-btn--secondary"
+              onClick={handleReverseOrder}
+              title="Rejouer l'algorithme en inversant l'ordre des collégiens : le résultat final sera identique."
+            >
+              ⇅ Inverser l'ordre des collégiens
             </button>
           )}
         </div>
