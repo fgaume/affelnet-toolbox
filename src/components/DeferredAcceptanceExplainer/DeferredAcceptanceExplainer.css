@@ -722,25 +722,36 @@
 }
 
 .da-control-btn {
-  padding: 7px 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 140px;
+  padding: 7px 14px;
   font-size: 13px;
   font-weight: 600;
-  background: var(--da-text-primary);
-  border: 0.5px solid var(--da-text-primary);
+  background: transparent;
+  border: 1px solid var(--da-border-strong);
   border-radius: var(--da-radius-md);
-  color: var(--da-bg-card);
+  color: var(--da-text-primary);
   cursor: pointer;
   font-family: inherit;
-  transition: background-color 120ms ease, transform 120ms ease;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
 
-.da-control-btn:hover {
+.da-control-btn .da-icon {
+  color: inherit;
+}
+
+.da-control-btn:hover:not(:disabled) {
+  background: var(--da-bg-muted);
+  border-color: var(--da-text-primary);
   transform: translateY(-1px);
 }
 
-.da-control-btn--secondary {
-  background: transparent;
-  color: var(--da-text-primary);
+.da-control-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 /* ---- Tooltip pédagogique (auto-affichée, auto-disparaissante) ---- */
