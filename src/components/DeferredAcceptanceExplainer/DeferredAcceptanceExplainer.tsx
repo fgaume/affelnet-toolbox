@@ -10,10 +10,13 @@ import {
 import {
   actionsForward,
   actionsReversed,
+  actionsRoseAddon,
   candidatesFor,
   deriveState,
   lycees,
+  rose,
   students,
+  studentsWithRose,
   voeuKey,
   type Action,
   type LyceeId,
@@ -110,6 +113,21 @@ function LightbulbIcon({ size = 18 }: { readonly size?: number }) {
   );
 }
 
+function ResetIcon({ size = 16 }: { readonly size?: number }) {
+  return (
+    <svg
+      className="da-icon"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6 0 2.97-2.17 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93 0-4.42-3.58-8-8-8zm-6 8c0-1.65.67-3.15 1.76-4.24L6.34 7.34C4.9 8.79 4 10.79 4 13c0 4.08 3.05 7.44 7 7.93v-2.02c-2.83-.48-5-2.94-5-5.91z" />
+    </svg>
+  );
+}
+
 function TimerIcon({ size = 14 }: { readonly size?: number }) {
   return (
     <svg
@@ -145,19 +163,25 @@ export function DeferredAcceptanceExplainer() {
   const [showCandidates, setShowCandidates] = useState(true);
   const [reversed, setReversed] = useState(false);
   const [reorderAnimating, setReorderAnimating] = useState(false);
+  const [roseAdded, setRoseAdded] = useState(false);
   const tooltipIdRef = useRef(0);
 
-  const currentActions: readonly Action[] = reversed
+  const baseActions: readonly Action[] = reversed
     ? actionsReversed
     : actionsForward;
-  const displayedStudents = useMemo(
-    () => (reversed ? [...students].reverse() : students),
-    [reversed],
+  const currentActions: readonly Action[] = useMemo(
+    () => (roseAdded ? [...baseActions, ...actionsRoseAddon] : baseActions),
+    [baseActions, roseAdded],
   );
+  const currentStudents = roseAdded ? studentsWithRose : students;
+  const displayedStudents = useMemo(() => {
+    const base = reversed ? [...students].reverse() : [...students];
+    return roseAdded ? [...base, rose] : base;
+  }, [reversed, roseAdded]);
 
   const derived = useMemo(
-    () => deriveState(actionIndex, currentActions),
-    [actionIndex, currentActions],
+    () => deriveState(actionIndex, currentActions, currentStudents),
+    [actionIndex, currentActions, currentStudents],
   );
 
   const boardRef = useRef<HTMLDivElement>(null);
@@ -372,6 +396,7 @@ export function DeferredAcceptanceExplainer() {
     setAnimation(null);
     setTooltip(null);
     setActionIndex(0);
+    setRoseAdded(false);
   }, []);
 
   const handleReverseOrder = useCallback(() => {
@@ -386,9 +411,34 @@ export function DeferredAcceptanceExplainer() {
     setAnimation(null);
     setTooltip(null);
     setActionIndex(0);
+    setRoseAdded(false);
     setReorderAnimating(true);
     setReversed((r) => !r);
   }, []);
+
+  const handleAddRose = useCallback(() => {
+    setAnimation(null);
+    setTooltip(null);
+    setRoseAdded(true);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    // FLIP step 1 si on était en mode inversé : capturer les positions actuelles
+    // pour animer le retour à l'ordre normal.
+    if (reversed) {
+      const rects = new Map<StudentName, DOMRect>();
+      studentRowRefs.current.forEach((el, name) => {
+        rects.set(name, el.getBoundingClientRect());
+      });
+      reorderFromRectsRef.current = rects;
+      setReorderAnimating(true);
+    }
+    setAnimation(null);
+    setTooltip(null);
+    setActionIndex(0);
+    setRoseAdded(false);
+    setReversed(false);
+  }, [reversed]);
 
   // FLIP steps 2-4 (Last/Invert/Play) : après le réordonnancement du DOM,
   // on applique aux lignes un transform qui les remet à leur ancienne
@@ -457,11 +507,22 @@ export function DeferredAcceptanceExplainer() {
     let text: string = derived.lastNarrative;
     let side: TooltipSide = "above";
 
+    const roseStartIndex = baseActions.length;
+    const isRoseIntro = roseAdded && actionIndex === roseStartIndex;
+
     if (actionIndex === 0) {
       const first = currentActions[0];
       target =
         voeuBtnRefs.current.get(voeuKey(first.student, first.lycee)) ?? null;
       side = "below";
+    } else if (isRoseIntro) {
+      const firstRose = currentActions[roseStartIndex];
+      target =
+        voeuBtnRefs.current.get(voeuKey(firstRose.student, firstRose.lycee)) ??
+        null;
+      side = "below";
+      text =
+        "Rose (40 200 pts) rejoint la liste. Ses vœux : 1.Bach, 2.Chopin, 3.Liszt. Cliquez sur le bouton orange pour voir si elle peut s'intégrer.";
     } else {
       const lastAction = currentActions[actionIndex - 1];
       target = slotRefs.current.get(lastAction.lycee) ?? null;
@@ -490,7 +551,17 @@ export function DeferredAcceptanceExplainer() {
         id: tooltipIdRef.current,
       });
     }
-  }, [actionIndex, animation, tooltip, resizeCount, currentActions, reorderAnimating]);
+  }, [
+    actionIndex,
+    animation,
+    tooltip,
+    resizeCount,
+    currentActions,
+    reorderAnimating,
+    baseActions.length,
+    roseAdded,
+    derived.lastNarrative,
+  ]);
 
   // La tooltip reste affichée jusqu'au prochain clic du user : c'est le
   // démarrage de la nouvelle animation (`setAnimation(...)`) qui la fait
@@ -520,11 +591,11 @@ export function DeferredAcceptanceExplainer() {
           <LightbulbIcon />
           <span>
             Cette animation vise à vous convaincre que{" "}
-            <strong>tenter des lycées de "coeur"</strong> (où vos chances
-            paraissent bien faibles a priori) en premiers voeux{" "}
+            <strong>tenter des lycées de "cœur"</strong> (où vos chances
+            paraissent bien faibles a priori) en premiers vœux{" "}
             <strong>n'a absolument aucune incidence sur vos chances</strong>{" "}
             d'obtenir une place dans vos lycées de "raison", que vous avez
-            classés plus bas dans votre liste de voeux.
+            classés plus bas dans votre liste de vœux.
           </span>
         </p>
       </div>
@@ -696,8 +767,8 @@ export function DeferredAcceptanceExplainer() {
           {lycees.map((l) => {
             const occupant = derived.slots[l.id];
             const occupantStudent =
-              occupant && students.find((s) => s.name === occupant);
-            const cands = candidatesFor(l.id);
+              occupant && currentStudents.find((s) => s.name === occupant);
+            const cands = candidatesFor(l.id, currentStudents);
             return (
               <div key={l.id} className="da-lycee-row">
                 <div className="da-lycee-card">
@@ -767,7 +838,7 @@ export function DeferredAcceptanceExplainer() {
         </div>
       </div>
 
-      {(actionIndex > 0 || derived.isComplete) && (
+      {(actionIndex > 0 || derived.isComplete || reversed || roseAdded) && (
         <div className="da-controls">
           {actionIndex > 0 && (
             <button
@@ -775,8 +846,9 @@ export function DeferredAcceptanceExplainer() {
               className="da-control-btn"
               onClick={handlePrevious}
               disabled={!!animation}
+              title="Revenir d'une étape en arrière."
             >
-              ← Étape précédente
+              ← Retour
             </button>
           )}
           {derived.isComplete && (
@@ -784,26 +856,48 @@ export function DeferredAcceptanceExplainer() {
               type="button"
               className="da-control-btn"
               onClick={handleReplay}
+              title="Rejouer l'animation depuis le début, en conservant les options actuelles (ordre, Rose)."
             >
-              ↻ Rejouer l'animation
+              ↻ Rejouer
             </button>
           )}
-          {derived.isComplete && (
+          {derived.isComplete && !roseAdded && (
             <button
               type="button"
-              className="da-control-btn da-control-btn--secondary"
+              className="da-control-btn"
               onClick={handleReverseOrder}
               title="Rejouer l'algorithme en inversant l'ordre des collégiens : le résultat final sera identique."
             >
-              ⇅ Inverser l'ordre des collégiens
+              ⇅ Inverser l'ordre
             </button>
           )}
+          {derived.isComplete && !roseAdded && (
+            <button
+              type="button"
+              className="da-control-btn"
+              onClick={handleAddRose}
+              title="Ajouter Rose (40 200 pts) qui tente Bach puis Chopin avant Liszt."
+            >
+              + Ajouter un élève
+            </button>
+          )}
+          <button
+            type="button"
+            className="da-control-btn"
+            onClick={handleReset}
+            disabled={!!animation}
+            title="Revenir à l'état initial (ordre normal, sans Rose, aucune action jouée)."
+          >
+            <ResetIcon /> Réinitialiser
+          </button>
         </div>
       )}
 
       {animation &&
         (() => {
-          const s = students.find((st) => st.name === animation.studentName);
+          const s = currentStudents.find(
+            (st) => st.name === animation.studentName,
+          );
           if (!s) return null;
           // Le floater adopte la taille de la destination (slot) dès le départ,
           // pour qu'il s'intègre parfaitement à l'arrivée. On le centre sur la
