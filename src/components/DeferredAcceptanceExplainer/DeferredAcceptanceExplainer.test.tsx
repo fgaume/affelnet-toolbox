@@ -47,7 +47,7 @@ describe('DeferredAcceptanceExplainer', () => {
     );
     // Le bouton "Rejouer" est apparu
     expect(
-      screen.getByRole('button', { name: /Rejouer l'animation/ })
+      screen.getByRole('button', { name: /Rejouer/ })
     ).toBeInTheDocument();
     // Affectations finales attendues : Bach=Léa, Chopin=Théo, Liszt=Bob
     const finals = screen.getAllByText(/✓ affecté/);
@@ -87,7 +87,7 @@ describe('DeferredAcceptanceExplainer', () => {
   it("le bouton Rejouer remet l'état initial", () => {
     render(<DeferredAcceptanceExplainer />);
     for (let i = 0; i < actions.length; i += 1) clickActiveVoeu();
-    fireEvent.click(screen.getByRole('button', { name: /Rejouer l'animation/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Rejouer/ }));
 
     // On revient à l'état initial : un seul bouton actif (Bob→Chopin)
     const buttons = screen.getAllByRole('button', { name: /^Proposer / });

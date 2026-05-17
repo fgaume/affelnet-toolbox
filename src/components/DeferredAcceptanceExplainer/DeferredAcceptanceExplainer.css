@@ -783,6 +783,34 @@
   transform: translate(-50%, 0);
 }
 
+.da-tooltip--has-close {
+  padding-right: 32px;
+  pointer-events: auto;
+}
+
+.da-tooltip-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--da-text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.da-tooltip-close:hover {
+  color: var(--da-bg-card);
+  background: rgba(255, 255, 255, 0.15);
+}
+
 @keyframes da-tooltip-in-above {
   from {
     opacity: 0;
