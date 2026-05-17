@@ -143,6 +143,26 @@ function TimerIcon({ size = 14 }: { readonly size?: number }) {
   );
 }
 
+function CloseIcon({ size = 16 }: { readonly size?: number }) {
+  return (
+    <svg
+      className="da-icon"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  );
+}
+
 const kindCssSuffix = (k: AnimationKind): "accept" | "reject" | "evict" =>
   k === "fly-accept" ? "accept" : k === "reject" ? "reject" : "evict";
 
@@ -158,6 +178,7 @@ export function DeferredAcceptanceExplainer() {
   const [actionIndex, setActionIndex] = useState(0);
   const [animation, setAnimation] = useState<Animation | null>(null);
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
+  const [isFinalTooltipDismissed, setIsFinalTooltipDismissed] = useState(false);
   const [connections, setConnections] = useState<readonly Connection[]>([]);
   const [resizeCount, setResizeCount] = useState(0);
   const [showCandidates, setShowCandidates] = useState(true);
@@ -314,6 +335,7 @@ export function DeferredAcceptanceExplainer() {
       advanceImmediately();
       return;
     }
+    setIsFinalTooltipDismissed(false);
     setAnimation({
       kind: action.outcome.kind === "reject" ? "reject" : "fly-accept",
       studentName: action.student,
@@ -393,6 +415,7 @@ export function DeferredAcceptanceExplainer() {
   }, [animation]);
 
   const handleReplay = useCallback(() => {
+    setIsFinalTooltipDismissed(false);
     setAnimation(null);
     setTooltip(null);
     setActionIndex(0);
@@ -408,6 +431,7 @@ export function DeferredAcceptanceExplainer() {
       rects.set(name, el.getBoundingClientRect());
     });
     reorderFromRectsRef.current = rects;
+    setIsFinalTooltipDismissed(false);
     setAnimation(null);
     setTooltip(null);
     setActionIndex(0);
@@ -417,6 +441,7 @@ export function DeferredAcceptanceExplainer() {
   }, []);
 
   const handleAddRose = useCallback(() => {
+    setIsFinalTooltipDismissed(false);
     setAnimation(null);
     setTooltip(null);
     setRoseAdded(true);
@@ -433,6 +458,7 @@ export function DeferredAcceptanceExplainer() {
       reorderFromRectsRef.current = rects;
       setReorderAnimating(true);
     }
+    setIsFinalTooltipDismissed(false);
     setAnimation(null);
     setTooltip(null);
     setActionIndex(0);
@@ -488,6 +514,7 @@ export function DeferredAcceptanceExplainer() {
 
   const handlePrevious = useCallback(() => {
     if (animation) return;
+    setIsFinalTooltipDismissed(false);
     setAnimation(null);
     setTooltip(null);
     setActionIndex((i) => Math.max(0, i - 1));
@@ -497,7 +524,11 @@ export function DeferredAcceptanceExplainer() {
   // lycée concerné une fois l'action terminée, ou au-dessus du bouton orange
   // pour l'intro. Affichée seulement quand aucune animation n'est en cours.
   useLayoutEffect(() => {
-    if (animation || reorderAnimating) {
+    if (
+      animation ||
+      reorderAnimating ||
+      (derived.isComplete && isFinalTooltipDismissed)
+    ) {
       if (tooltip !== null) {
         setTooltip(null);
       }
@@ -561,6 +592,8 @@ export function DeferredAcceptanceExplainer() {
     baseActions.length,
     roseAdded,
     derived.lastNarrative,
+    derived.isComplete,
+    isFinalTooltipDismissed,
   ]);
 
   // La tooltip reste affichée jusqu'au prochain clic du user : c'est le
@@ -943,12 +976,22 @@ export function DeferredAcceptanceExplainer() {
       {tooltip && (
         <div
           key={tooltip.id}
-          className={`da-tooltip da-tooltip--${tooltip.side}`}
+          className={`da-tooltip da-tooltip--${tooltip.side}${derived.isComplete ? " da-tooltip--has-close" : ""}`}
           role="status"
           aria-live="polite"
           style={{ left: tooltip.anchorX, top: tooltip.anchorY }}
         >
           {tooltip.text}
+          {derived.isComplete && (
+            <button
+              type="button"
+              className="da-tooltip-close"
+              onClick={() => setIsFinalTooltipDismissed(true)}
+              aria-label="Fermer le message"
+            >
+              <CloseIcon size={14} />
+            </button>
+          )}
         </div>
       )}
     </section>
