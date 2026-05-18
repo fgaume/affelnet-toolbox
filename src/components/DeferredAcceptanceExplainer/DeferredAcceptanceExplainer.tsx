@@ -39,7 +39,7 @@ const FLY_ACCEPT_MS = 1200;
 const REJECT_MS = 2200;
 const EVICT_MS = 1600;
 
-type TooltipSide = "above" | "below";
+type TooltipSide = "above" | "below" | "northeast";
 
 interface Tooltip {
   readonly text: string;
@@ -545,13 +545,13 @@ export function DeferredAcceptanceExplainer() {
       const first = currentActions[0];
       target =
         voeuBtnRefs.current.get(voeuKey(first.student, first.lycee)) ?? null;
-      side = "below";
+      side = "northeast";
     } else if (isRoseIntro) {
       const firstRose = currentActions[roseStartIndex];
       target =
         voeuBtnRefs.current.get(voeuKey(firstRose.student, firstRose.lycee)) ??
         null;
-      side = "below";
+      side = "northeast";
       text =
         "Rose (40 200 pts) rejoint la liste. Ses vœux : 1.Bach, 2.Chopin, 3.Liszt. Cliquez sur le bouton orange pour voir si elle peut s'intégrer.";
     } else {
@@ -563,8 +563,9 @@ export function DeferredAcceptanceExplainer() {
     if (!target) return;
     const rect = target.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return; // JSDOM
-    const anchorX = rect.left + rect.width / 2;
-    const anchorY = side === "above" ? rect.top - 10 : rect.bottom + 10;
+    const anchorX =
+      side === "northeast" ? rect.left + 20 : rect.left + rect.width / 2;
+    const anchorY = side === "below" ? rect.bottom + 10 : rect.top - 10;
 
     if (
       !tooltip ||
