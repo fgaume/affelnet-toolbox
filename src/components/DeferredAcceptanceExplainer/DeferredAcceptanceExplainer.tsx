@@ -565,7 +565,7 @@ export function DeferredAcceptanceExplainer() {
     if (rect.width === 0 && rect.height === 0) return; // JSDOM
     const anchorX =
       side === "northeast" ? rect.left + 20 : rect.left + rect.width / 2;
-    const anchorY = side === "below" ? rect.bottom + 10 : rect.top - 10;
+    const anchorY = side === "above" || side === "northeast" ? rect.top - 10 : rect.bottom + 10;
 
     if (
       !tooltip ||
