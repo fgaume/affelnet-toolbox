@@ -767,6 +767,7 @@
   max-width: 280px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
   pointer-events: none;
+  --da-tooltip-x: -50%;
   /* Le `transform` de base ancre la tooltip par rapport au point (left, top) :
      - `--above` : bottom-center du tooltip sur le point (donc le tooltip est
        posé juste au-dessus).
@@ -774,13 +775,21 @@
 }
 
 .da-tooltip--above {
+  --da-tooltip-x: -50%;
   animation: da-tooltip-in-above 220ms ease-out;
-  transform: translate(-50%, -100%);
+  transform: translate(var(--da-tooltip-x), -100%);
 }
 
 .da-tooltip--below {
+  --da-tooltip-x: -50%;
   animation: da-tooltip-in-below 220ms ease-out;
-  transform: translate(-50%, 0);
+  transform: translate(var(--da-tooltip-x), 0);
+}
+
+.da-tooltip--northeast {
+  --da-tooltip-x: -20px;
+  animation: da-tooltip-in-above 220ms ease-out;
+  transform: translate(var(--da-tooltip-x), -100%);
 }
 
 .da-tooltip--has-close {
@@ -814,22 +823,22 @@
 @keyframes da-tooltip-in-above {
   from {
     opacity: 0;
-    transform: translate(-50%, calc(-100% + 6px));
+    transform: translate(var(--da-tooltip-x), calc(-100% + 6px));
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -100%);
+    transform: translate(var(--da-tooltip-x), -100%);
   }
 }
 
 @keyframes da-tooltip-in-below {
   from {
     opacity: 0;
-    transform: translate(-50%, -6px);
+    transform: translate(var(--da-tooltip-x), -6px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translate(var(--da-tooltip-x), 0);
   }
 }
 
@@ -841,11 +850,16 @@
   border: 6px solid transparent;
 }
 
-.da-tooltip--above::after {
+.da-tooltip--above::after,
+.da-tooltip--northeast::after {
   bottom: -12px;
   left: 50%;
   margin-left: -6px;
   border-top-color: var(--da-text-primary);
+}
+
+.da-tooltip--northeast::after {
+  left: 20px;
 }
 
 .da-tooltip--below::after {
