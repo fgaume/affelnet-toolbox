@@ -29,7 +29,7 @@
 .overflow-menu-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
   padding: 10px 12px;
   font-size: 14px;
@@ -40,6 +40,7 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
+  text-align: left;
 }
 
 .overflow-menu-item:hover {
@@ -49,12 +50,22 @@
 
 .overflow-menu-item.active {
   color: var(--color-primary);
+  background: var(--color-bg-page);
 }
 
-.overflow-menu-item svg {
+.overflow-menu-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+}
+
+.overflow-menu-item-icon svg {
+  width: 20px;
+  height: 20px;
+  color: inherit;
 }
 
 /* On mobile: show overflow menu, hide the inline tab */
