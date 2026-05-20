@@ -94,6 +94,44 @@
   color: var(--color-text-faint);
 }
 
+.weighted-average-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.weighted-average-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.weighted-average-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.weighted-average-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.weighted-average-value.above-threshold {
+  color: #16a34a;
+}
+
+.weighted-average-thresholds {
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+}
+
 .form-actions {
   margin-top: 2rem;
   display: flex;

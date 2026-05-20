@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Subject, DisciplinaryField, UserGrades } from '../types';
 import { DISCIPLINARY_FIELDS } from '../types';
 import { getUserGrades, saveUserGrades, clearScoreData } from '../services/storage';
+import { calculateWeightedAverage } from '../services/scoreCalculation';
 import './GradeInputForm.css';
 
 const FIELD_MAPPING: Record<DisciplinaryField, Subject[]> = {
@@ -214,6 +215,21 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
           </section>
         ))}
       </div>
+
+      {(() => {
+        const avg = calculateWeightedAverage(grades);
+        return avg !== null ? (
+          <div className="weighted-average-bar">
+            <div className="weighted-average-left">
+              <span className="weighted-average-label">Moyenne pondérée LLG/H4</span>
+              <span className="weighted-average-thresholds">LLG ≥ 18,3 · H4 ≥ 18,2</span>
+            </div>
+            <span className={`weighted-average-value${avg >= 18.2 ? ' above-threshold' : ''}`}>
+              {avg.toFixed(2)}
+            </span>
+          </div>
+        ) : null;
+      })()}
 
       <div className="form-actions">
         <button type="button" className="btn-reset" onClick={handleReset}>
