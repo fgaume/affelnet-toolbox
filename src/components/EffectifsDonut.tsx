@@ -1,6 +1,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Label, type PieLabelRenderProps } from 'recharts';
 import type { EffectifLycee } from '../types';
 import type { AdmissionDifficulty } from '../services/seuilsApi';
+import { useTheme } from '../hooks/useTheme';
 import './EffectifsDonut.css';
 
 const PARTICLES = new Set(['DE', 'DU', 'LE', 'LA', 'DES', 'LES']);
@@ -133,12 +134,19 @@ function separateColors<T>(entries: T[], colorOf: (e: T) => string): T[] {
 }
 
 export function EffectifsDonut({ effectifs, difficulties, requestedCount }: EffectifsDonutProps) {
+  const { resolvedTheme } = useTheme();
   const total = effectifs.reduce((sum, e) => sum + e.effectif, 0);
   if (total === 0) return null;
 
   const annee = effectifs[0]?.annee?.slice(0, 4) ?? '';
 
-  const colorOf = (e: EffectifLycee) => difficulties.get(e.uai)?.color ?? DEFAULT_COLOR;
+  const colorOf = (e: EffectifLycee) => {
+    const baseColor = difficulties.get(e.uai)?.color ?? DEFAULT_COLOR;
+    if (baseColor.toLowerCase() === '#1a1a1a') {
+      return resolvedTheme === 'dark' ? '#a855f7' : '#1a1a1a';
+    }
+    return baseColor;
+  };
 
   // Sort by effectif desc, then separate same colors
   const sorted = [...effectifs].sort((a, b) => b.effectif - a.effectif);

@@ -57,17 +57,170 @@
   border-top: 1px solid var(--color-border);
 }
 
+.lycee-detail-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
 .lycee-detail-chart h5 {
   font-size: 13px;
   font-weight: 500;
   color: var(--color-text-secondary);
-  margin: 0 0 4px 0;
+  margin: 0;
 }
 
 .lycee-detail-chart-subtitle {
   font-size: 11px;
   color: var(--color-text-muted);
-  margin: 0 0 8px 0;
+  margin: 4px 0 0 0;
+}
+
+/* Bouton Plein Écran */
+.lycee-chart-fullscreen-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.lycee-chart-fullscreen-btn:hover {
+  color: var(--color-text-primary);
+  background: var(--color-border);
+  transform: scale(1.05);
+}
+
+/* Conteneur de hauteur pour Recharts */
+.lycee-chart-wrapper {
+  width: 100%;
+  height: 220px; /* Hauteur par défaut sur bureau */
+  position: relative;
+}
+
+/* Version grand écran */
+.is-fullscreen .lycee-chart-wrapper {
+  height: 480px; /* Hauteur confortable sur bureau */
+}
+
+/* Overlay de la Modale Plein Écran */
+.lycee-chart-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45); /* Fond sombre transparent */
+  backdrop-filter: blur(12px); /* Effet verre dépoli / glassmorphism */
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: chartFadeIn 0.25s ease-out;
+}
+
+/* Contenu de la Modale */
+.lycee-chart-modal-content {
+  background: var(--color-bg-card, #ffffff);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 1000px;
+  padding: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: chartScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Bouton Fermer */
+.lycee-chart-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--color-border);
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.lycee-chart-modal-close:hover {
+  background: var(--color-text-muted);
+  color: var(--color-bg-card);
+  transform: rotate(90deg);
+}
+
+/* --- ADAPTATION RESPONSIVE (MEDIA QUERIES) --- */
+
+@media (max-width: 768px) {
+  /* Modale prend 100% de l'écran sur mobile */
+  .lycee-chart-modal-overlay {
+    padding: 0;
+  }
+
+  .lycee-chart-modal-content {
+    border-radius: 0;
+    border: none;
+    height: 100%;
+    max-height: 100%;
+    padding: 60px 16px 24px 16px; /* Plus d'espace en haut pour éviter le bouton fermer */
+    justify-content: center;
+  }
+
+  .lycee-chart-modal-close {
+    top: 12px;
+    right: 12px;
+  }
+
+  /* Hauteurs normales des graphiques sur mobile */
+  .lycee-chart-wrapper {
+    height: 180px; /* Plus compact pour l'affichage en liste */
+  }
+
+  /* Hauteur dynamique en mode Plein Écran sur mobile */
+  .is-fullscreen .lycee-chart-wrapper {
+    height: 60vh; /* S'adapte à la hauteur du téléphone */
+    min-height: 280px; /* Évite l'écrasement sur les petits écrans */
+  }
+}
+
+/* Gestion du mode Paysage sur Mobile court */
+@media (max-width: 900px) and (max-height: 500px) {
+  .lycee-chart-modal-content {
+    padding: 44px 16px 12px 16px;
+  }
+  .is-fullscreen .lycee-chart-wrapper {
+    height: 55vh;
+  }
+  .lycee-detail-chart-subtitle {
+    display: none; /* Cache les sous-titres longs en paysage court */
+  }
+}
+
+/* Animations */
+@keyframes chartFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes chartScaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .lycee-detail-loading {
