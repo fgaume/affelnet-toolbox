@@ -347,7 +347,7 @@ function App() {
             Contribuer
           </button>
           <button
-            className={`input-tab${topTab === 'affectation' ? ' active' : ''}`}
+            className={`input-tab tab-overflow-item${topTab === 'affectation' ? ' active' : ''}`}
             onClick={() => handleTopTabChange('affectation')}
           >
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -367,9 +367,30 @@ function App() {
           </button>
           {/* Mobile overflow menu trigger */}
           <OverflowMenu
-            active={topTab === 'history'}
-            onSelect={() => handleTopTabChange('history')}
-            label="Seuils d'admission"
+            items={[
+              {
+                id: 'affectation',
+                label: 'Algorithme',
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 6h13v2H3V6zm0 5h10v2H3v-2zm0 5h13v2H3v-2zm15.5-9L22 10.5 18.5 14 17 12.5 19 10.5 17 8.5 18.5 7zm0 9l3.5 3.5L18.5 23 17 21.5 19 19.5 17 17.5 18.5 16z" />
+                  </svg>
+                ),
+                active: topTab === 'affectation',
+                onSelect: () => handleTopTabChange('affectation'),
+              },
+              {
+                id: 'history',
+                label: "Seuils d'admission",
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
+                  </svg>
+                ),
+                active: topTab === 'history',
+                onSelect: () => handleTopTabChange('history'),
+              },
+            ]}
           />
         </div>
 

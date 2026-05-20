@@ -658,7 +658,7 @@ export function DeferredAcceptanceExplainer() {
             <path
               key={c.id}
               d={`M ${c.x1} ${c.y1} L ${c.x2} ${c.y2}`}
-              className="da-arrow-path"
+              className={`da-arrow-path ${derived.isComplete ? "da-arrow-path--final" : ""}`}
               markerEnd="url(#arrowhead)"
             />
           ))}
