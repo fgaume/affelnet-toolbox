@@ -45,7 +45,7 @@ export const FIELD_WEIGHTS: Record<DisciplinaryField, number> = {
  * 4. Weighting: Apply coefficients (5 for FR/Maths, 4 for others).
  * 5. Final Score: (Sum of weighted harmonized scores) * 2.
  */
-export const DEFAULT_MULTIPLIER = 2.3;
+export const DEFAULT_MULTIPLIER = 2.5;
 
 export function calculateAffelnetScore(
   grades: UserGrades,
@@ -67,14 +67,14 @@ export function calculateAffelnetScore(
 
     if (fieldGrades.length > 0) {
       rawAverage = fieldGrades.reduce((a, b) => a + b, 0) / fieldGrades.length;
-      
+
       const fieldStats = stats[field];
       if (fieldStats) {
         const { moyenne: mu, ecartType: sigma } = fieldStats;
         // H = 10 * [10 + (T - mu) / sigma]
         harmonizedNote = 10 * (10 + (rawAverage - mu) / sigma);
       }
-      
+
       const weight = FIELD_WEIGHTS[field];
       contribution = harmonizedNote * weight;
     }
