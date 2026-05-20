@@ -9,6 +9,44 @@ import type {
 } from '../types';
 import { DISCIPLINARY_FIELDS } from '../types';
 
+// Official weekly hours per subject (3ème)
+const HOURLY_WEIGHTS: Array<[Subject, number]> = [
+  ['FRANCAIS', 4],
+  ['MATHEMATIQUES', 3.5],
+  ['LV1', 3],
+  ['LV2', 2.5],
+  ['EPS', 3],
+  ['PHYSIQUE_CHIMIE', 1.5],
+  ['SVT', 1.5],
+  ['TECHNOLOGIE', 1.5],
+  ['ARTS_PLASTIQUES', 1],
+  ['EDUCATION_MUSICALE', 1],
+];
+
+// HISTOIRE_GEO and EMC share 3.5h: average them first, then apply the weight
+export function calculateWeightedAverage(grades: UserGrades): number | null {
+  let weightedSum = 0;
+  let totalHours = 0;
+
+  for (const [subject, hours] of HOURLY_WEIGHTS) {
+    const grade = grades[subject];
+    if (grade !== null) {
+      weightedSum += grade * hours;
+      totalHours += hours;
+    }
+  }
+
+  const hgGrade = grades.HISTOIRE_GEO;
+  const emcGrade = grades.EMC;
+  if (hgGrade !== null) {
+    const avg = emcGrade !== null ? (hgGrade + emcGrade) / 2 : hgGrade;
+    weightedSum += avg * 3.5;
+    totalHours += 3.5;
+  }
+
+  return totalHours > 0 ? weightedSum / totalHours : null;
+}
+
 export const GEO_BONUS = {
   SECTEUR_1: 32640,
   SECTEUR_2: 17760,

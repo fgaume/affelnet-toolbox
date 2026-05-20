@@ -104,7 +104,7 @@ describe('scoreCalculation', () => {
 
   it('calculates the final total as (Sum of weighted scores) * multiplier', () => {
     // If all H = 100, Sum = (100*5)*2 + (100*4)*5 = 1000 + 2000 = 3000
-    // Total = 3000 * 2.3 = 6900
+    // Total = 3000 * 2.5 = 7500 (default multiplier)
     const grades: UserGrades = {
       FRANCAIS: 12,
       MATHEMATIQUES: 10,
@@ -120,7 +120,7 @@ describe('scoreCalculation', () => {
       EMC: 11,
     };
     const score = calculateAffelnetScore(grades, mockStats);
-    expect(score.totalScore).toBeCloseTo(6900, 9);
+    expect(score.totalScore).toBeCloseTo(7500, 9);
   });
 
   it('handles missing grades within a field correctly', () => {
