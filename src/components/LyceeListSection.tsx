@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTheme } from '../hooks/useTheme';
 import type { LyceeSecteur, EffectifLycee } from '../types';
 import { type AdmissionDifficulty, fetchTauxCibleBoursiers } from '../services/seuilsApi';
 import { EffectifsDonut, EffectifsLoading } from './EffectifsDonut';
@@ -46,8 +47,16 @@ export function LyceeListSection({
   uaiCollegeUtilisateur,
   onSectorChange,
 }: LyceeListSectionProps) {
+  const { resolvedTheme } = useTheme();
   const [activeSector, setActiveSector] = useState(1);
   const [tauxCible, setTauxCible] = useState<ReadonlyMap<string, number>>(new Map());
+
+  const resolveDifficultyColor = (color: string) => {
+    if (color.toLowerCase() === '#1a1a1a') {
+      return resolvedTheme === 'dark' ? '#a855f7' : '#1a1a1a';
+    }
+    return color;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -81,9 +90,9 @@ export function LyceeListSection({
       effectifs.map((e) => ({
         uai: e.uai,
         nom: e.nom,
-        color: difficulties.get(e.uai)?.color ?? '#9ca3af',
+        color: resolveDifficultyColor(difficulties.get(e.uai)?.color ?? '#9ca3af'),
       })),
-    [effectifs, difficulties]
+    [effectifs, difficulties, resolvedTheme]
   );
 
   return (
@@ -122,7 +131,7 @@ export function LyceeListSection({
               ['#16a34a', 'Très accessible'],
             ] as const).map(([color, label]) => (
               <span key={color} className="legend-item">
-                <span className="difficulty-badge" style={{ backgroundColor: color }} />
+                <span className="difficulty-badge" style={{ backgroundColor: resolveDifficultyColor(color) }} />
                 {label}
               </span>
             ))}
@@ -143,7 +152,7 @@ export function LyceeListSection({
                 {diff && (
                   <span
                     className="difficulty-badge"
-                    style={{ backgroundColor: diff.color }}
+                    style={{ backgroundColor: resolveDifficultyColor(diff.color) }}
                     title={diff.label}
                   />
                 )}
@@ -175,7 +184,7 @@ export function LyceeListSection({
               ['#16a34a', 'Très accessible'],
             ] as const).map(([color, label]) => (
               <span key={color} className="legend-item">
-                <span className="difficulty-badge" style={{ backgroundColor: color }} />
+                <span className="difficulty-badge" style={{ backgroundColor: resolveDifficultyColor(color) }} />
                 {label}
               </span>
             ))}
@@ -198,7 +207,7 @@ export function LyceeListSection({
                     {diff && (
                       <span
                         className="difficulty-badge"
-                        style={{ backgroundColor: diff.color }}
+                        style={{ backgroundColor: resolveDifficultyColor(diff.color) }}
                         title={diff.label}
                       />
                     )}

@@ -1,4 +1,5 @@
 import type { AdmissionDifficulty } from '../services/seuilsApi';
+import { useTheme } from '../hooks/useTheme';
 import './ScoreGauge.css';
 
 export interface LyceeSeuil {
@@ -27,21 +28,26 @@ const DIFFICULTY_STOPS = [
   { threshold: 40731, color: '#1a1a1a' },
 ];
 
-function buildGradient(min: number, max: number): string {
+function buildGradient(min: number, max: number, theme: 'light' | 'dark'): string {
+  const extremeColor = theme === 'dark' ? '#a855f7' : '#1a1a1a';
   const stops: string[] = ['#2563eb 0%'];
   for (const { threshold, color } of DIFFICULTY_STOPS) {
     const pct = scoreToPercent(threshold, min, max);
     if (pct > 0 && pct < 100) {
-      stops.push(`${color} ${pct.toFixed(1)}%`);
+      const resolvedColor = color === '#1a1a1a' ? extremeColor : color;
+      stops.push(`${resolvedColor} ${pct.toFixed(1)}%`);
     }
   }
-  stops.push('#1a1a1a 100%');
+  stops.push(`${extremeColor} 100%`);
   return `linear-gradient(to right, ${stops.join(', ')})`;
 }
 
 /** For labels: use a theme-aware color for 'extreme' level (black invisible in dark mode) */
-function labelColor(difficulty: AdmissionDifficulty): string {
-  return difficulty.level === 'extreme' ? 'var(--color-text-primary)' : difficulty.color;
+function labelColor(difficulty: AdmissionDifficulty, theme: 'light' | 'dark'): string {
+  if (difficulty.level === 'extreme') {
+    return theme === 'dark' ? '#a855f7' : '#1a1a1a';
+  }
+  return difficulty.color;
 }
 
 function AdmissionIcon({ admitted }: { admitted: boolean }) {
@@ -62,11 +68,12 @@ function AdmissionIcon({ admitted }: { admitted: boolean }) {
 }
 
 export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaugeProps) {
+  const { resolvedTheme } = useTheme();
   const onGauge = lycees.filter(l => l.difficulty.level !== 'very-easy');
   const veryEasy = lycees.filter(l => l.difficulty.level === 'very-easy');
 
   // Sort by seuil for consistent alternating placement
-  const sorted = [...onGauge].sort((a, b) => a.seuil - b.seuil);
+  const sorted = onGauge.toSorted((a, b) => a.seuil - b.seuil);
   const above = sorted.filter((_, i) => i % 2 === 0);
   const below = sorted.filter((_, i) => i % 2 === 1);
 
@@ -80,7 +87,7 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
         <div className="score-gauge-easy-list">
           <ul>
             {veryEasy.map(l => (
-              <li key={l.uai} style={{ color: labelColor(l.difficulty) }}>
+              <li key={l.uai} style={{ color: labelColor(l.difficulty, resolvedTheme) }}>
                 {sector1Score != null && <AdmissionIcon admitted={sector1Score >= l.seuil} />}
                 {l.nom} <span className="score-gauge-seuil-value">(seuil : {l.seuil.toLocaleString()})</span>
               </li>
@@ -93,7 +100,7 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
 
   if (onGauge.length === 0) return null;
 
-  const gradient = buildGradient(axisMin, axisMax);
+  const gradient = buildGradient(axisMin, axisMax, resolvedTheme);
   const userPct = sector1Score != null ? scoreToPercent(sector1Score, axisMin, axisMax) : null;
 
   return (
@@ -112,14 +119,14 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
                 className="score-gauge-label"
                 style={{ left: `${pct}%` }}
               >
-                <span className="score-gauge-label-name" style={{ color: labelColor(l.difficulty) }}>
+                <span className="score-gauge-label-name" style={{ color: labelColor(l.difficulty, resolvedTheme) }}>
                   {sector1Score != null && <AdmissionIcon admitted={admitted} />}
                   {l.nom}
                 </span>
-                <span className="score-gauge-label-value" style={{ color: labelColor(l.difficulty) }}>
+                <span className="score-gauge-label-value" style={{ color: labelColor(l.difficulty, resolvedTheme) }}>
                   {l.seuil.toLocaleString()}
                 </span>
-                <span className="score-gauge-label-line" style={{ backgroundColor: labelColor(l.difficulty) }} />
+                <span className="score-gauge-label-line" style={{ backgroundColor: labelColor(l.difficulty, resolvedTheme) }} />
               </div>
             );
           })}
@@ -152,11 +159,11 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
                 className="score-gauge-label"
                 style={{ left: `${pct}%` }}
               >
-                <span className="score-gauge-label-line" style={{ backgroundColor: labelColor(l.difficulty) }} />
-                <span className="score-gauge-label-value" style={{ color: labelColor(l.difficulty) }}>
+                <span className="score-gauge-label-line" style={{ backgroundColor: labelColor(l.difficulty, resolvedTheme) }} />
+                <span className="score-gauge-label-value" style={{ color: labelColor(l.difficulty, resolvedTheme) }}>
                   {l.seuil.toLocaleString()}
                 </span>
-                <span className="score-gauge-label-name" style={{ color: labelColor(l.difficulty) }}>
+                <span className="score-gauge-label-name" style={{ color: labelColor(l.difficulty, resolvedTheme) }}>
                   {sector1Score != null && <AdmissionIcon admitted={admitted} />}
                   {l.nom}
                 </span>
@@ -178,7 +185,7 @@ export function ScoreGauge({ sector1Score, lycees, axisMin, axisMax }: ScoreGaug
           <p className="score-gauge-easy-title">Lycées très facilement accessibles (hors échelle) :</p>
           <ul>
             {veryEasy.map(l => (
-              <li key={l.uai} style={{ color: labelColor(l.difficulty) }}>
+              <li key={l.uai} style={{ color: labelColor(l.difficulty, resolvedTheme) }}>
                 {sector1Score != null && <AdmissionIcon admitted={sector1Score >= l.seuil} />}
                 {l.nom} <span className="score-gauge-seuil-value">(seuil : {l.seuil.toLocaleString()})</span>
               </li>
