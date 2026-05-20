@@ -905,7 +905,13 @@
   stroke-linecap: round;
   stroke-dasharray: 4 4; /* Ligne pointillée pour un aspect plus "process" */
   animation: da-dash-offset 20s linear infinite;
-  transition: opacity 600ms ease;
+  transition: opacity 600ms ease, stroke-dasharray 500ms ease;
+}
+
+.da-arrow-path--final {
+  stroke-dasharray: none;
+  animation: none;
+  stroke-width: 2.5;
 }
 
 @keyframes da-dash-offset {
