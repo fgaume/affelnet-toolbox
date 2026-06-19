@@ -3,7 +3,6 @@ import {
   useEffect,
   useCallback,
   useRef,
-  type ClipboardEvent,
   type DragEvent,
   type ChangeEvent,
 } from "react";
@@ -70,28 +69,6 @@ export const ContributePanel = () => {
       setIsDragOver(false);
       const file = e.dataTransfer.files[0];
       if (file) doUpload(file);
-    },
-    [doUpload],
-  );
-
-  const handlePasteImage = useCallback(
-    (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (const item of items) {
-        if (item.type.startsWith("image/")) {
-          e.preventDefault();
-          const file = item.getAsFile();
-          if (file) {
-            const ext = file.type.split("/")[1] ?? "png";
-            const named = new File([file], `capture.${ext}`, {
-              type: file.type,
-            });
-            doUpload(named);
-          }
-          return;
-        }
-      }
     },
     [doUpload],
   );
@@ -316,42 +293,6 @@ export const ContributePanel = () => {
                   onChange={handleFileChange}
                   hidden
                 />
-              </div>
-            </section>
-
-            {/* Section 3: Paste image */}
-            <section className="contribute-section">
-              <h3>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="18"
-                  height="18"
-                >
-                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                </svg>
-                Coller une image (copie d'écran, photo de fiche-barème copiée,
-                etc.)
-              </h3>
-              <div
-                className="contribute-paste-zone"
-                role="button"
-                tabIndex={0}
-                onPaste={handlePasteImage}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="24"
-                  height="24"
-                >
-                  <path d="M19 2h-4.18C14.4.84 13.3 0 12 0c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z" />
-                </svg>
-                <span>Cliquez ici puis collez (Ctrl+V / Cmd+V)</span>
-                <span className="contribute-dropzone-hint">
-                  Copie d'écran Mac/Windows, copie depuis Aperçu, iPhone…
-                </span>
               </div>
             </section>
           </div>
