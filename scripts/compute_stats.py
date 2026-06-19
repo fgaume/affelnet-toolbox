@@ -5,9 +5,11 @@ Reads backend/data/notes-harmonisees.csv, computes per-discipline stats,
 updates the HuggingFace dataset JSON, and pushes if changed.
 
 Usage:
-    uv run scripts/compute_stats.py
+    uv run scripts/compute_stats.py            # millesime = annee courante
+    uv run scripts/compute_stats.py --annee 2025
 """
 
+import argparse
 import csv
 import json
 import subprocess
@@ -121,7 +123,11 @@ def find_record(data: list[dict], annee: int, champ: str) -> dict | None:
 
 # ----- Main logic -----
 
-def update_stats(csv_path: Path = CSV_PATH, json_path: Path = JSON_PATH) -> list[str]:
+def update_stats(
+    csv_path: Path = CSV_PATH,
+    json_path: Path = JSON_PATH,
+    annee: int = CURRENT_YEAR,
+) -> list[str]:
     """Compute stats and update JSON. Returns list of updated discipline names."""
     if not csv_path.exists():
         print(f"CSV not found: {csv_path}")
@@ -138,7 +144,7 @@ def update_stats(csv_path: Path = CSV_PATH, json_path: Path = JSON_PATH) -> list
 
     for discipline, points in sorted(groups.items()):
         n = len(points)
-        existing = find_record(data, CURRENT_YEAR, discipline)
+        existing = find_record(data, annee, discipline)
 
         # Skip if precision hasn't increased
         if existing and existing.get("precision", 0) >= n:
@@ -152,7 +158,7 @@ def update_stats(csv_path: Path = CSV_PATH, json_path: Path = JSON_PATH) -> list
         moyenne, ecart_type = compute_moyenne_ecart_type(a, b)
 
         record = {
-            "annee": CURRENT_YEAR,
+            "annee": annee,
             "champ": discipline,
             "moyenne": round(moyenne, 5),
             "ecart-type": round(ecart_type, 5),
@@ -197,11 +203,20 @@ def push_to_hf(updated: list[str], precision: int) -> None:
 
 
 def main() -> None:
-    print(f"Computing stats for {CURRENT_YEAR}...")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--annee",
+        type=int,
+        default=CURRENT_YEAR,
+        help=f"Millesime des donnees a calculer (defaut: {CURRENT_YEAR})",
+    )
+    args = parser.parse_args()
+
+    print(f"Computing stats for {args.annee}...")
     print(f"CSV: {CSV_PATH}")
     print(f"JSON: {JSON_PATH}\n")
 
-    updated = update_stats()
+    updated = update_stats(annee=args.annee)
 
     if not updated:
         print("\nNo changes — nothing to push.")
@@ -209,7 +224,7 @@ def main() -> None:
 
     # Read back precision from the updated JSON for commit message
     data = load_stats_json(JSON_PATH)
-    precisions = [r.get("precision", 0) for r in data if r.get("annee") == CURRENT_YEAR and r.get("champ") in updated]
+    precisions = [r.get("precision", 0) for r in data if r.get("annee") == args.annee and r.get("champ") in updated]
     max_precision = max(precisions) if precisions else 0
 
     push_to_hf(updated, max_precision)
