@@ -26,8 +26,7 @@ Les autres REQs (REQ1 à REQ9, REQ3b, RécupérationEffectifsSeconde) sont des e
 **Objectif** : permettre aux utilisateurs de contribuer à l'application en envoyant :
 
 - des fichiers PDF ou des images (photos),
-- du texte collé directement (copier/coller depuis un tableau PDF, Aperçu macOS, screenshot, etc.),
-- éventuellement une image collée (clipboard iPhone, macOS, Windows 11).
+- du texte collé directement (copier/coller depuis un tableau PDF, Aperçu macOS, screenshot, etc.).
 
 **Côté backend** : exposer un endpoint Python qui reçoit ces données (fichier ou texte brut) et les stocke pour traitement ultérieur (REQ11/REQ12).
 
