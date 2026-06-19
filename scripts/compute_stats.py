@@ -2,11 +2,12 @@
 """Compute academic stats (moyenne, ecart-type) from harmonized grades via linear regression.
 
 Reads backend/data/notes-harmonisees.csv, computes per-discipline stats,
-updates the HuggingFace dataset JSON, and pushes if changed.
+updates the local HuggingFace dataset JSON, and pushes only when --publish is set.
 
 Usage:
-    uv run scripts/compute_stats.py            # millesime = annee courante
-    uv run scripts/compute_stats.py --annee 2025
+    uv run scripts/compute_stats.py                      # calcul local, annee courante
+    uv run scripts/compute_stats.py --annee 2025         # calcul local, millesime 2025
+    uv run scripts/compute_stats.py --annee 2025 --publish  # calcul + push HuggingFace
 """
 
 import argparse
@@ -210,6 +211,11 @@ def main() -> None:
         default=CURRENT_YEAR,
         help=f"Millesime des donnees a calculer (defaut: {CURRENT_YEAR})",
     )
+    parser.add_argument(
+        "--publish",
+        action="store_true",
+        help="Pousse le JSON mis a jour vers HuggingFace (defaut: calcul local seulement)",
+    )
     args = parser.parse_args()
 
     print(f"Computing stats for {args.annee}...")
@@ -220,6 +226,10 @@ def main() -> None:
 
     if not updated:
         print("\nNo changes — nothing to push.")
+        return
+
+    if not args.publish:
+        print("\nCalcul local termine. Relancez avec --publish pour pousser vers HuggingFace.")
         return
 
     # Read back precision from the updated JSON for commit message
