@@ -81,14 +81,15 @@ export const FIELD_WEIGHTS: Record<DisciplinaryField, number> = {
  * 2. Raw Average: Calculate the average of non-null grades in each field.
  * 3. Harmonization: Apply H = 10 * [10 + (T - mu) / sigma]
  * 4. Weighting: Apply coefficients (5 for FR/Maths, 4 for others).
- * 5. Final Score: (Sum of weighted harmonized scores) * 2.
+ * 5. Final Score: (Sum of weighted harmonized scores) * WEIGHTING_COEFFICIENT.
  */
-export const DEFAULT_MULTIPLIER = 2.5;
+
+/** Coefficient de pondération scolaire — valeur officielle fixe. */
+export const WEIGHTING_COEFFICIENT = 2.5;
 
 export function calculateAffelnetScore(
   grades: UserGrades,
-  stats: Record<DisciplinaryField, AcademicStats>,
-  multiplier: number = DEFAULT_MULTIPLIER
+  stats: Record<DisciplinaryField, AcademicStats>
 ): UserScore {
   const details = {} as Record<DisciplinaryField, ScoreDetail>;
   let weightedSum = 0;
@@ -128,7 +129,7 @@ export function calculateAffelnetScore(
 
   return {
     weightedSum,
-    totalScore: weightedSum * multiplier,
+    totalScore: weightedSum * WEIGHTING_COEFFICIENT,
     details,
   };
 }
