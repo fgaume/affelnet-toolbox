@@ -40,14 +40,7 @@ import {
 import { useAdmissionHistory } from './hooks/useAdmissionHistory';
 import { fetchCollegeIps } from './services/collegeApi';
 import { fetchSeuils, getAdmissionDifficulty } from './services/seuilsApi';
-import { calculateAffelnetScore, DEFAULT_MULTIPLIER } from './services/scoreCalculation';
-import {
-  getCustomModels,
-  addCustomModel,
-  updateCustomModel as updateCustomModelStorage,
-  deleteCustomModel as deleteCustomModelStorage,
-  type CustomStatsModel,
-} from './services/customModelsStorage';
+import { calculateAffelnetScore } from './services/scoreCalculation';
 import './App.css';
 
 const ROUTE_TO_TAB: Record<string, TopTab> = {
@@ -99,24 +92,13 @@ function App() {
   const [statsKey, setStatsKey] = useState<string | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [ipsBonus, setIpsBonus] = useState(0);
-  const [multiplier, setMultiplier] = useState(DEFAULT_MULTIPLIER);
   const [lastGrades, setLastGrades] = useState<UserGrades | null>(null);
   const { data: admissionHistory, boursiers: admissionHistoryBoursiers, isLoading: isHistoryLoading, error: historyError } = useAdmissionHistory(topTab === 'history');
   const [seuils, setSeuils] = useState<Map<string, number> | null>(null);
   const [scolarisation, setScolarisation] = useState<ScolarisationStatus>('pending');
   const [collegeScolarisation, setCollegeScolarisation] = useState<College | null>(null);
-  const [customModels, setCustomModels] = useState<CustomStatsModel[]>(() => getCustomModels());
 
-  // Merge fetched stats with custom models so score calculation can resolve any active key
-  const mergedStats = useMemo(() => {
-    if (!allStatsByKey) return null;
-    const merged = new Map(allStatsByKey);
-    for (const m of customModels) {
-      merged.set(`custom:${m.id}`, m.stats as Record<DisciplinaryField, AcademicStats>);
-    }
-    return merged;
-  }, [allStatsByKey, customModels]);
-  const stats = statsKey && mergedStats ? mergedStats.get(statsKey) ?? null : null;
+  const stats = statsKey && allStatsByKey ? allStatsByKey.get(statsKey) ?? null : null;
 
   // Fetch seuils when score tab is activated
   useEffect(() => {
@@ -228,74 +210,19 @@ function App() {
   const handleGradesChange = useCallback((grades: UserGrades) => {
     setLastGrades(grades);
     if (stats) {
-      const newScore = calculateAffelnetScore(grades, stats, multiplier);
-      setScore(newScore);
+      setScore(calculateAffelnetScore(grades, stats));
     }
-  }, [stats, multiplier]);
-
-  const handleMultiplierChange = useCallback((delta: number) => {
-    setMultiplier(prev => {
-      const next = Math.round((prev + delta) * 10) / 10;
-      if (next < 0.1) return prev;
-      if (lastGrades && stats) {
-        const newScore = calculateAffelnetScore(lastGrades, stats, next);
-        setScore(newScore);
-      }
-      return next;
-    });
-  }, [lastGrades, stats]);
+  }, [stats]);
 
   const handleStatsKeyChange = useCallback((key: string) => {
     setStatsKey(key);
-    if (lastGrades && mergedStats) {
-      const keyStats = mergedStats.get(key);
+    if (lastGrades && allStatsByKey) {
+      const keyStats = allStatsByKey.get(key);
       if (keyStats) {
-        setScore(calculateAffelnetScore(lastGrades, keyStats, multiplier));
+        setScore(calculateAffelnetScore(lastGrades, keyStats));
       }
     }
-  }, [lastGrades, mergedStats, multiplier]);
-
-  const handleCreateCustomModel = useCallback((baseKey: string) => {
-    if (!allStatsByKey) return;
-    const baseStats = allStatsByKey.get(baseKey);
-    if (!baseStats) return;
-    const id = crypto.randomUUID();
-    const name = `Perso ${customModels.length + 1}`;
-    const roundedStats = {} as Record<DisciplinaryField, AcademicStats>;
-    for (const [field, val] of Object.entries(baseStats) as [DisciplinaryField, AcademicStats][]) {
-      roundedStats[field] = {
-        moyenne: Math.round(val.moyenne * 10) / 10,
-        ecartType: Math.round(val.ecartType * 10) / 10,
-      };
-    }
-    const model: CustomStatsModel = {
-      id,
-      name,
-      stats: roundedStats,
-    };
-    const updated = addCustomModel(model);
-    setCustomModels(updated);
-    setStatsKey(`custom:${id}`);
-    if (lastGrades) {
-      setScore(calculateAffelnetScore(lastGrades, baseStats, multiplier));
-    }
-  }, [allStatsByKey, customModels.length, lastGrades, multiplier]);
-
-  const handleUpdateCustomModel = useCallback((id: string, stats: Record<DisciplinaryField, AcademicStats>) => {
-    const updated = updateCustomModelStorage(id, stats);
-    setCustomModels(updated);
-    if (statsKey === `custom:${id}` && lastGrades) {
-      setScore(calculateAffelnetScore(lastGrades, stats, multiplier));
-    }
-  }, [statsKey, lastGrades, multiplier]);
-
-  const handleDeleteCustomModel = useCallback((id: string) => {
-    const updated = deleteCustomModelStorage(id);
-    setCustomModels(updated);
-    if (statsKey === `custom:${id}`) {
-      setStatsKey(availableStatsKeys.includes(DEFAULT_STATS_MODEL) ? DEFAULT_STATS_MODEL : availableStatsKeys[0]);
-    }
-  }, [statsKey, availableStatsKeys]);
+  }, [lastGrades, allStatsByKey]);
 
   const handleTopTabChange = (tab: TopTab) => {
     navigate(TAB_TO_ROUTE[tab]);
@@ -481,17 +408,11 @@ function App() {
                   score={score}
                   ipsBonus={ipsBonus}
                   collegeName={scolarisation === 'other' && collegeScolarisation ? collegeScolarisation.nom : result?.college.nom}
-                  multiplier={multiplier}
-                  onMultiplierChange={handleMultiplierChange}
                   statsKey={statsKey}
                   availableStatsKeys={availableStatsKeys}
                   onStatsKeyChange={handleStatsKeyChange}
                   sector1Lycees={sector1LyceesWithSeuils}
                   allSeuilsRange={allSeuilsRange}
-                  customModels={customModels}
-                  onCreateCustomModel={handleCreateCustomModel}
-                  onUpdateCustomModel={handleUpdateCustomModel}
-                  onDeleteCustomModel={handleDeleteCustomModel}
                 />
               </div>
             )}

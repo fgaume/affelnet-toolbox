@@ -132,8 +132,8 @@ export interface ScoreDetail {
 }
 
 export interface UserScore {
-  weightedSum: number; // Sum of weighted harmonized scores (before multiplier)
-  totalScore: number; // Academic score = weightedSum * multiplier
+  weightedSum: number; // Sum of weighted harmonized scores (before weighting coefficient)
+  totalScore: number; // Academic score = weightedSum * WEIGHTING_COEFFICIENT (2.5)
   details: Record<DisciplinaryField, ScoreDetail>;
 }
 
