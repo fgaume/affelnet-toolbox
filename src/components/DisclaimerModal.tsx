@@ -38,9 +38,9 @@ export function DisclaimerModal() {
             pour comparer.
           </li>
           <li>
-            Le coefficient de pondération scolaire ne sera que très tardivement
-            connu (c'est-à-dire courant juin) donc l'application propose de le
-            faire varier à loisirs pour se rendre compte de l'impact.
+            Le coefficient de pondération scolaire est désormais connu : il
+            vaut 2,5. L'application l'applique donc directement, sans possibilité
+            de le faire varier.
           </li>
           <li>
             N'hésitez pas à formuler vos remarques/critiques tant sur le fond
