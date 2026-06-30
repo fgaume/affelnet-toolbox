@@ -35,6 +35,13 @@ describe('parseGrades — variance des libellés', () => {
     const m = bySubject(parseGrades('Physique-Chimie 12').matched);
     expect(m.PHYSIQUE_CHIMIE?.value).toBe(12);
   });
+
+  it('reconnaît "Musique" comme Éducation musicale', () => {
+    expect(bySubject(parseGrades('Musique 16').matched).EDUCATION_MUSICALE?.value).toBe(16);
+    expect(
+      bySubject(parseGrades('Education musicale 16').matched).EDUCATION_MUSICALE?.value,
+    ).toBe(16);
+  });
 });
 
 describe('parseGrades — EPS et abréviations', () => {
