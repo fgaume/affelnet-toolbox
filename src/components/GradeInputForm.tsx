@@ -3,6 +3,7 @@ import type { Subject, DisciplinaryField, UserGrades } from '../types';
 import { DISCIPLINARY_FIELDS } from '../types';
 import { getUserGrades, saveUserGrades, clearScoreData } from '../services/storage';
 import { calculateWeightedAverage } from '../services/scoreCalculation';
+import PasteGradesModal from './PasteGradesModal';
 import './GradeInputForm.css';
 
 const FIELD_MAPPING: Record<DisciplinaryField, Subject[]> = {
@@ -77,6 +78,7 @@ function computeEpsDispenseGrade(grades: UserGrades): number | null {
 const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
   const [grades, setGrades] = useState<UserGrades>(INITIAL_GRADES);
   const [epsDispense, setEpsDispense] = useState(false);
+  const [showPasteModal, setShowPasteModal] = useState(false);
 
   useEffect(() => {
     const savedGrades = getUserGrades();
@@ -143,6 +145,11 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
     updateGrades(newGrades);
   };
 
+  const handlePasteApply = (toApply: Partial<Record<Subject, number>>) => {
+    if (Object.keys(toApply).length === 0) return;
+    updateGrades({ ...grades, ...toApply });
+  };
+
   const handleReset = () => {
     if (window.confirm('Voulez-vous vraiment réinitialiser toutes les notes ?')) {
       setGrades(INITIAL_GRADES);
@@ -158,6 +165,17 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
     <div className="grade-input-form">
       <div className="grade-form-header">
         <h3>Moyennes de 3ème</h3>
+        <button
+          type="button"
+          className="btn-paste-grades"
+          onClick={() => setShowPasteModal(true)}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+          </svg>
+          Coller mes notes
+        </button>
       </div>
 
       <div className="disciplinary-fields">
@@ -236,6 +254,14 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange }) => {
           Réinitialiser
         </button>
       </div>
+
+      {showPasteModal && (
+        <PasteGradesModal
+          currentGrades={grades}
+          onApply={handlePasteApply}
+          onClose={() => setShowPasteModal(false)}
+        />
+      )}
     </div>
   );
 };
