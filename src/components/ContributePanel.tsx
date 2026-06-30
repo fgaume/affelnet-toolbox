@@ -102,7 +102,7 @@ export const ContributePanel = () => {
           données se retrouvent facilement sur votre <b>fiche-barème</b> qu'il
           faut demander dès que votre affectation a été prononcée via{" "}
           <a
-            href="https://www.demarches-simplifiees.fr/commencer/demande-de-fiche-bareme"
+            href="https://demarche.numerique.gouv.fr/commencer/academie-de-paris-demande-de-fiche-bareme-2026"
             target="_blank"
             rel="noopener noreferrer"
           >
