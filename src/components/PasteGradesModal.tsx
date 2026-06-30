@@ -32,18 +32,17 @@ function formatNote(n: number): string {
 
 const PLACEHOLDER = `Collez ici vos notes, par exemple :
 
-Mathématiques        14,5
-Français             12   13   11
-Histoire-Géographie  15
-E.M.C.               16
-Anglais              17
-Espagnol             13
-SVT                  11,5
-Physique-Chimie      12
-Technologie          14
-Arts plastiques      15
-Éducation musicale   16
-EPS                  18`;
+ANGLAIS LV1            17
+FRANCAIS              12   13   11
+HISTOIRE-GEOGRAPHIE    15
+ITALIEN                13
+MATHEMATIQUES          14,5
+PHYSIQUE-CHIMIE        12
+SCIENCES VIE & TERRE   11,5
+TECHNOLOGIE            14
+ARTS PLASTIQUES        15
+ED.PHYSIQUE & SPORT.   18
+EDUCATION MUSICALE     16`;
 
 const PasteGradesModal: React.FC<PasteGradesModalProps> = ({ currentGrades, onApply, onClose }) => {
   const [text, setText] = useState('');

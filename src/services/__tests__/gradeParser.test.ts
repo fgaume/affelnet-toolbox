@@ -110,6 +110,41 @@ describe('parseGrades — notes multiples et moyennes', () => {
   });
 });
 
+describe('parseGrades — bulletin réel (libellés du placeholder)', () => {
+  it('reconnaît tous les libellés du bulletin exemple', () => {
+    const bulletin = [
+      'ANGLAIS LV1            17',
+      'FRANCAIS              12   13   11',
+      'HISTOIRE-GEOGRAPHIE    15',
+      'ITALIEN                13',
+      'MATHEMATIQUES          14,5',
+      'PHYSIQUE-CHIMIE        12',
+      'SCIENCES VIE & TERRE   11,5',
+      'TECHNOLOGIE            14',
+      'ARTS PLASTIQUES        15',
+      'ED.PHYSIQUE & SPORT.   18',
+      'EDUCATION MUSICALE     16',
+    ].join('\n');
+
+    const r = parseGrades(bulletin);
+    const m = bySubject(r.matched);
+
+    expect(r.ignoredLines).toEqual([]);
+    expect(r.conflicts).toEqual([]);
+    expect(m.LV1?.value).toBe(17);
+    expect(m.FRANCAIS?.value).toBe(12); // moyenne 12,13,11
+    expect(m.HISTOIRE_GEO?.value).toBe(15);
+    expect(m.LV2?.value).toBe(13); // italien => LV2
+    expect(m.MATHEMATIQUES?.value).toBe(14.5);
+    expect(m.PHYSIQUE_CHIMIE?.value).toBe(12);
+    expect(m.SVT?.value).toBe(11.5);
+    expect(m.TECHNOLOGIE?.value).toBe(14);
+    expect(m.ARTS_PLASTIQUES?.value).toBe(15);
+    expect(m.EPS?.value).toBe(18); // "ED.PHYSIQUE & SPORT."
+    expect(m.EDUCATION_MUSICALE?.value).toBe(16);
+  });
+});
+
 describe('parseGrades — lignes ignorées', () => {
   it('ignore les lignes sans matière ou sans note', () => {
     const r = parseGrades('Bulletin du 2e trimestre\nMaths 14\nAbsences : 3 demi-journées\nMoyenne générale');

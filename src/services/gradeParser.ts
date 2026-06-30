@@ -219,12 +219,15 @@ function extractGrades(line: string): number[] {
   const cleaned = line.replace(/coe?f(?:ficient)?\s*:?\s*\d+(?:[.,]\d+)?/gi, ' ');
 
   const grades: number[] = [];
-  // Capture un nombre, éventuellement suivi de "/20" (qu'on ignore).
-  const re = /(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:\/\s*20)?/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(cleaned)) !== null) {
+  for (const token of cleaned.split(/\s+/)) {
+    // Un token n'est une note que s'il ne contient aucune lettre : cela écarte
+    // les libellés alphanumériques comme "LV1", "LV2", "3ème", "2nde".
+    if (/[a-zA-ZÀ-ɏ]/.test(token)) continue;
+    // Nombre éventuellement suivi de "/20" (qu'on ignore).
+    const m = token.match(/^[^\d]*(\d{1,2}(?:[.,]\d{1,2})?)(?:\/20)?[^\d]*$/);
+    if (!m) continue;
     const value = parseFloat(m[1].replace(',', '.'));
-    if (!Number.isNaN(value) && value >= 0 && value <= 20) {
+    if (value >= 0 && value <= 20) {
       grades.push(value);
     }
   }
