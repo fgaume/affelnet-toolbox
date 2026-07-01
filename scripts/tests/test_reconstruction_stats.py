@@ -149,3 +149,28 @@ def test_vraies_fiches_2025():
     for field in FIELDS:
         truth_sigma = payload["verite_cachee"][field]["ecart_type"]
         assert sigmas[field] == pytest.approx(truth_sigma, abs=0.02)
+
+
+def test_modele_2026_reproduit_baremes():
+    """Le modèle émis (μ* effectifs, σ) reproduit exactement les barèmes.
+
+    μ* encode K sans être affiché ; le couple (μ*, σ) — consommé tel quel par
+    l'appli — doit redonner le barème total de chaque fiche au flottant près.
+    """
+    from emit_2026_model import SUM_WEIGHTS, effective_means  # noqa: E402
+
+    fixture = RECON_DIR / "fiches_2025_reelles.json"
+    fiches = json.loads(fixture.read_text(encoding="utf-8"))["fiches"]
+    sigmas, k_value = recover(fiches)
+    mus = effective_means(sigmas, k_value)
+
+    # μ* encode bien K : Σ wᵢ·μ*ᵢ/σᵢ == K.
+    encoded_k = sum(FIELD_WEIGHTS[f] * mus[f] / sigmas[f] for f in FIELDS)
+    assert encoded_k == pytest.approx(k_value, abs=1e-9)
+    assert SUM_WEIGHTS == sum(FIELD_WEIGHTS.values())
+
+    stats = {f: FieldStats(mus[f], sigmas[f]) for f in FIELDS}
+    for fiche in fiches:
+        assert bareme_from_grades(fiche["notes"], stats) == pytest.approx(
+            fiche["bareme"], abs=1e-6
+        )

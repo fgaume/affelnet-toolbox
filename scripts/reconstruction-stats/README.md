@@ -60,6 +60,25 @@ Si l'on tient à afficher les moyennes par champ, il faut **une information
 externe** (p. ex. supposer les moyennes stables d'une année sur l'autre, ou une
 seule note harmonisée détaillée sur une fiche) — mais c'est purement cosmétique.
 
+## Alimenter l'appli (modèle 2026)
+
+L'appli calcule le barème à partir d'un couple `(moyenne, écart-type)` par champ.
+Depuis 2026 le détail par champ n'est plus affiché, donc on encode `K` via des
+moyennes « effectives » jamais montrées :
+
+```
+μ*_i = (K / Σ wᵢ) · σ_i        # vérifie Σ wᵢ·μ*_i/σ_i = K
+```
+
+Le couple `(μ*_i, σ_i)` reproduit le barème total **exactement**, sans changement
+de code côté appli. `emit_2026_model.py` produit ces lignes au format du dataset
+legacy ; publier l'année 2026 la rend modèle par défaut :
+
+```bash
+python3 emit_2026_model.py fiches_2026.json --annee 2026 -o modele_2026.json
+# → fusionner modele_2026.json dans le dataset puis publier
+```
+
 ## Fichiers
 
 | Fichier | Rôle |
@@ -69,6 +88,7 @@ seule note harmonisée détaillée sur une fiche) — mais c'est purement cosmé
 | `generate_test_fiches.py` | Génère 14 fiches synthétiques à partir des stats **réelles 2025** (vérité cachée) |
 | `solve_stats.py` | Reconstruit `sigma_i` + `K`, valide contre la vérité cachée et par aller-retour barème |
 | `validate_2025.py` | Valide la formule (harmonisation, coefficients, ×2.5) contre 8 **vraies** fiches 2025 |
+| `emit_2026_model.py` | Émet le modèle 2026 publiable (σ + K encodé en μ*) pour l'appli |
 | `fiches_2025_reelles.json` | Fixture : 8 vraies fiches 2025 (barème = Disciplines × 2.5) pour le solveur |
 
 ## Utilisation
