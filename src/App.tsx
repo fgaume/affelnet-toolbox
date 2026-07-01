@@ -92,7 +92,6 @@ function App() {
   const [statsKey, setStatsKey] = useState<string | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [ipsBonus, setIpsBonus] = useState(0);
-  const [lastGrades, setLastGrades] = useState<UserGrades | null>(null);
   const { data: admissionHistory, boursiers: admissionHistoryBoursiers, isLoading: isHistoryLoading, error: historyError } = useAdmissionHistory(topTab === 'history');
   const [seuils, setSeuils] = useState<Map<string, number> | null>(null);
   const [scolarisation, setScolarisation] = useState<ScolarisationStatus>('pending');
@@ -208,21 +207,10 @@ function App() {
   }, [reset, refresh]);
 
   const handleGradesChange = useCallback((grades: UserGrades) => {
-    setLastGrades(grades);
     if (stats) {
       setScore(calculateAffelnetScore(grades, stats));
     }
   }, [stats]);
-
-  const handleStatsKeyChange = useCallback((key: string) => {
-    setStatsKey(key);
-    if (lastGrades && allStatsByKey) {
-      const keyStats = allStatsByKey.get(key);
-      if (keyStats) {
-        setScore(calculateAffelnetScore(lastGrades, keyStats));
-      }
-    }
-  }, [lastGrades, allStatsByKey]);
 
   const handleTopTabChange = (tab: TopTab) => {
     navigate(TAB_TO_ROUTE[tab]);
@@ -410,7 +398,6 @@ function App() {
                   collegeName={scolarisation === 'other' && collegeScolarisation ? collegeScolarisation.nom : result?.college.nom}
                   statsKey={statsKey}
                   availableStatsKeys={availableStatsKeys}
-                  onStatsKeyChange={handleStatsKeyChange}
                   sector1Lycees={sector1LyceesWithSeuils}
                   allSeuilsRange={allSeuilsRange}
                 />

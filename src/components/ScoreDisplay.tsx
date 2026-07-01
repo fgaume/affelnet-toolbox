@@ -15,7 +15,6 @@ interface ScoreDisplayProps {
   collegeName?: string;
   statsKey: string | null;
   availableStatsKeys: string[];
-  onStatsKeyChange: (key: string) => void;
   sector1Lycees?: LyceeSeuil[];
   allSeuilsRange?: { min: number; max: number };
 }
@@ -26,7 +25,6 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   collegeName,
   statsKey,
   availableStatsKeys,
-  onStatsKeyChange,
   sector1Lycees,
   allSeuilsRange,
 }) => {
@@ -132,25 +130,6 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
           axisMin={allSeuilsRange.min}
           axisMax={allSeuilsRange.max}
         />
-      )}
-
-      {availableStatsKeys.length > 1 && statsKey && (
-        <div className="stats-year-selector">
-          <span className="stats-year-label">
-            Statistiques d'harmonisation :
-          </span>
-          <div className="stats-year-buttons">
-            {availableStatsKeys.map((key) => (
-              <button
-                key={key}
-                className={`stats-year-btn${statsKey === key ? " active" : ""}`}
-                onClick={() => onStatsKeyChange(key)}
-              >
-                {STATS_MODEL_LABELS[key] ?? key}
-              </button>
-            ))}
-          </div>
-        </div>
       )}
 
       <div className="score-info">

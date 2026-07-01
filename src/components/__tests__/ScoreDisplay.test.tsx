@@ -16,7 +16,6 @@ const score = {
 const baseProps = {
   score,
   ipsBonus: 800,
-  onStatsKeyChange: () => {},
 };
 
 afterEach(() => {
@@ -51,7 +50,7 @@ describe('ScoreDisplay — indicateur de millésime des stats', () => {
     ).toBeTruthy();
   });
 
-  it('quand 2026 est disponible, montre 2026 actif sans repli et laisse comparer', () => {
+  it('quand 2026 est disponible, montre 2026 actif sans repli', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-01'));
     render(
@@ -63,8 +62,5 @@ describe('ScoreDisplay — indicateur de millésime des stats', () => {
     );
     expect(screen.getByText('stats 2026')).toBeTruthy();
     expect(screen.queryByText(/ne sont pas encore disponibles/i)).toBeNull();
-    // Les deux millésimes restent sélectionnables pour voir la différence.
-    expect(screen.getByRole('button', { name: '2025' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '2026' })).toBeTruthy();
   });
 });

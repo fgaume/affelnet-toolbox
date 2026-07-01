@@ -171,53 +171,6 @@
   margin-top: 0.5rem;
 }
 
-.stats-year-selector {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  background: var(--color-bg-subtle);
-  border-radius: 8px;
-  border: 1px solid var(--color-border-subtle);
-  flex-wrap: wrap;
-}
-
-.stats-year-label {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-
-.stats-year-buttons {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.stats-year-btn {
-  padding: 4px 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: color 0.2s, background 0.2s, border-color 0.2s;
-}
-
-.stats-year-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.stats-year-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-}
-
 .score-placeholder {
   text-align: center;
   padding: 3rem 1rem;
