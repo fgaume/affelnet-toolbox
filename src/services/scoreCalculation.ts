@@ -47,6 +47,26 @@ export function calculateWeightedAverage(grades: UserGrades): number | null {
   return totalHours > 0 ? weightedSum / totalHours : null;
 }
 
+/**
+ * Seuils d'admission LLG/H4 (moyenne pondérée) par tier de bonus IPS.
+ * Valeurs observées du dernier admis selon la catégorie de bonus IPS
+ * (source : Rectorat de Paris).
+ */
+export const LLG_H4_THRESHOLD_BY_IPS_BONUS: Record<number, number> = {
+  1200: 18.0,
+  800: 18.25,
+  400: 18.15,
+  0: 18.26,
+};
+
+/**
+ * Seuil LLG/H4 applicable pour un bonus IPS donné. Tout bonus inconnu
+ * retombe sur le seuil « sans bonus » (le plus exigeant).
+ */
+export function getLlgH4Threshold(ipsBonus: number): number {
+  return LLG_H4_THRESHOLD_BY_IPS_BONUS[ipsBonus] ?? LLG_H4_THRESHOLD_BY_IPS_BONUS[0];
+}
+
 export const GEO_BONUS = {
   SECTEUR_1: 32640,
   SECTEUR_2: 17760,

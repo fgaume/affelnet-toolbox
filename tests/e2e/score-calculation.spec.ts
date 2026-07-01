@@ -44,4 +44,16 @@ test.describe('Score Calculation & Admission Chances Integration', () => {
     await expect(page.locator('.score-summary-breakdown').first()).toBeVisible();
     await expect(page.locator('.summary-item:has-text("Barème scolaire total")')).toBeVisible();
   });
+
+  test('affiche le seuil LLG/H4 « sans bonus » par défaut (bonus IPS inconnu)', async ({ page }) => {
+    const search = new SearchPage(page);
+    await search.goToScoreTab();
+
+    // Une note suffit à faire apparaître la barre de moyenne pondérée.
+    await page.getByLabel('Moyenne annuelle de Français').first().fill('19');
+
+    const bar = page.locator('.weighted-average-bar');
+    await expect(bar).toBeVisible();
+    await expect(bar.locator('.weighted-average-thresholds')).toContainText('sans bonus IPS ≥ 18,26');
+  });
 });

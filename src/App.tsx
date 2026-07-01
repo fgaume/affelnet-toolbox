@@ -403,7 +403,7 @@ function App() {
             {statsError && <ErrorMessage message={`Erreur lors du chargement des statistiques : ${statsError}`} />}
             {stats && (
               <div className="score-grid">
-                <GradeInputForm onGradesChange={handleGradesChange} />
+                <GradeInputForm onGradesChange={handleGradesChange} ipsBonus={ipsBonus} />
                 <ScoreDisplay
                   score={score}
                   ipsBonus={ipsBonus}
