@@ -34,3 +34,8 @@ scripts/tests/
 test-results/
 .antigravitycli/
 
+# Données de travail locales (non versionnées)
+docs/*.jpg
+backend/data/affelnet-paris-seuils-admission-lycees.json
+backend/data/notes-harmonisees.csv
+
