@@ -39,7 +39,7 @@ import {
 } from './services/scoreApi';
 import { useAdmissionHistory } from './hooks/useAdmissionHistory';
 import { fetchCollegeIps } from './services/collegeApi';
-import { fetchSeuils, getAdmissionDifficulty } from './services/seuilsApi';
+import { fetchSeuils, getAdmissionDifficulty, isKnownSeuil } from './services/seuilsApi';
 import { calculateAffelnetScore } from './services/scoreCalculation';
 import './App.css';
 
@@ -114,7 +114,7 @@ function App() {
       .filter(l => l.secteur === 1)
       .map(l => {
         const seuil = seuils.get(l.uai);
-        if (seuil == null) return null;
+        if (!isKnownSeuil(seuil)) return null;
         return { uai: l.uai, nom: l.nom, seuil, difficulty: getAdmissionDifficulty(seuil) };
       })
       .filter((l): l is NonNullable<typeof l> => l != null);
