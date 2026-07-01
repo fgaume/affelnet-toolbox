@@ -42,6 +42,14 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
 
   const finalScores = calculateFinalScores(score.totalScore, ipsBonus);
 
+  // Indicateur du millésime de statistiques d'harmonisation utilisé.
+  const currentYear = new Date().getFullYear();
+  const activeLabel = statsKey ? STATS_MODEL_LABELS[statsKey] ?? statsKey : null;
+  const activeIsYear = statsKey !== null && /^\d{4}$/.test(statsKey);
+  const currentYearAvailable = availableStatsKeys.includes(String(currentYear));
+  const isFallbackYear =
+    activeIsYear && Number(statsKey) < currentYear && !currentYearAvailable;
+
   return (
     <div className="score-display">
       <h2>Barème selon le secteur</h2>
@@ -69,11 +77,28 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
 
       <div className="score-summary-breakdown">
         <div className="summary-item">
-          <span>Barème scolaire total</span>
+          <span className="summary-label-with-badge">
+            Barème scolaire total
+            {activeLabel && (
+              <span
+                className={`stats-source-badge${isFallbackYear ? " is-fallback" : ""}`}
+                title="Statistiques d'harmonisation utilisées pour ce calcul"
+              >
+                <span className="stats-source-badge-dot" aria-hidden="true" />
+                {activeIsYear ? `stats ${activeLabel}` : `modèle ${activeLabel}`}
+              </span>
+            )}
+          </span>
           <span className="summary-value">
             {Math.round(score.totalScore).toLocaleString()}
           </span>
         </div>
+        {isFallbackYear && (
+          <p className="stats-fallback-note">
+            Harmonisation basée sur le millésime {statsKey} : les statistiques{" "}
+            {currentYear} ne sont pas encore disponibles.
+          </p>
+        )}
         <div className="summary-item">
           <span>
             Bonus IPS {collegeName ? collegeName : "(collège de scolarisation)"}
