@@ -39,3 +39,6 @@ docs/*.jpg
 backend/data/affelnet-paris-seuils-admission-lycees.json
 backend/data/notes-harmonisees.csv
 
+# Miroir local des données Freebox (données perso — jamais versionné)
+data/freebox/
+

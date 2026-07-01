@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Agent launchd : miroir périodique des données Freebox vers data/freebox/.
+  Installation :
+    cp scripts/launchd/com.affelnet.freebox-mirror.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.affelnet.freebox-mirror.plist
+  Désinstallation :
+    launchctl unload ~/Library/LaunchAgents/com.affelnet.freebox-mirror.plist
+    rm ~/Library/LaunchAgents/com.affelnet.freebox-mirror.plist
+  Logs : ~/Library/Logs/affelnet-freebox-mirror.log
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.affelnet.freebox-mirror</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/fred/Code/college/affelnet-no-socle/scripts/mirror-freebox-data.sh</string>
+        <string>-v</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/fred/.pyenv/shims:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- Toutes les heures (3600 s). Ajuste cette valeur pour changer la cadence. -->
+    <key>StartInterval</key>
+    <integer>3600</integer>
+
+    <!-- Lance une première sync au chargement de l'agent. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/fred/Library/Logs/affelnet-freebox-mirror.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/fred/Library/Logs/affelnet-freebox-mirror.log</string>
+</dict>
+</plist>
