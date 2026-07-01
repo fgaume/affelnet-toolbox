@@ -1,11 +1,8 @@
 import React from "react";
-import type { UserScore, DisciplinaryField } from "../types";
-import { DISCIPLINARY_FIELDS } from "../types";
+import type { UserScore } from "../types";
 import {
   calculateFinalScores,
   GEO_BONUS,
-  FIELD_WEIGHTS,
-  WEIGHTING_COEFFICIENT,
 } from "../services/scoreCalculation";
 import { STATS_MODEL_LABELS } from "../services/scoreApi";
 import { ScoreGauge } from "./ScoreGauge";
@@ -22,16 +19,6 @@ interface ScoreDisplayProps {
   sector1Lycees?: LyceeSeuil[];
   allSeuilsRange?: { min: number; max: number };
 }
-
-const FIELD_NAMES: Record<DisciplinaryField, string> = {
-  FRANCAIS: "Français",
-  MATHEMATIQUES: "Mathématiques",
-  HISTOIRE_GEO: "Histoire-Géo / EMC",
-  LANGUES_VIVANTES: "Langues Vivantes",
-  SCIENCES_TECHNO_DP: "Sciences & Technologie",
-  ARTS: "Arts",
-  EPS: "EPS",
-};
 
 const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   score,
@@ -121,73 +108,6 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
           axisMax={allSeuilsRange.max}
         />
       )}
-
-      <div className="score-breakdown">
-        <h3>Détails par champ disciplinaire</h3>
-        <p className="harmonisation-explanation">
-          La note harmonisée replace chaque moyenne dans le contexte académique
-          : elle mesure l'écart à la moyenne de l'académie, rapporté à la
-          dispersion des résultats. Concrètement, on prend la note brute, on lui
-          soustrait la moyenne académique, puis on divise par l'écart-type. On y
-          ajoute 10 puis on multiplie le tout par 10 pour obtenir une note
-          harmonisée autour de 100. Les moyennes académiques et les écarts-types
-          utilisés pour cette harmonisation sont fournis pas les modèles tout en
-          bas.
-        </p>
-        <table className="score-table">
-          <thead>
-            <tr>
-              <th scope="col">Champ</th>
-              <th scope="col" className="numeric">
-                Brut
-              </th>
-              <th scope="col" className="numeric">
-                Harmonisé
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {DISCIPLINARY_FIELDS.map((field) => {
-              const detail = score.details[field];
-              const harmonizedValue = detail.harmonizedNote;
-
-              return (
-                <tr key={field}>
-                  <td>{FIELD_NAMES[field]}</td>
-                  <td className="numeric">{detail.rawAverage.toFixed(9)}</td>
-                  <td className="numeric">
-                    <span className="weight-prefix">
-                      {FIELD_WEIGHTS[field]}x
-                    </span>{" "}
-                    {harmonizedValue.toFixed(9)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          <tfoot>
-            <tr className="score-total-row">
-              <td>Total pondéré</td>
-              <td className="numeric"></td>
-              <td className="numeric">
-                {Math.round(score.weightedSum).toLocaleString()}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <div className="score-summary-breakdown" style={{ marginTop: "1rem" }}>
-        <div className="summary-item summary-item-emphasis">
-          <span className="multiplier-label">
-            Coefficient de pondération
-            <span className="multiplier-value">×{WEIGHTING_COEFFICIENT.toFixed(1)}</span>
-          </span>
-          <span className="summary-value">
-            {Math.round(score.totalScore).toLocaleString()}
-          </span>
-        </div>
-      </div>
 
       {availableStatsKeys.length > 1 && statsKey && (
         <div className="stats-year-selector">
