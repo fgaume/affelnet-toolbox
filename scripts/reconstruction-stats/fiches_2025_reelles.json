@@ -1,0 +1,179 @@
+{
+  "description": "8 vraies fiches 2025 (barème = colonne Disciplines × 2.5 pour simuler 2026). EMC=HI-GE quand absent.",
+  "verite_cachee": {
+    "FRANCAIS": {
+      "moyenne": 12.3112,
+      "ecart_type": 3.26782
+    },
+    "MATHEMATIQUES": {
+      "moyenne": 11.8787,
+      "ecart_type": 3.95099
+    },
+    "HISTOIRE_GEO": {
+      "moyenne": 12.606,
+      "ecart_type": 3.17345
+    },
+    "LANGUES_VIVANTES": {
+      "moyenne": 13.1834,
+      "ecart_type": 3.01142
+    },
+    "SCIENCES_TECHNO_DP": {
+      "moyenne": 12.9214,
+      "ecart_type": 2.80484
+    },
+    "ARTS": {
+      "moyenne": 14.5552,
+      "ecart_type": 1.96101
+    },
+    "EPS": {
+      "moyenne": 14.5939,
+      "ecart_type": 1.96253
+    }
+  },
+  "fiches": [
+    {
+      "eleve": "PierreAlviset",
+      "notes": {
+        "FRANCAIS": 11.33,
+        "MATHEMATIQUES": 14,
+        "LV1": 16,
+        "LV2": 15,
+        "EPS": 15,
+        "ARTS_PLASTIQUES": 16,
+        "EDUCATION_MUSICALE": 14,
+        "SVT": 11.33,
+        "TECHNOLOGIE": 15,
+        "PHYSIQUE_CHIMIE": 15,
+        "HISTOIRE_GEO": 13,
+        "EMC": 13
+      },
+      "bareme": 7692.915
+    },
+    {
+      "eleve": "Braque-Rodin",
+      "notes": {
+        "FRANCAIS": 13,
+        "MATHEMATIQUES": 14,
+        "LV1": 14,
+        "LV2": 15,
+        "EPS": 14,
+        "ARTS_PLASTIQUES": 14,
+        "EDUCATION_MUSICALE": 16,
+        "SVT": 11.33,
+        "TECHNOLOGIE": 13,
+        "PHYSIQUE_CHIMIE": 13.33,
+        "HISTOIRE_GEO": 8,
+        "EMC": 8
+      },
+      "bareme": 7471.2325
+    },
+    {
+      "eleve": "Lamartine",
+      "notes": {
+        "FRANCAIS": 13,
+        "MATHEMATIQUES": 13,
+        "LV1": 11.33,
+        "LV2": 14,
+        "EPS": 16,
+        "ARTS_PLASTIQUES": 16,
+        "EDUCATION_MUSICALE": 16,
+        "SVT": 14,
+        "TECHNOLOGIE": 16,
+        "PHYSIQUE_CHIMIE": 11.33,
+        "HISTOIRE_GEO": 14,
+        "EMC": 14
+      },
+      "bareme": 7764.645
+    },
+    {
+      "eleve": "Boursier-Charlemagne",
+      "notes": {
+        "FRANCAIS": 15,
+        "MATHEMATIQUES": 12.33,
+        "LV1": 14,
+        "LV2": 15,
+        "EPS": 16,
+        "ARTS_PLASTIQUES": 16,
+        "EDUCATION_MUSICALE": 13,
+        "SVT": 14.5,
+        "TECHNOLOGIE": 13,
+        "PHYSIQUE_CHIMIE": 14.5,
+        "HISTOIRE_GEO": 15,
+        "EMC": 15
+      },
+      "bareme": 7843.575
+    },
+    {
+      "eleve": "Charlemagne",
+      "notes": {
+        "FRANCAIS": 8,
+        "MATHEMATIQUES": 8,
+        "LV1": 13,
+        "LV2": 16,
+        "EPS": 14,
+        "ARTS_PLASTIQUES": 16,
+        "EDUCATION_MUSICALE": 15,
+        "SVT": 9.66,
+        "TECHNOLOGIE": 13,
+        "PHYSIQUE_CHIMIE": 13,
+        "HISTOIRE_GEO": 13,
+        "EMC": 13
+      },
+      "bareme": 7249.665
+    },
+    {
+      "eleve": "Oeben-Arago",
+      "notes": {
+        "FRANCAIS": 15,
+        "MATHEMATIQUES": 16,
+        "LV1": 14,
+        "LV2": 15,
+        "EPS": 16,
+        "ARTS_PLASTIQUES": 16,
+        "EDUCATION_MUSICALE": 16,
+        "SVT": 15,
+        "TECHNOLOGIE": 16,
+        "PHYSIQUE_CHIMIE": 16,
+        "HISTOIRE_GEO": 14,
+        "EMC": 14
+      },
+      "bareme": 8064.2175
+    },
+    {
+      "eleve": "Charlemagne-Weil",
+      "notes": {
+        "FRANCAIS": 13,
+        "MATHEMATIQUES": 14,
+        "LV1": 16,
+        "LV2": 16,
+        "EPS": 16,
+        "ARTS_PLASTIQUES": 16,
+        "EDUCATION_MUSICALE": 16,
+        "SVT": 15,
+        "TECHNOLOGIE": 16,
+        "PHYSIQUE_CHIMIE": 15,
+        "HISTOIRE_GEO": 13,
+        "EMC": 13
+      },
+      "bareme": 7930.6125
+    },
+    {
+      "eleve": "Oeben-H4",
+      "notes": {
+        "FRANCAIS": 16,
+        "MATHEMATIQUES": 16,
+        "LV1": 16,
+        "LV2": 16,
+        "EPS": 16,
+        "ARTS_PLASTIQUES": 16,
+        "EDUCATION_MUSICALE": 16,
+        "SVT": 16,
+        "TECHNOLOGIE": 16,
+        "PHYSIQUE_CHIMIE": 16,
+        "HISTOIRE_GEO": 16,
+        "EMC": 16
+      },
+      "bareme": 8227.0575
+    }
+  ]
+}

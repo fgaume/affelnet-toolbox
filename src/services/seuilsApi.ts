@@ -13,11 +13,21 @@ export function getSeuilYears(): readonly number[] {
   return seuilYears;
 }
 
+/**
+ * Un seuil de 0 signifie « non connu » (année sans fiche pour ce lycée) — à
+ * distinguer d'un vrai seuil. Toutes les vues doivent traiter 0 comme absent.
+ */
+export const SEUIL_UNKNOWN = 0;
+
+export function isKnownSeuil(seuil: number | null | undefined): seuil is number {
+  return seuil != null && seuil > SEUIL_UNKNOWN;
+}
+
 export interface AdmissionDifficulty {
   color: string;
   label: string;
   seuil: number;
-  level: 'extreme' | 'hard' | 'medium' | 'easy' | 'very-easy';
+  level: 'extreme' | 'hard' | 'medium' | 'easy' | 'very-easy' | 'unknown';
 }
 
 interface DatasetRow {
@@ -97,7 +107,8 @@ export function fetchSeuils(): Promise<Map<string, number>> {
     const map = new Map<string, number>();
     for (const { row } of rows) {
       const seuil = row.seuils[latestIndex];
-      if (seuil != null) map.set(row.code, seuil);
+      // 0 = seuil non connu pour cette année → traité comme absent.
+      if (isKnownSeuil(seuil)) map.set(row.code, seuil);
     }
     return map;
   })().catch((err) => {
@@ -181,6 +192,9 @@ export function fetchTauxCibleBoursiers(): Promise<ReadonlyMap<string, number>> 
  * Determine admission difficulty from a seuil value.
  */
 export function getAdmissionDifficulty(seuil: number): AdmissionDifficulty {
+  if (!isKnownSeuil(seuil)) {
+    return { color: '#9ca3af', label: 'Seuil non connu', seuil, level: 'unknown' };
+  }
   if (seuil > 40731) {
     return { color: '#1a1a1a', label: 'Inaccessible sans bonus', seuil, level: 'extreme' };
   }

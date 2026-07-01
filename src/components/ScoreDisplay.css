@@ -96,6 +96,54 @@
   flex-shrink: 0;
 }
 
+.summary-label-with-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stats-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-primary);
+  background-color: var(
+    --color-primary-light,
+    rgba(var(--color-primary-rgb), 0.08)
+  );
+  border: 1px solid var(--color-primary);
+}
+
+.stats-source-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+}
+
+.stats-source-badge.is-fallback {
+  color: var(--color-warning, #b45309);
+  border-color: var(--color-warning, #b45309);
+  background-color: rgba(180, 83, 9, 0.08);
+}
+
+.stats-source-badge.is-fallback .stats-source-badge-dot {
+  background-color: var(--color-warning, #b45309);
+}
+
+.stats-fallback-note {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
 .multiplier-label {
   display: flex;
   align-items: center;
@@ -121,53 +169,6 @@
   font-size: 1.25rem;
   color: var(--color-text-secondary);
   margin-top: 0.5rem;
-}
-
-.stats-year-selector {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  background: var(--color-bg-subtle);
-  border-radius: 8px;
-  border: 1px solid var(--color-border-subtle);
-  flex-wrap: wrap;
-}
-
-.stats-year-label {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-
-.stats-year-buttons {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.stats-year-btn {
-  padding: 4px 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: color 0.2s, background 0.2s, border-color 0.2s;
-}
-
-.stats-year-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.stats-year-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
 }
 
 .score-placeholder {

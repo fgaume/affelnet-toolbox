@@ -1,6 +1,5 @@
 import {
   useState,
-  useEffect,
   useCallback,
   useRef,
   type DragEvent,
@@ -8,10 +7,6 @@ import {
 } from "react";
 import { uploadFile, type UploadResult } from "../services/uploadApi";
 import "./ContributePanel.css";
-
-// Imports des GIFs d'instruction
-import harmoGif from "../assets/images/tableau-harmo.gif";
-import voeuxGif from "../assets/images/tableau-voeux.gif";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
 
@@ -26,13 +21,8 @@ export const ContributePanel = () => {
     status: "idle",
   });
   const [isDragOver, setIsDragOver] = useState(false);
-  const [pasteText, setPasteText] = useState("");
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [currentYear] = useState(() => new Date().getFullYear());
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
 
   const doUpload = useCallback(async (file: File) => {
     setUploadState({ status: "uploading" });
@@ -73,15 +63,6 @@ export const ContributePanel = () => {
     [doUpload],
   );
 
-  const handleSendText = useCallback(() => {
-    const trimmed = pasteText.trim();
-    if (!trimmed) return;
-    const blob = new Blob([trimmed], { type: "text/plain" });
-    const file = new File([blob], "fiche-bareme.txt", { type: "text/plain" });
-    doUpload(file);
-    setPasteText("");
-  }, [pasteText, doUpload]);
-
   const resetState = useCallback(() => {
     setUploadState({ status: "idle" });
   }, []);
@@ -95,12 +76,12 @@ export const ContributePanel = () => {
 
       <div className="contribute-description">
         <p>
-          Cette section vous permet de contribuer à cet outil en saisissant les
+          Cette section vous permet de contribuer à cet outil en envoyant les
           données indispensables à son fonctionnement :{" "}
-          <b>les seuils d'admission</b> aux lycées et les{" "}
-          <b>notes harmonisées</b> nécessaires au calcul du score Affelnet. Ces
-          données se retrouvent facilement sur votre <b>fiche-barème</b> qu'il
-          faut demander dès que votre affectation a été prononcée via{" "}
+          <b>les seuils d'admission</b> aux lycées et les <b>notes</b>{" "}
+          nécessaires au calcul du score Affelnet. Ces données se trouvent sur
+          votre <b>fiche-barème</b>, qu'il faut demander dès que votre
+          affectation a été prononcée via{" "}
           <a
             href="https://demarche.numerique.gouv.fr/commencer/academie-de-paris-demande-de-fiche-bareme-2026"
             target="_blank"
@@ -110,21 +91,10 @@ export const ContributePanel = () => {
           </a>
           .
         </p>
-        <p>Vous pouvez ici :</p>
-        <ul>
-          <li>
-            copier-coller le contenu du tableau des vœux (qui contient le barème
-            du dernier admis qui nous intéresse) et envoyer les données.
-          </li>
-          <li>
-            puis copier-coller le contenu du tableau des notes harmonisées des
-            champs disciplinaires et envoyer les données.
-          </li>
-          <li>
-            ou bien simplement envoyer directement la fiche-barème reçue du
-            Rectorat.
-          </li>
-        </ul>
+        <p>
+          Envoyez simplement votre <b>fiche-barème complète</b> (PDF ou photo) :
+          nous en extrayons automatiquement toutes les données nécessaires.
+        </p>
       </div>
 
       {/* Status feedback */}
@@ -160,98 +130,7 @@ export const ContributePanel = () => {
       {uploadState.status !== "uploading" &&
         uploadState.status !== "success" && (
           <div className="contribute-sections">
-            {/* Section 1: Paste text */}
-            <section className="contribute-section">
-              <h3>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="18"
-                  height="18"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
-                </svg>
-                Copier/coller des données textuelles de la fiche barème
-              </h3>
-
-              <div
-                className="contribute-instructions-gifs"
-                style={{
-                  display: "flex",
-                  gap: "1rem",
-                  marginBottom: "1rem",
-                  marginTop: "0.5rem",
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <p
-                    style={{
-                      fontSize: "0.85rem",
-                      marginBottom: "0.5rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Zone du tableau des notes à sélectionner :
-                  </p>
-                  <img
-                    src={harmoGif}
-                    alt="Zone à copier pour le tableau des notes harmonisées"
-                    style={{
-                      maxWidth: "100%",
-                      height: "auto",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                </div>
-                <div style={{ flex: 2 }}>
-                  <p
-                    style={{
-                      fontSize: "0.85rem",
-                      marginBottom: "0.5rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Zone du tableau des vœux à sélectionner :
-                  </p>
-                  <img
-                    src={voeuxGif}
-                    alt="Zone à copier pour le tableau des vœux"
-                    style={{
-                      maxWidth: "100%",
-                      height: "auto",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <textarea
-                className="contribute-textarea"
-                placeholder="Collez ici le contenu texte de votre fiche-barème (sélectionnez le contenu du tableau des vœux ou des notes harmonisées en suivant les animations ci-dessus et copiez-collez-le ici)"
-                value={pasteText}
-                onChange={(e) => setPasteText(e.target.value)}
-                rows={6}
-              />
-              <button
-                className="contribute-send-btn"
-                disabled={!pasteText.trim()}
-                onClick={handleSendText}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="16"
-                  height="16"
-                >
-                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                </svg>
-                Envoyer les données
-              </button>
-            </section>
-
-            {/* Section 2: File upload */}
+            {/* Envoi de la fiche-barème (PDF ou image) */}
             <section className="contribute-section">
               <h3>
                 <svg
@@ -262,7 +141,7 @@ export const ContributePanel = () => {
                 >
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
                 </svg>
-                Fichier-barème au format PDF ou image
+                Fiche-barème au format PDF ou image
               </h3>
               <div
                 className={`contribute-dropzone${isDragOver ? " contribute-dropzone--active" : ""}`}

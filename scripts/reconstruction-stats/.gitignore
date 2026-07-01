@@ -1,0 +1,5 @@
+# Artefacts régénérables (voir generate_test_fiches.py)
+__pycache__/
+fiches_test.json
+fiches_test.csv
+fiche_verif.json
