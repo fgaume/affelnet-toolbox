@@ -1,6 +1,20 @@
 import { describe, it, expect } from 'vitest';
-import { calculateAffelnetScore } from '../scoreCalculation';
+import { calculateAffelnetScore, getLlgH4Threshold } from '../scoreCalculation';
 import type { UserGrades, AcademicStats, DisciplinaryField } from '../../types';
+
+describe('getLlgH4Threshold', () => {
+  it('retourne le seuil correspondant à chaque tier de bonus IPS', () => {
+    expect(getLlgH4Threshold(1200)).toBe(18.0);
+    expect(getLlgH4Threshold(800)).toBe(18.25);
+    expect(getLlgH4Threshold(400)).toBe(18.15);
+    expect(getLlgH4Threshold(0)).toBe(18.26);
+  });
+
+  it('retombe sur le seuil « sans bonus » pour un bonus inconnu', () => {
+    expect(getLlgH4Threshold(-1)).toBe(18.26);
+    expect(getLlgH4Threshold(999)).toBe(18.26);
+  });
+});
 
 describe('scoreCalculation', () => {
   const mockStats: Record<DisciplinaryField, AcademicStats> = {

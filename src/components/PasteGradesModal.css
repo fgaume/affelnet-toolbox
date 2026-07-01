@@ -1,0 +1,235 @@
+.paste-grades-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.paste-grades-modal {
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border-radius: 16px;
+  padding: 1.75rem;
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: paste-grades-slide-in 0.25s ease-out;
+}
+
+@keyframes paste-grades-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.paste-grades-title {
+  margin: 0 0 1rem;
+  color: var(--color-text-primary);
+}
+
+.paste-grades-help {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.paste-grades-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  resize: vertical;
+}
+
+.paste-grades-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.paste-grades-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.paste-grades-btn-primary,
+.paste-grades-btn-secondary {
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, opacity 0.2s;
+}
+
+.paste-grades-btn-primary {
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.paste-grades-btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.paste-grades-btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.paste-grades-btn-secondary {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.paste-grades-btn-secondary:hover {
+  background: var(--color-bg-hover);
+}
+
+.paste-grades-empty {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.92rem;
+}
+
+.paste-grades-summary {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.paste-grades-summary th,
+.paste-grades-summary td {
+  text-align: left;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.paste-grades-summary th {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cell-note {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cell-avg-hint {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.cell-label {
+  color: var(--color-text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+}
+
+.cell-status {
+  font-size: 0.78rem;
+  color: var(--color-success-text);
+  white-space: nowrap;
+}
+
+.row-skipped {
+  opacity: 0.55;
+}
+
+.row-skipped .cell-status {
+  color: var(--color-text-muted);
+}
+
+.paste-grades-conflict {
+  margin-top: 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--color-warning-text);
+  background: var(--color-warning-bg);
+  border-radius: 8px;
+}
+
+.paste-grades-conflict-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-warning-text);
+}
+
+.paste-grades-conflict-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-warning-text);
+}
+
+.paste-grades-conflict-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.paste-grades-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.paste-grades-ignored {
+  margin-top: 1rem;
+}
+
+.paste-grades-ignored-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.paste-grades-ignored-toggle:hover {
+  color: var(--color-text-secondary);
+}
+
+.paste-grades-ignored-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.paste-grades-ignored-list li {
+  margin-bottom: 0.15rem;
+}
