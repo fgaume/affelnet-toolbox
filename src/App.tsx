@@ -30,7 +30,10 @@ import {
   DisclaimerModal,
   ContributePanel,
   DeferredAcceptanceExplainer,
+  LyceeSecteurPicker,
+  ReverseSectorResult,
 } from './components';
+import { useReverseSectorSearch } from './hooks/useReverseSectorSearch';
 import OverflowMenu from './components/OverflowMenu';
 import { updateHistoryScolarisation } from './services/storage';
 import {
@@ -68,6 +71,7 @@ function App() {
   const navigate = useNavigate();
   const topTab = useMemo(() => ROUTE_TO_TAB[location.pathname] ?? 'search', [location.pathname]);
   const [searchMode, setSearchMode] = useState<SearchMode>('address');
+  const reverseSearch = useReverseSectorSearch();
 
   // Sync state with URL
   useEffect(() => {
@@ -78,7 +82,12 @@ function App() {
 
   // Focus the correct input when search mode changes
   useEffect(() => {
-    const selector = searchMode === 'address' ? '.address-input' : '.college-input';
+    const selector =
+      searchMode === 'address'
+        ? '.address-input'
+        : searchMode === 'lycees'
+          ? '.lycee-picker-input'
+          : '.college-input';
     requestAnimationFrame(() => {
       const input = document.querySelector<HTMLInputElement>(selector);
       input?.focus();
@@ -331,6 +340,15 @@ function App() {
                   </svg>
                   Par collège de secteur
                 </button>
+                <button
+                  className={`search-mode-tab${searchMode === 'lycees' ? ' active' : ''}`}
+                  onClick={() => setSearchMode('lycees')}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zm0 13L3.74 11.5 12 7l8.26 4.5L12 16z" />
+                  </svg>
+                  Par lycées de secteur
+                </button>
               </div>
               {searchMode === 'address' && (
                 <AddressInput onAddressSelect={handleAddressSelect} disabled={isLoading} />
@@ -341,6 +359,22 @@ function App() {
                   placeholder="Nom de votre collège de secteur..."
                   disabled={isLoading}
                 />
+              )}
+              {searchMode === 'lycees' && (
+                <>
+                  <LyceeSecteurPicker
+                    catalog={reverseSearch.catalog}
+                    selected={reverseSearch.selected}
+                    isLoading={reverseSearch.isCatalogLoading}
+                    onAdd={reverseSearch.addLycee}
+                    onRemove={reverseSearch.removeLycee}
+                    onClear={reverseSearch.clear}
+                  />
+                  <ReverseSectorResult
+                    selectedCount={reverseSearch.selected.length}
+                    result={reverseSearch.result}
+                  />
+                </>
               )}
             </>
           )}

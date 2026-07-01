@@ -1,0 +1,92 @@
+.reverse-result {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 16px;
+}
+
+.reverse-result--hint,
+.reverse-result--empty {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-subtle);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.reverse-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.reverse-status--success {
+  color: #16a34a;
+  background-color: rgba(22, 163, 74, 0.1);
+}
+
+.reverse-status--info {
+  color: var(--color-primary);
+  background-color: var(--color-primary-light, rgba(var(--color-primary-rgb), 0.1));
+}
+
+.reverse-status--warn {
+  color: #b45309;
+  background-color: rgba(180, 83, 9, 0.1);
+}
+
+.reverse-note {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.reverse-college-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reverse-college {
+  padding: 12px 14px;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.reverse-college-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.reverse-college-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.reverse-college-score {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.reverse-college-missing {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
