@@ -1,0 +1,126 @@
+.lycee-picker {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+}
+
+.lycee-picker-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background-color: var(--color-bg-input);
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s ease;
+}
+
+.lycee-picker-field:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.lycee-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background-color: var(--color-primary-light, rgba(var(--color-primary-rgb), 0.1));
+  border: 1px solid var(--color-primary);
+  border-radius: 999px;
+}
+
+.lycee-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.lycee-chip-remove:hover {
+  opacity: 1;
+}
+
+.lycee-chip-remove svg {
+  width: 12px;
+  height: 12px;
+}
+
+.lycee-picker-input {
+  flex: 1;
+  min-width: 140px;
+  padding: 4px;
+  font-size: 15px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+}
+
+.lycee-picker-input:focus {
+  outline: none;
+}
+
+.lycee-picker-input::placeholder {
+  color: var(--color-text-faint);
+}
+
+.lycee-picker-clear {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.lycee-picker-clear:hover {
+  color: var(--color-text-secondary);
+}
+
+.lycee-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  background-color: var(--color-bg-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--color-shadow-lg);
+  z-index: 100;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.lycee-suggestion {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 15px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background-color 0.15s;
+}
+
+.lycee-suggestion:hover,
+.lycee-suggestion.highlighted {
+  background-color: var(--color-bg-hover);
+}

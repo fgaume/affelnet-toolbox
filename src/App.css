@@ -174,15 +174,35 @@
   justify-content: center;
   gap: 6px;
   flex: 1;
-  padding: 8px 16px;
+  min-width: 0;
+  padding: 8px 12px;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
   color: var(--color-text-muted);
   background: none;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: color 0.2s, background 0.2s;
+}
+
+.search-mode-tab svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .search-mode-tab {
+    padding: 8px 6px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .search-mode-tab svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .search-mode-tab:hover {

@@ -176,4 +176,4 @@ export interface HeterogeneiteResult {
 }
 
 export type TopTab = 'search' | 'score' | 'history' | 'contribute' | 'affectation';
-export type SearchMode = 'address' | 'college';
+export type SearchMode = 'address' | 'college' | 'lycees';

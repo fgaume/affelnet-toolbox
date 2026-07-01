@@ -14,3 +14,5 @@ export { default as AdmissionHistoryTable } from './AdmissionHistoryTable';
 export { DisclaimerModal } from './DisclaimerModal';
 export { ContributePanel } from './ContributePanel';
 export { DeferredAcceptanceExplainer } from './DeferredAcceptanceExplainer';
+export { LyceeSecteurPicker } from './LyceeSecteurPicker';
+export { ReverseSectorResult } from './ReverseSectorResult';
