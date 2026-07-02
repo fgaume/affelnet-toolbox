@@ -124,6 +124,22 @@
   border-bottom: none;
 }
 
+.admission-history-table tbody tr:nth-child(even) {
+  background-color: var(--color-bg-page);
+}
+
+.admission-history-table tbody tr:nth-child(even) .col-name {
+  background-color: var(--color-bg-page);
+}
+
+.admission-history-table tbody tr:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.admission-history-table tbody tr:hover .col-name {
+  background-color: var(--color-bg-hover);
+}
+
 .admission-history-table .col-name {
   font-weight: 500;
   color: var(--color-text-primary);
