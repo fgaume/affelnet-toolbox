@@ -27,7 +27,6 @@ import {
   ScoreDisplay,
   DataSourcesPanel,
   AdmissionHistoryTable,
-  DisclaimerModal,
   ContributePanel,
   DeferredAcceptanceExplainer,
   LyceeSecteurPicker,
@@ -227,7 +226,6 @@ function App() {
 
   return (
     <div className="app">
-      <DisclaimerModal />
       <header className="app-header">
         <ThemeToggle mode={mode} onToggle={setMode} />
         <div className="logo">

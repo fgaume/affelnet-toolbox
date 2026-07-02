@@ -10,8 +10,6 @@ test.use({ locale: 'fr-FR', viewport: { width: 1440, height: 900 } });
 
 async function searchOnOurApp(page: Page, address: string): Promise<string> {
   await page.goto('/');
-  await page.evaluate(() => localStorage.setItem('disclaimer_seen', 'true'));
-  await page.reload();
   const input = page.locator('input[type="text"]');
   await input.fill(address);
   await page.waitForTimeout(500);

@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import type { UserScore } from "../types";
 import {
   calculateFinalScores,
   GEO_BONUS,
+  BOURSIER_BONUS,
 } from "../services/scoreCalculation";
 import { STATS_MODEL_LABELS } from "../services/scoreApi";
 import { ScoreGauge } from "./ScoreGauge";
@@ -28,6 +29,8 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   sector1Lycees,
   allSeuilsRange,
 }) => {
+  const [isBoursier, setIsBoursier] = useState(false);
+
   if (!score) {
     return (
       <div className="score-display">
@@ -38,7 +41,19 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
     );
   }
 
-  const finalScores = calculateFinalScores(score.totalScore, ipsBonus);
+  const boursierBonus = isBoursier ? BOURSIER_BONUS : 0;
+  const finalScores = calculateFinalScores(
+    score.totalScore,
+    ipsBonus,
+    boursierBonus,
+  );
+
+  // Barèmes affichés au millième (précision des fiches barèmes).
+  const fmt3 = (n: number) =>
+    n.toLocaleString(undefined, {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+    });
 
   // Indicateur du millésime de statistiques d'harmonisation utilisé.
   const currentYear = new Date().getFullYear();
@@ -52,24 +67,27 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
     <div className="score-display">
       <h2>Barème selon le secteur</h2>
 
+      <label className="boursier-toggle">
+        <input
+          type="checkbox"
+          checked={isBoursier}
+          onChange={(e) => setIsBoursier(e.target.checked)}
+        />
+        <span>Je suis boursier (bonus {BOURSIER_BONUS})</span>
+      </label>
+
       <div className="final-scores-grid">
         <div className="final-score-card secteur-1">
           <div className="score-label">Secteur 1</div>
-          <div className="score-value">
-            {Math.round(finalScores.secteur1).toLocaleString()}
-          </div>
+          <div className="score-value">{fmt3(finalScores.secteur1)}</div>
         </div>
         <div className="final-score-card secteur-2">
           <div className="score-label">Secteur 2</div>
-          <div className="score-value">
-            {Math.round(finalScores.secteur2).toLocaleString()}
-          </div>
+          <div className="score-value">{fmt3(finalScores.secteur2)}</div>
         </div>
         <div className="final-score-card secteur-3">
           <div className="score-label">Secteur 3</div>
-          <div className="score-value">
-            {Math.round(finalScores.secteur3).toLocaleString()}
-          </div>
+          <div className="score-value">{fmt3(finalScores.secteur3)}</div>
         </div>
       </div>
 
@@ -88,7 +106,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
             )}
           </span>
           <span className="summary-value">
-            {Math.round(score.totalScore).toLocaleString()}
+            {fmt3(score.totalScore)}
           </span>
         </div>
         {isFallbackYear && (
@@ -103,6 +121,12 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
           </span>
           <span className="summary-value">{ipsBonus}</span>
         </div>
+        {isBoursier && (
+          <div className="summary-item">
+            <span>Bonus boursier</span>
+            <span className="summary-value">{BOURSIER_BONUS}</span>
+          </div>
+        )}
         <div className="summary-item">
           <span>Bonus géographique Secteur 1</span>
           <span className="summary-value">

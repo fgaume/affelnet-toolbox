@@ -73,6 +73,9 @@ export const GEO_BONUS = {
   SECTEUR_3: 16800,
 } as const;
 
+/** Bonus forfaitaire ajouté au barème pour les élèves boursiers. */
+export const BOURSIER_BONUS = 600;
+
 const FIELD_MAPPING: Record<DisciplinaryField, Subject[]> = {
   FRANCAIS: ['FRANCAIS'],
   MATHEMATIQUES: ['MATHEMATIQUES'],
