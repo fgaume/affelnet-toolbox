@@ -6,6 +6,7 @@ import {
   type ChangeEvent,
 } from "react";
 import { uploadFile, type UploadResult } from "../services/uploadApi";
+import { SeuilContributionForm } from "./SeuilContributionForm";
 import "./ContributePanel.css";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
@@ -174,6 +175,8 @@ export const ContributePanel = () => {
                 />
               </div>
             </section>
+
+            <SeuilContributionForm />
           </div>
         )}
     </div>

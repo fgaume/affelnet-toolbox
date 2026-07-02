@@ -188,6 +188,26 @@ export function fetchTauxCibleBoursiers(): Promise<ReadonlyMap<string, number>> 
   return tauxCibleBoursiersInflight;
 }
 
+export interface MissingSeuilLycee {
+  code: string;
+  nom: string;
+}
+
+/**
+ * Liste les lycées dont le seuil de l'année la plus récente est inconnu (= 0),
+ * pour la catégorie demandée (boursiers ou non). Sert au formulaire de
+ * contribution : on ne propose d'ajouter un seuil que là où il manque.
+ */
+export async function fetchMissingSeuilLycees(
+  boursier: boolean,
+): Promise<MissingSeuilLycee[]> {
+  const history = boursier ? await fetchAllSeuilsBoursiers() : await fetchAllSeuils();
+  return history
+    .filter((l) => !isKnownSeuil(l.seuils[l.seuils.length - 1]))
+    .map((l) => ({ code: l.code, nom: l.nom }))
+    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+}
+
 /**
  * Determine admission difficulty from a seuil value.
  */
