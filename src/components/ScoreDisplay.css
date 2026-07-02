@@ -21,6 +21,24 @@
   display: none;
 }
 
+.boursier-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.boursier-toggle input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
 .final-scores-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
