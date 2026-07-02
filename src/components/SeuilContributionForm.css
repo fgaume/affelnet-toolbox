@@ -1,0 +1,129 @@
+.seuil-contribution {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.seuil-contribution h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.seuil-contribution-hint {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.seuil-contribution-category {
+  display: inline-flex;
+  gap: 0;
+  margin-bottom: 1rem;
+  padding: 3px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.seuil-category-btn {
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.seuil-category-btn.active {
+  color: var(--color-primary);
+  background: var(--color-bg-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.seuil-contribution-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.seuil-contribution-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.seuil-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.seuil-field select,
+.seuil-field input {
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.seuil-field select:focus,
+.seuil-field input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.seuil-contribution-invalid {
+  margin: -4px 0 0;
+  font-size: 0.78rem;
+  color: var(--color-warning, #b45309);
+}
+
+.seuil-contribution-submit {
+  align-self: flex-start;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.seuil-contribution-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.seuil-contribution-feedback {
+  margin: 0.85rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.seuil-contribution-feedback.success {
+  color: #16a34a;
+}
+
+.seuil-contribution-feedback.error {
+  color: #dc2626;
+}

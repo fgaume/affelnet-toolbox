@@ -1,15 +1,25 @@
 """Backend de réception des fiches-barèmes Affelnet."""
 
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from parser.fiche_bareme import clean_text, extract_seuils
 from parser.notes_harmonisees import extract_notes
 from services.notes_store import append_notes
 from services.seuils_store import consolidate_seuils
+from services.pending_seuils_store import (
+    SEUIL_MAX,
+    SEUIL_MIN,
+    add_pending_seuil,
+    is_plausible_seuil,
+)
+
+UAI_PATTERN = re.compile(r"^\d{7}[A-Z]$")
 
 app = FastAPI(title="Affelnet Upload", version="0.1.0")
 
@@ -51,6 +61,43 @@ def _safe_filename(original: str) -> str:
     # Keep only safe characters in stem
     safe_stem = "".join(c if c.isalnum() or c in "-_" else "_" for c in stem)
     return f"{ts}_{safe_stem}{suffix}"
+
+
+class SeuilSubmission(BaseModel):
+    """Seuil d'admission saisi manuellement par un utilisateur."""
+
+    code: str
+    nom: str
+    seuil: float
+    is_boursier: bool
+    annee: int = 2026
+
+
+@app.post("/seuil")
+async def submit_seuil(payload: SeuilSubmission) -> dict:
+    """Enregistre un seuil saisi à la main en file d'attente de validation.
+
+    La donnée n'est PAS publiée directement : elle est journalisée pour
+    relecture. Le frontend ne propose que les lycées dont le seuil manque.
+    """
+    code = payload.code.strip().upper()
+    if not UAI_PATTERN.match(code):
+        raise HTTPException(status_code=400, detail="Code UAI invalide.")
+
+    nom = payload.nom.strip()
+    if not nom:
+        raise HTTPException(status_code=400, detail="Nom de lycée manquant.")
+
+    if not is_plausible_seuil(payload.seuil):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Seuil hors plage plausible ({SEUIL_MIN}–{SEUIL_MAX}).",
+        )
+
+    record = add_pending_seuil(
+        code, nom, payload.seuil, payload.is_boursier, payload.annee
+    )
+    return {"status": "pending", "record": record}
 
 
 @app.post("/upload")
