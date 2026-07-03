@@ -53,6 +53,33 @@ def effective_means(sigmas: dict[str, float], k_value: float) -> dict[str, float
     return {field: factor * sigmas[field] for field in FIELDS}
 
 
+def plausible_means(
+    sigmas: dict[str, float], k_value: float, anchor_mus: dict[str, float]
+) -> dict[str, float]:
+    """Moyennes « plausibles » : au plus près d'un profil d'ancrage (ex. les
+    moyennes officielles 2025), sous la contrainte Σ wᵢ·μᵢ/σᵢ = K.
+
+    Projection L2 sur l'hyperplan de contrainte :
+        μᵢ = μᵢ_ancre + λ·aᵢ,  aᵢ = wᵢ/σᵢ,  λ = (K − a·μ_ancre) / (a·a)
+
+    Comme K est exactement préservé, le barème total reste identique ; seule la
+    ventilation par champ (jamais utilisée seule) change de tête.
+    """
+    a = {f: FIELD_WEIGHTS[f] / sigmas[f] for f in FIELDS}
+    lam = (k_value - sum(a[f] * anchor_mus[f] for f in FIELDS)) / sum(
+        a[f] ** 2 for f in FIELDS
+    )
+    return {f: anchor_mus[f] + lam * a[f] for f in FIELDS}
+
+
+def load_anchor_means(path: str, annee: int) -> dict[str, float]:
+    """Charge les moyennes d'une année du dataset legacy (champ -> moyenne)."""
+    with open(path, encoding="utf-8") as f:
+        records = json.load(f)
+    by_legacy = {r["champ"]: r["moyenne"] for r in records if r["annee"] == annee}
+    return {field: by_legacy[legacy] for field, legacy in LEGACY_CHAMP.items()}
+
+
 def build_records(
     sigmas: dict[str, float], mus: dict[str, float], annee: int, n_fiches: int
 ) -> list[dict]:
@@ -77,6 +104,13 @@ def main() -> None:
     parser.add_argument("fiches", help="JSON des fiches (12 notes + barème par fiche)")
     parser.add_argument("--annee", type=int, default=2026)
     parser.add_argument("-o", "--output", default=None)
+    parser.add_argument(
+        "--anchor-stats",
+        default=None,
+        help="JSON legacy dont les moyennes d'une année servent d'ancrage pour des "
+        "μ plausibles (projection L2 à K constant) au lieu des μ* proportionnels",
+    )
+    parser.add_argument("--anchor-annee", type=int, default=2025)
     args = parser.parse_args()
 
     with open(args.fiches, encoding="utf-8") as f:
@@ -84,7 +118,11 @@ def main() -> None:
     fiches = payload["fiches"] if isinstance(payload, dict) else payload
 
     sigmas, k_value = recover(fiches)
-    mus = effective_means(sigmas, k_value)
+    if args.anchor_stats:
+        anchor = load_anchor_means(args.anchor_stats, args.anchor_annee)
+        mus = plausible_means(sigmas, k_value, anchor)
+    else:
+        mus = effective_means(sigmas, k_value)
 
     # Garde-fou : le modèle (μ*, σ) doit reproduire chaque barème d'entrée.
     stats = {f: FieldStats(mus[f], sigmas[f]) for f in FIELDS}
