@@ -260,7 +260,6 @@ function AdmissionHistoryTable({ data, boursiers }: AdmissionHistoryTableProps) 
         <span className="legend-item difficulty-easy">Facilement accessible</span>
         <span className="legend-item difficulty-medium">Moyennement accessible</span>
         <span className="legend-item difficulty-hard">Difficilement accessible</span>
-        <span className="legend-item difficulty-extreme">Inaccessible sans bonus</span>
       </div>
     </div>
   );

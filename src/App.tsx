@@ -459,7 +459,22 @@ function App() {
 
       <footer className="app-footer">
         <p>Données publiques issues du Ministère de l'Éducation, du Rectorat de Paris et de la Ville de Paris</p>
-        <DataSourcesPanel />
+        <div className="app-footer-meta">
+          <DataSourcesPanel />
+          <span className="app-footer-updated">
+            Mis à jour le{' '}
+            {new Date(__BUILD_DATE__).toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}{' '}
+            à{' '}
+            {new Date(__BUILD_DATE__).toLocaleTimeString('fr-FR', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </span>
+        </div>
       </footer>
     </div>
   );

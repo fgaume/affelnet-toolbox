@@ -2,16 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getAdmissionDifficulty } from '../seuilsApi';
 
 describe('getAdmissionDifficulty', () => {
-  it('returns black for seuil > 40731', () => {
-    const result = getAdmissionDifficulty(40800);
-    expect(result.color).toBe('#1a1a1a');
-    expect(result.label).toBe('Inaccessible sans bonus');
-  });
-
-  it('returns red for seuil > 40600 and <= 40731', () => {
-    const result = getAdmissionDifficulty(40650);
-    expect(result.color).toBe('#dc2626');
-    expect(result.label).toBe('Difficilement accessible');
+  it('returns red for any seuil > 40600 (top category)', () => {
+    for (const seuil of [40650, 40800, 42000]) {
+      const result = getAdmissionDifficulty(seuil);
+      expect(result.color).toBe('#dc2626');
+      expect(result.label).toBe('Difficilement accessible');
+      expect(result.level).toBe('hard');
+    }
   });
 
   it('returns orange for seuil > 40250 and <= 40600', () => {
@@ -30,11 +27,6 @@ describe('getAdmissionDifficulty', () => {
     const result = getAdmissionDifficulty(37000);
     expect(result.color).toBe('#16a34a');
     expect(result.label).toBe('Très facilement accessible');
-  });
-
-  it('handles exact boundary 40731', () => {
-    // 40731 is NOT > 40731, so it should be red
-    expect(getAdmissionDifficulty(40731).color).toBe('#dc2626');
   });
 
   it('handles exact boundary 40600', () => {
