@@ -27,7 +27,7 @@ export interface AdmissionDifficulty {
   color: string;
   label: string;
   seuil: number;
-  level: 'extreme' | 'hard' | 'medium' | 'easy' | 'very-easy' | 'unknown';
+  level: 'hard' | 'medium' | 'easy' | 'very-easy' | 'unknown';
 }
 
 interface DatasetRow {
@@ -214,9 +214,6 @@ export async function fetchMissingSeuilLycees(
 export function getAdmissionDifficulty(seuil: number): AdmissionDifficulty {
   if (!isKnownSeuil(seuil)) {
     return { color: '#9ca3af', label: 'Seuil non connu', seuil, level: 'unknown' };
-  }
-  if (seuil > 40731) {
-    return { color: '#1a1a1a', label: 'Inaccessible sans bonus', seuil, level: 'extreme' };
   }
   if (seuil > 40600) {
     return { color: '#dc2626', label: 'Difficilement accessible', seuil, level: 'hard' };

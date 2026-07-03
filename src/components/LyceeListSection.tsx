@@ -124,7 +124,6 @@ export function LyceeListSection({
           <span className="legend-title">Difficulté d'admission sans bonus IPS :</span>
           <div className="legend-items">
             {([
-              ['#1a1a1a', 'Inaccessible'],
               ['#dc2626', 'Difficile'],
               ['#d97706', 'Moyen'],
               ['#2563eb', 'Accessible'],
@@ -177,7 +176,6 @@ export function LyceeListSection({
           <span className="legend-title">Difficulté d'admission sans bonus IPS :</span>
           <div className="legend-items">
             {([
-              ['#1a1a1a', 'Inaccessible'],
               ['#dc2626', 'Difficile'],
               ['#d97706', 'Moyen'],
               ['#2563eb', 'Accessible'],
