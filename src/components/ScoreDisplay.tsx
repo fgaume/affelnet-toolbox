@@ -48,11 +48,12 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
     boursierBonus,
   );
 
-  // Barèmes affichés au millième (précision des fiches barèmes).
-  const fmt3 = (n: number) =>
+  // Barèmes affichés à 6 décimales (le modèle σ/μ* à 8 décimales reproduit
+  // les fiches barèmes à ~1e-7 pt près : 6 décimales sont significatives).
+  const fmt6 = (n: number) =>
     n.toLocaleString(undefined, {
-      minimumFractionDigits: 3,
-      maximumFractionDigits: 3,
+      minimumFractionDigits: 6,
+      maximumFractionDigits: 6,
     });
 
   // Indicateur du millésime de statistiques d'harmonisation utilisé.
@@ -79,15 +80,15 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
       <div className="final-scores-grid">
         <div className="final-score-card secteur-1">
           <div className="score-label">Secteur 1</div>
-          <div className="score-value">{fmt3(finalScores.secteur1)}</div>
+          <div className="score-value">{fmt6(finalScores.secteur1)}</div>
         </div>
         <div className="final-score-card secteur-2">
           <div className="score-label">Secteur 2</div>
-          <div className="score-value">{fmt3(finalScores.secteur2)}</div>
+          <div className="score-value">{fmt6(finalScores.secteur2)}</div>
         </div>
         <div className="final-score-card secteur-3">
           <div className="score-label">Secteur 3</div>
-          <div className="score-value">{fmt3(finalScores.secteur3)}</div>
+          <div className="score-value">{fmt6(finalScores.secteur3)}</div>
         </div>
       </div>
 
@@ -106,7 +107,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
             )}
           </span>
           <span className="summary-value">
-            {fmt3(score.totalScore)}
+            {fmt6(score.totalScore)}
           </span>
         </div>
         {isFallbackYear && (

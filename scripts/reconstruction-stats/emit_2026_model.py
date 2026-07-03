@@ -61,8 +61,10 @@ def build_records(
         {
             "annee": annee,
             "champ": LEGACY_CHAMP[field],
-            "moyenne": round(mus[field], 5),
-            "ecart-type": round(sigmas[field], 5),
+            # 8 décimales : les barèmes des fiches sont eux-mêmes précis à 1e-8,
+            # arrondir à 5 décimales dégradait la reproduction (~6e-4 pt).
+            "moyenne": round(mus[field], 8),
+            "ecart-type": round(sigmas[field], 8),
             "precision": n_fiches,
             "mis_a_jour": now,
         }
