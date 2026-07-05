@@ -283,6 +283,25 @@
   line-height: 1.5;
 }
 
+.bareme-doc-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin-top: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.bareme-doc-link:hover {
+  text-decoration: underline;
+}
+
+.bareme-doc-link svg {
+  flex-shrink: 0;
+}
+
 .contribution-chart {
   margin: 1.75rem 0 0;
 }

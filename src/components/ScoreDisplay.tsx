@@ -79,7 +79,9 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
 
   // Indicateur du millésime de statistiques d'harmonisation utilisé.
   const currentYear = new Date().getFullYear();
-  const activeLabel = statsKey ? STATS_MODEL_LABELS[statsKey] ?? statsKey : null;
+  const activeLabel = statsKey
+    ? (STATS_MODEL_LABELS[statsKey] ?? statsKey)
+    : null;
   const activeIsYear = statsKey !== null && /^\d{4}$/.test(statsKey);
   const currentYearAvailable = availableStatsKeys.includes(String(currentYear));
   const isFallbackYear =
@@ -123,7 +125,9 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
                 title="Statistiques d'harmonisation utilisées pour ce calcul"
               >
                 <span className="stats-source-badge-dot" aria-hidden="true" />
-                {activeIsYear ? `stats ${activeLabel}` : `modèle ${activeLabel}`}
+                {activeIsYear
+                  ? `stats ${activeLabel}`
+                  : `modèle ${activeLabel}`}
               </span>
             )}
           </span>
@@ -182,11 +186,12 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
           <p className="harmonisation-explanation">
             Le barème scolaire est une fonction affine de vos moyennes : un
             barème de base, auquel s'ajoute pour chaque discipline sa moyenne
-            multipliée par un coefficient propre. Ce coefficient vaut 25 × (poids
-            de la discipline) ÷ (écart-type académique) — plus une matière est
-            discriminante dans l'académie, plus elle pèse. La constante et les
-            coefficients intègrent déjà l'harmonisation académique et la
-            pondération scolaire (× {WEIGHTING_COEFFICIENT.toLocaleString()}).
+            multipliée par un coefficient propre. Ce coefficient vaut 25 ×
+            (poids de la discipline) ÷ (écart-type académique) — plus une
+            matière est discriminante dans l'académie, plus elle pèse. Le barème
+            de base et les coefficients intègrent déjà l'harmonisation
+            académique et la pondération scolaire (×{" "}
+            {WEIGHTING_COEFFICIENT.toLocaleString()}).
           </p>
           <table className="score-table">
             <thead>
@@ -231,7 +236,9 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
             const terms = [...score.linearModel.terms].sort(
               (a, b) => b.contribution - a.contribution,
             );
-            const maxContribution = Math.max(...terms.map((t) => t.contribution));
+            const maxContribution = Math.max(
+              ...terms.map((t) => t.contribution),
+            );
             return (
               <figure className="contribution-chart">
                 <figcaption className="contribution-chart-title">
@@ -239,8 +246,10 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
                 </figcaption>
                 <ul className="contribution-bars">
                   {terms.map((term) => {
-                    const pctOfTotal = (term.contribution / score.totalScore) * 100;
-                    const barWidth = (term.contribution / maxContribution) * 100;
+                    const pctOfTotal =
+                      (term.contribution / score.totalScore) * 100;
+                    const barWidth =
+                      (term.contribution / maxContribution) * 100;
                     return (
                       <li key={term.field} className="contribution-row">
                         <span className="contribution-label">
@@ -268,7 +277,8 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
                 </ul>
                 <p className="contribution-caption">
                   Le reste du barème provient du barème de base (
-                  {fmt0(score.linearModel.intercept)} pts), indépendant des notes.
+                  {fmt0(score.linearModel.intercept)} pts), indépendant des
+                  notes.
                 </p>
               </figure>
             );
@@ -279,9 +289,32 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
       <div className="score-info">
         <strong>Information sur le calcul :</strong>
         <br />
-        Le score total est composé de trois éléments : le score scolaire
-        harmonisé, le bonus IPS de votre collège de scolarisation, et le bonus
-        lié au secteur géographique du lycée demandé.
+        Le score total est composé de quatre éléments : le barème scolaire, le
+        bonus IPS de votre collège de scolarisation, le bonus boursier le cas
+        échéant, et le bonus lié au secteur géographique du lycée demandé.
+        <a
+          className="bareme-doc-link"
+          href={`${import.meta.env.BASE_URL}bareme-scolaire.pdf`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            width="15"
+            height="15"
+            aria-hidden="true"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <path d="M9 13h6M9 17h4" />
+          </svg>
+          Voir la démonstration du calcul du barème (PDF)
+        </a>
       </div>
     </div>
   );
