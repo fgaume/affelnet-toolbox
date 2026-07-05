@@ -52,12 +52,21 @@ interface SeuilsSectionProps {
 }
 
 function SeuilsSection({ title, subtitle, data, filter, showSparklines = true, startYear }: SeuilsSectionProps) {
-  const [expandedRows, setExpandedRows] = useState<ReadonlySet<string>>(
-    new Set(),
+  const isMobile = useIsMobile();
+  // Sur grand écran, les graphiques de tendance sont dépliés d'emblée ;
+  // sur mobile ils restent repliés (place limitée). L'utilisateur peut ensuite
+  // les masquer/afficher individuellement.
+  const [expandedRows, setExpandedRows] = useState<ReadonlySet<string>>(() =>
+    !isMobile && showSparklines
+      ? new Set(
+          data
+            .filter((l) => hasValidSparklineData(l.seuils))
+            .map((l) => l.code),
+        )
+      : new Set(),
   );
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
-  const isMobile = useIsMobile();
 
   const seuilYears = getSeuilYears();
 
