@@ -5,6 +5,7 @@ import type {
   UserScore,
   Subject,
   ScoreDetail,
+  ScoreLinearTerm,
   FinalScores,
 } from '../types';
 import { DISCIPLINARY_FIELDS } from '../types';
@@ -117,6 +118,10 @@ export function calculateAffelnetScore(
   const details = {} as Record<DisciplinaryField, ScoreDetail>;
   let weightedSum = 0;
 
+  // Développement affine du barème : B = intercept + Σ slope·T (cf. ScoreLinearModel).
+  let intercept = 0;
+  const linearTerms: ScoreLinearTerm[] = [];
+
   for (const field of DISCIPLINARY_FIELDS) {
     const subjects = FIELD_MAPPING[field];
     const fieldGrades = subjects
@@ -129,15 +134,21 @@ export function calculateAffelnetScore(
 
     if (fieldGrades.length > 0) {
       rawAverage = fieldGrades.reduce((a, b) => a + b, 0) / fieldGrades.length;
+      const weight = FIELD_WEIGHTS[field];
 
       const fieldStats = stats[field];
       if (fieldStats) {
         const { moyenne: mu, ecartType: sigma } = fieldStats;
         // H = 10 * [10 + (T - mu) / sigma]
         harmonizedNote = 10 * (10 + (rawAverage - mu) / sigma);
+
+        // 2.5·coef·H développé : partie constante + partie proportionnelle à T.
+        // 2.5·coef·H = 2.5·coef·(100 − 10μ/σ) + (25·coef/σ)·T
+        const slope = (WEIGHTING_COEFFICIENT * 10 * weight) / sigma;
+        intercept += WEIGHTING_COEFFICIENT * weight * (100 - (10 * mu) / sigma);
+        linearTerms.push({ field, rawAverage, slope, contribution: slope * rawAverage });
       }
 
-      const weight = FIELD_WEIGHTS[field];
       contribution = harmonizedNote * weight;
     }
 
@@ -154,6 +165,7 @@ export function calculateAffelnetScore(
     weightedSum,
     totalScore: weightedSum * WEIGHTING_COEFFICIENT,
     details,
+    linearModel: { intercept, terms: linearTerms },
   };
 }
 

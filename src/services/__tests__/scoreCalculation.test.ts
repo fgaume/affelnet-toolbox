@@ -137,6 +137,37 @@ describe('scoreCalculation', () => {
     expect(score.totalScore).toBeCloseTo(7500, 9);
   });
 
+  it('exposes an affine model that reconstructs the barème', () => {
+    const grades: UserGrades = {
+      FRANCAIS: 16, MATHEMATIQUES: 17, HISTOIRE_GEO: 15, EMC: 18,
+      LV1: 14, LV2: 13, SVT: 15, TECHNOLOGIE: 16, PHYSIQUE_CHIMIE: 14,
+      ARTS_PLASTIQUES: 17, EDUCATION_MUSICALE: 18, EPS: 12,
+    };
+    const score = calculateAffelnetScore(grades, mockStats);
+    const model = score.linearModel!;
+
+    // B = intercept + Σ (slope · T)
+    const rebuilt =
+      model.intercept + model.terms.reduce((sum, t) => sum + t.contribution, 0);
+    expect(rebuilt).toBeCloseTo(score.totalScore, 6);
+
+    // slope = 25 × poids / écart-type ; FRANCAIS : 25 × 5 / 3
+    const fr = model.terms.find((t) => t.field === 'FRANCAIS')!;
+    expect(fr.slope).toBeCloseTo((25 * 5) / 3, 9);
+    expect(fr.contribution).toBeCloseTo(fr.slope * fr.rawAverage, 9);
+  });
+
+  it('only includes filled fields in the affine model (partial input stays exact)', () => {
+    const grades: UserGrades = { ...emptyGrades, FRANCAIS: 15 };
+    const score = calculateAffelnetScore(grades, mockStats);
+    const model = score.linearModel!;
+
+    expect(model.terms).toHaveLength(1);
+    expect(model.terms[0].field).toBe('FRANCAIS');
+    const rebuilt = model.intercept + model.terms[0].contribution;
+    expect(rebuilt).toBeCloseTo(score.totalScore, 6);
+  });
+
   it('handles missing grades within a field correctly', () => {
     // Only one science grade
     const grades: UserGrades = {

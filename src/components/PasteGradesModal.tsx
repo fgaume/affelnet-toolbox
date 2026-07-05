@@ -21,7 +21,7 @@ const SUBJECT_LABELS: Record<Subject, string> = {
 
 interface PasteGradesModalProps {
   currentGrades: UserGrades;
-  /** Reçoit les notes à écrire (déjà filtrées sur les champs vides). */
+  /** Reçoit les notes à écrire (elles écrasent les valeurs déjà saisies). */
   onApply: (toApply: Partial<Record<Subject, number>>) => void;
   onClose: () => void;
 }
@@ -58,19 +58,19 @@ const PasteGradesModal: React.FC<PasteGradesModalProps> = ({ currentGrades, onAp
 
   const lv2Conflict = result?.conflicts.find((c) => c.kind === 'LV2_AMBIGUOUS') ?? null;
 
-  /** Notes effectivement appliquées : matières détectées + LV2 résolue, sur champs vides uniquement. */
+  /** Notes appliquées : matières détectées + LV2 résolue ; écrasent les valeurs existantes. */
   const toApply = useMemo<Partial<Record<Subject, number>>>(() => {
     if (!result) return {};
     const map: Partial<Record<Subject, number>> = {};
     for (const m of result.matched) {
-      if (currentGrades[m.subject] === null) map[m.subject] = m.value;
+      map[m.subject] = m.value;
     }
-    if (lv2Conflict && lv2Choice && currentGrades.LV2 === null) {
+    if (lv2Conflict && lv2Choice) {
       const chosen = lv2Conflict.candidates.find((c) => c.label === lv2Choice);
       if (chosen) map.LV2 = chosen.value;
     }
     return map;
-  }, [result, currentGrades, lv2Conflict, lv2Choice]);
+  }, [result, lv2Conflict, lv2Choice]);
 
   const handleApply = useCallback(() => {
     onApply(toApply);
@@ -139,8 +139,8 @@ const PasteGradesModal: React.FC<PasteGradesModalProps> = ({ currentGrades, onAp
             ) : (
               <>
                 <p className="paste-grades-help">
-                  Vérifiez la synthèse ci-dessous. Seuls les champs encore <b>vides</b> seront
-                  remplis ; les matières déjà saisies sont conservées.
+                  Vérifiez la synthèse ci-dessous. Les notes reconnues seront appliquées et{' '}
+                  <b>remplaceront</b> les valeurs déjà saisies.
                 </p>
                 <table className="paste-grades-summary">
                   <thead>
@@ -155,7 +155,7 @@ const PasteGradesModal: React.FC<PasteGradesModalProps> = ({ currentGrades, onAp
                     {result.matched.map((m) => {
                       const alreadyFilled = currentGrades[m.subject] !== null;
                       return (
-                        <tr key={m.subject} className={alreadyFilled ? 'row-skipped' : ''}>
+                        <tr key={m.subject}>
                           <td>{SUBJECT_LABELS[m.subject]}</td>
                           <td className="cell-note">
                             {formatNote(m.value)}
@@ -168,7 +168,7 @@ const PasteGradesModal: React.FC<PasteGradesModalProps> = ({ currentGrades, onAp
                           </td>
                           <td className="cell-label">{m.matchedLabel}</td>
                           <td className="cell-status">
-                            {alreadyFilled ? 'déjà saisi — ignoré' : 'sera ajouté'}
+                            {alreadyFilled ? 'remplace la valeur actuelle' : 'sera ajouté'}
                           </td>
                         </tr>
                       );
@@ -181,25 +181,19 @@ const PasteGradesModal: React.FC<PasteGradesModalProps> = ({ currentGrades, onAp
             {lv2Conflict && (
               <div className="paste-grades-conflict">
                 <p className="paste-grades-conflict-title">⚠ {lv2Conflict.message}</p>
-                {currentGrades.LV2 !== null ? (
-                  <p className="paste-grades-conflict-note">
-                    LV2 est déjà saisie : aucune de ces langues ne sera appliquée.
-                  </p>
-                ) : (
-                  <div className="paste-grades-conflict-options">
-                    {lv2Conflict.candidates.map((c) => (
-                      <label key={c.label} className="paste-grades-radio">
-                        <input
-                          type="radio"
-                          name="lv2-choice"
-                          checked={lv2Choice === c.label}
-                          onChange={() => setLv2Choice(c.label)}
-                        />
-                        {c.label} ({formatNote(c.value)})
-                      </label>
-                    ))}
-                  </div>
-                )}
+                <div className="paste-grades-conflict-options">
+                  {lv2Conflict.candidates.map((c) => (
+                    <label key={c.label} className="paste-grades-radio">
+                      <input
+                        type="radio"
+                        name="lv2-choice"
+                        checked={lv2Choice === c.label}
+                        onChange={() => setLv2Choice(c.label)}
+                      />
+                      {c.label} ({formatNote(c.value)})
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
 
