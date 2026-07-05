@@ -48,6 +48,27 @@ test.describe('Coller mes notes', () => {
     await expect(page.getByLabel('Moyenne annuelle de EPS').first()).toHaveValue('18');
   });
 
+  test('écrase les notes déjà saisies', async ({ page }) => {
+    const search = new SearchPage(page);
+    await search.goToScoreTab();
+    await expect(page.locator('.grade-input-form')).toBeVisible({ timeout: 15000 });
+
+    // Note existante à écraser
+    const francais = page.getByLabel('Moyenne annuelle de Français').first();
+    await francais.fill('8');
+    await expect(francais).toHaveValue('8');
+
+    await page.click('button:has-text("Coller mes notes")');
+    await page.locator('.paste-grades-textarea').fill('Français 15');
+    await page.click('.paste-grades-modal button:has-text("Analyser")');
+
+    // La synthèse annonce le remplacement
+    await expect(page.locator('.paste-grades-summary')).toContainText('remplace la valeur actuelle');
+
+    await page.click('.paste-grades-modal button:has-text("Appliquer")');
+    await expect(francais).toHaveValue('15');
+  });
+
   test('signale un conflit LV2 quand deux langues non-anglaises sont collées', async ({ page }) => {
     const search = new SearchPage(page);
     await search.goToScoreTab();

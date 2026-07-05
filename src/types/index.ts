@@ -131,10 +131,29 @@ export interface ScoreDetail {
   contribution: number;
 }
 
+/**
+ * Développement affine du barème scolaire en fonction des moyennes brutes :
+ * B = intercept + Σ (slope_champ × moyenne_champ).
+ * Chaque terme est la « vraie » contribution d'une discipline au barème,
+ * sans passer par des notes harmonisées individuelles (peu parlantes).
+ */
+export interface ScoreLinearTerm {
+  field: DisciplinaryField;
+  rawAverage: number; // T : moyenne brute du champ
+  slope: number; // coefficient multiplicatif = 25 × poids / écart-type
+  contribution: number; // slope × rawAverage
+}
+
+export interface ScoreLinearModel {
+  intercept: number; // constante intégrant harmonisation + pondération ×2,5
+  terms: ScoreLinearTerm[]; // uniquement les champs effectivement renseignés
+}
+
 export interface UserScore {
   weightedSum: number; // Sum of weighted harmonized scores (before weighting coefficient)
   totalScore: number; // Academic score = weightedSum * WEIGHTING_COEFFICIENT (2.5)
   details: Record<DisciplinaryField, ScoreDetail>;
+  linearModel?: ScoreLinearModel; // optionnel : absent des scores persistés en ancien format
 }
 
 export interface FinalScores {

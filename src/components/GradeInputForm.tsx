@@ -153,13 +153,11 @@ const GradeInputForm: React.FC<GradeInputFormProps> = ({ onGradesChange, ipsBonu
   };
 
   const handleReset = () => {
-    if (window.confirm('Voulez-vous vraiment réinitialiser toutes les notes ?')) {
-      setGrades(INITIAL_GRADES);
-      setEpsDispense(false);
-      clearScoreData();
-      if (onGradesChange) {
-        onGradesChange(INITIAL_GRADES);
-      }
+    setGrades(INITIAL_GRADES);
+    setEpsDispense(false);
+    clearScoreData();
+    if (onGradesChange) {
+      onGradesChange(INITIAL_GRADES);
     }
   };
 
